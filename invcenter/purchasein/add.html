@@ -1,0 +1,277 @@
+<#include "/common/head.html"/>
+
+<html>
+ <head></head> 
+ <body> 
+  <div class="datagrid-toolbar"> 
+   <div style="text-align: right; margin: 0px;"> 
+    <a href="javascript:void(0)" class="easyui-linkbutton color1 l-btn l-btn-small" iconcls="glyphicon-plus" plain="true" onclick="save()">保存</a> 
+   </div> 
+  </div> 
+  <div id="master" class="container_12" data-bind="inputwidth:0.9"> 
+   <div class="grid_1 lbl">
+     	单据类型： 
+   </div> 
+   <div class="grid_3 val"> 
+    <input type="text" name="vbilltypecode" id="vbilltypecode" data-bind="value:form.BillNo,readOnly:true" class="z-txt readonly" /> 
+   </div> 
+   <div class="grid_1 lbl">
+     	单据日期 
+   </div> 
+   <div class="grid_3 val"> 
+    <input type="text" data-bind="dateboxValue:form.BillDate" class="z-txt easyui-datebox" /> 
+   </div> 
+   <div class="grid_1 lbl">
+     	经办人 
+   </div> 
+   <div class="grid_3 val "> 
+    <input type="text" data-bind="value:form.DoPerson" class="z-txt easyui-validatebox" /> 
+   </div> 
+   <div class="clear"></div> 
+   <div class="grid_1 lbl required">
+     	供应商 
+   </div> 
+   <div class="grid_3 val"> 
+    <input type="text" data-bind="lookupValue:form.SupplierCode" required="true" class="z-txt easyui-lookup" data-options="lookupType:'merchants',queryParams:{MerchantsProperty:'\'采购\''}" /> 
+   </div> 
+   <div class="grid_1 lbl required">
+     	库房 
+   </div> 
+   <div class="grid_3 val"> 
+    <input type="text" data-bind="comboboxValue:form.WarehouseCode,datasource:dataSource.warehouseItems" class="z-txt easyui-combobox" required="true" /> 
+   </div> 
+   <div class="grid_1 lbl required">
+    	 收料日期 
+   </div> 
+   <div class="grid_3 val"> 
+    <input type="text" data-bind="dateboxValue:form.ReceiveDate" class="easyui-datebox z-txt" required="true" /> 
+   </div> 
+   <div class="clear"></div> 
+   <div class="grid_1 lbl required">
+     	供应类型 
+   </div> 
+   <div class="grid_3 val"> 
+    <input type="text" data-bind="comboboxValue:form.SupplyType,datasource:dataSource.supplyType" class="easyui-combobox z-txt" required="true" /> 
+   </div> 
+   <div class="grid_1 lbl required">
+     	付款方式 
+   </div> 
+   <div class="grid_3 val"> 
+    <input type="text" data-bind="comboboxValue:form.PayKind,datasource:dataSource.payKinds" class="z-txt easyui-combobox" required="true" /> 
+   </div> 
+   <div class="grid_1 lbl">
+    	 合同名称 
+   </div> 
+   <div class="grid_3 val required"> 
+    <input type="text" data-bind="value:form.ContractCode" class="z-txt" /> 
+   </div> 
+   <div class="clear"></div> 
+   <div class="grid_1 lbl">
+     	原始票号 
+   </div> 
+   <div class="grid_3 val"> 
+    <input type="text" data-bind="value:form.OriginalNum" class="z-txt" /> 
+   </div> 
+   <div class="grid_1 lbl">
+     	金额 
+   </div> 
+   <div class="grid_3 val"> 
+    <input type="text" id="TotalMoney" name="TotalMoney" data-bind="numberboxValue:form.TotalMoney,readOnly:true" class="z-txt easyui-numberbox readonly" data-options="min: 0, precision: 2" /> 
+   </div> 
+   <div class="grid_1 lbl">
+    	 备注 
+   </div> 
+   <div class="grid_3 val"> 
+    <input type="text" id="Remark" name="Remark" data-bind="value:form.Remark" class="z-txt" /> 
+   </div> 
+   <div class="clear"></div> 
+  </div> 
+  <div id="dg" class="easyui-tabs"> 
+   <div title="材料明细"> 
+    <table id="list" data-bind="datagrid:grid" data-options="rownumbers:true,onClickCell: onClickCell"> 
+    </table> 
+   </div> 
+  </div>  
+ </body>
+</html>
+
+<script>
+var datagrid = $("#dg");
+var editIndex = undefined; //定义全局变量：当前编辑的行
+
+
+var dgOptions = {
+        rownumbers:true,
+    	fit:true,
+    	border:false,
+        rownumbers:true,
+ 
+    	toolbar:'#detail_tb',
+    	pageSize: 10,
+    	pagination:true,
+    	multiSort:true,	
+        columns: [[
+		         {field:'cid', checkbox:true}
+	           	 ,{field:'vrowno', title: '行号', width:120, sortable: true, editor:'text'}
+	           	 ,{field:'nynum', title: '应收金额', width:120, sortable: true, editor:'text'}
+	           	 ,{field:'nsnum', title: '实收金额', width:120, sortable: true, editor:'text'}
+	           	 ,{field:'vbatch', title: '批次号', width:120, editor:'text'}
+	           	 
+	           ]],
+	           toolbar: [{ text: '添加', iconCls: 'icon-add', handler: function () {//添加列表的操作按钮添加，修改，删除等
+                   //添加时先判断是否有开启编辑的行，如果有则把开户编辑的那行结束编辑
+                   if (editIndex != undefined) {
+                       datagrid.datagrid("endEdit", editIndex);
+                   }
+                   //添加时如果没有正在编辑的行，则在datagrid的第一行插入一行
+                   if (editIndex == undefined) {
+                       datagrid.datagrid("insertRow", {
+                           index: 0, // index start with 0
+                           row: {
+
+                           }
+                       });
+                       //将新插入的那一行开户编辑状态
+                       datagrid.datagrid("beginEdit", 0);
+                       //给当前编辑的行赋值
+                       editIndex = 0;
+                   }
+
+               }
+               }, '-',
+                { text: '删除', iconCls: 'icon-remove', handler: function () {
+                    //删除时先获取选择行
+                    var rows = datagrid.datagrid("getSelections");
+                    //选择要删除的行
+                    if (rows.length > 0) {
+                        $.messager.confirm("提示", "你确定要删除吗?", function (r) {
+                            if (r) {
+                                var ids = [];
+                                for (var i = 0; i < rows.length; i++) {
+                                    ids.push(rows[i]);
+                                }
+                                //将选择到的行存入数组并用,分隔转换成字符串，
+                                //本例只是前台操作没有与数据库进行交互所以此处只是弹出要传入后台的id
+                                for(var i =0;i<ids.length;i++){    
+                                    var index = $('#dg').datagrid('getRowIndex',ids[i]);
+                                    $('#dg').datagrid('deleteRow',index); 
+                                }
+
+                            }
+                        });
+                    }
+                    else {
+                        $.messager.alert("提示", "请选择要删除的行", "error");
+                    }
+                }
+                }, '-',
+
+                ],
+                
+                
+               onAfterEdit: function (rowIndex, rowData, changes) {
+                    //endEdit该方法触发此事件
+                    console.info(rowData);
+                    editIndex = undefined;
+                },
+                onDblClickRow: function (rowIndex, rowData) {
+                //双击开启编辑行
+                    if (editIndex != undefined) {
+                        datagrid.datagrid("endEdit", editIndex);
+                    }
+                    if (editIndex == undefined) {
+                        datagrid.datagrid("beginEdit", rowIndex);
+                        editIndex = rowIndex;
+                    }
+                }
+
+	          
+	};
+$(function() {
+	handleAuthDataRule();
+	datagrid.datagrid(dgOptions);
+});
+
+
+
+
+function endEditing(){
+	if (editIndex == undefined){return true}
+	if ($('#dg').datagrid('validateRow', editIndex)){
+		 $('#dg').datagrid('endEdit',editIndex);//当前行编辑事件取消
+         editIndex = undefined; //重置编辑行索引对象，返回真，允许编辑
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+top.window.subPage.save = save;
+function save() {
+	
+	if($("#zcurdHeadTable").form('validate')) {
+		$.post("add", getParam(), function(data) {
+			top.window.closeWindow();
+			top.window.subPage.loadCurrDatagrid();
+		});
+	}
+}
+
+
+function getSubParam() {
+    if (endEditing()) {
+       var $dg = $('#dg');
+        var rows = $dg.datagrid('getChanges');
+        if (rows.length) {
+           var inserted = $dg.datagrid('getChanges', "inserted");
+           var deleted = $dg.datagrid('getChanges', "deleted");
+           var updated = $dg.datagrid('getChanges', "updated");
+           var effectRow = new Object();
+           if (inserted.length) {
+                effectRow["inserted"] = JSON.stringify(inserted);
+            }
+            if (deleted.length) {
+                effectRow["deleted"] = JSON.stringify(deleted);
+           }
+           if (updated.length) {
+                effectRow["updated"] = JSON.stringify(updated);
+            }
+        }
+   }
+    return effectRow;
+
+}
+
+
+
+function getParam() {
+	var param = {	
+
+       	    "model.vbilltypecode": getInputValue("vbilltypecode"), 
+       	    "model.vbillcode": getInputValue("vbillcode"), 
+       	    "model.incomedate": getInputValue("incomedate"), 
+       	    "model.inv_org": getInputValue("inv_org"), 
+       	    "model.purchase_org": getInputValue("purchase_org"), 
+       	    "model.purchase_dept": getInputValue("purchase_dept"), 
+       	    "model.purchase_user": getInputValue("purchase_user"), 
+       	    "model.deliver_nation": getInputValue("deliver_nation"), 
+       	    "model.deliver_area": getInputValue("deliver_area"), 
+       	    "model.supplier_user": getInputValue("supplier_user"), 
+       	    "model.transportation": getInputValue("transportation"), 
+       	    "model.status": getInputValue("status"), 
+       	    "bids":getSubParam(),
+       	   
+	   		 
+	}
+	for(key in param) {
+		if(!param[key]) {
+			delete param[key];
+		}
+	}
+	return param;
+}
+
+//扩展js
+</script>
+<#include "/common/foot.html"/>
