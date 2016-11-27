@@ -18,7 +18,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $apiBaseURL + "ocr-productcenter/catelog-mgr/channelrestocking?context=3|3|lj|aaa",
+            url: $salesURL + "ocr-sales-center/channel-restocking/create?context=3|3|lj|aaa",
             data: JSON.stringify(cloneReplenishmentObj),
             async: true,
             dataType: 'json',
@@ -26,19 +26,22 @@ function save(){
                 x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
             },
             success: function (data) {
-                //$.messager.alert('提示','删除成功!');
 
                 //-------刷新关联属性------
+                cloneReplenishmentObj = data;
                 replenishmentObj = cloneReplenishmentObj;
+
                 var dgList = $('#dgList');
-                var row = $('#dgList').datagrid('getSelected');
+                var row = dgList.datagrid('getSelected');
+                var index = dgList.datagrid('getRowIndex', row);
+                row['code'] = data.bo_id;
+                row['req_date'] = data.req_date;
+                row['req_send_date'] = data.req_send_date;
                 row.obj = replenishmentObj;
-                //data.originalRows.push(rowData);
+                dgList.datagrid('refreshRow', index);
 
                 resetState();
                 alert_autoClose('提示','保存成功!');
-
-                //bindGoodsDg(data);
 
             },
             error: function (x, e) {
@@ -58,7 +61,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'DELETE',
-                url: $apiBaseURL + "ocr-productcenter/catelog-mgr/channelrestocking_cancel?context=3|3|lj|aaa",
+                url: $salesURL + "ocr-sales-center/channel-restocking/remove?context=3|3|lj|aaa",
                 data: JSON.stringify(cloneReplenishmentObj),
                 async: true,
                 dataType: 'json',
@@ -142,8 +145,8 @@ function detailListSetting(){
         rownumbers : true,
         pagination : true,
         pageNumber: 1, //初始化的页码编号,默认1
-        pageSize: 2, //每页的数据条数，默认10
-        pageList: [2, 10, 20, 50, 100], //页面数据条数选择清单
+        pageSize: 5, //每页的数据条数，默认10
+        pageList: [5, 10, 20, 50, 100], //页面数据条数选择清单
         singleSelect : true,
         border : false,
         showFooter: true,
@@ -310,7 +313,7 @@ function buildGoodsQueryCond(total, pageNum, cateLog) {
     return reqData;
 }
 
-//品类树选择
+//品类树选择，查询商品列表
 function catelogTreeSel(node) {
 
     var catelog = node.attributes.inner_code;
@@ -320,7 +323,7 @@ function catelogTreeSel(node) {
 
     $.ajax({
         method: 'POST',
-        url: $apiBaseURL + "ocr-productcenter/product-mgr/findall?context=3|3|lj|aaa",
+        url: $goodsURL + "ocr-goods-center/goods-mgr/findall?context=3|3|lj|aaa",
         data: condition,
         async: true,
         dataType: 'json',
@@ -350,7 +353,7 @@ function catelogTreeSel(node) {
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $apiBaseURL + "ocr-productcenter/product-mgr/findall?context=3|3|lj|aaa",
+                            url: $goodsURL + "ocr-goods-center/goods-mgr/findall?context=3|3|lj|aaa",
                             data: condition,
                             async: true,
                             dataType: 'json',
@@ -382,6 +385,7 @@ function onGoodsSelected (index, rowData) {
     $('#goodsEditor').val(selectdData.title);
 
     //设置商品到当前表体行对象上
+    delete selectdData._id;
     currentDetailRowObj.goods = selectdData;
 
     //-------刷新关联属性------
@@ -613,8 +617,8 @@ function formatCellTooltip(value){
 function bindDgListData(data){
     var dgLst = $('#dgList');
     var viewModel = new Array();
-    for ( var i in data.rows) {
-        var dataItem = data.rows[i];
+    for ( var i in data.datas) {
+        var dataItem = data.datas[i].bo;
         var row_data = {
             code : dataItem.bo_id,
             req_date : dataItem.req_date,
@@ -633,22 +637,34 @@ function bindDgListData(data){
             });
 }
 
-function clickHanler(){
-    var parentwin = window.parent;
-    parentwin.postMessage("aaa","*");
 
-    //alert(1);
+//构建分页条件
+function buildRepsQueryCond(total, pageNum) {
+    var condition = {
+        paging: {
+            sort_field: "_id",
+            sort_direction: -1,
+            page_number: pageNum,
+            page_size: 5,
+            total: total,
+            total_page: -1
+        }
+    };
+    var reqData = JSON.stringify(condition);
+    return reqData;
 }
-
 var repCurrentPageIndex = 1;
 //加载数据列表
 function loadDgList(){
 
+    var condStr = buildRepsQueryCond(0,1);
+
     //定义查询条件
     $.ajax({
-        method : 'GET',
-        url : $apiBaseURL + "ocr-productcenter/catelog-mgr/get_replenishment?context=3|3|lj|aaa",
+        method : 'POST',
+        url : $salesURL + "ocr-sales-center/channel-restocking/findcreated?context=3|3|lj|aaa",
         async : true,
+        data: condStr,
         dataType : 'json',
         beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
         success : function(data) {
@@ -675,10 +691,14 @@ function loadDgList(){
                         var gridOpts = $('#dgList').datagrid('options');
                         gridOpts.pageNumber = pPageIndex;
                         gridOpts.pageSize = pPageSize;
+
+                        condStr = buildRepsQueryCond(0, pPageIndex);
+
                         //定义查询条件
                         $.ajax({
-                            method: 'GET',
-                            url: $apiBaseURL + "ocr-productcenter/catelog-mgr/get_replenishment?context=3|3|lj|aaa",
+                            method: 'POST',
+                            url: $salesURL + "ocr-sales-center/channel-restocking/findcreated?context=3|3|lj|aaa",
+                            data: condStr,
                             async: true,
                             dataType: 'json',
                             beforeSend: function (x) {
@@ -860,16 +880,16 @@ function bindDetailData(data){
         }*/
 
         var row_data = {
-            product_sku_code : dataItem.detail_code,
+            product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
             bar_code : dataItem.goods.product_sku.bar_code,
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
             quantity: dataItem.quantity,
-            supply_price: dataItem.supply_price.price_including_tax.currency.money,
-            retail_price: dataItem.retail_price.price_including_tax.currency.money,
-            commission: dataItem.commission.commission_value.currency.money,
+            supply_price: (dataItem.supply_price.price_including_tax==undefined)?0.00:dataItem.supply_price.price_including_tax.currency.money,
+            retail_price: (dataItem.retail_price.price_including_tax==undefined)?0.00:dataItem.retail_price.price_including_tax.currency.money,
+            commission: (dataItem.commission.commission_value==undefined)?0.00:dataItem.commission.commission_value.currency.money,
             brand: dataItem.goods.product_sku.product_spu.brand.name,
             manufacturer: dataItem.goods.product_sku.product_spu.brand.manufacturer.name,
             obj: dataItem

@@ -72,7 +72,7 @@
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-textbox" id="code" style="width:200px" data-options="label:'Name:',required:true,onChange:onCodeChanged">
+                            <input class="easyui-textbox" id="code" style="width:200px" data-options="label:'Name:',required:false,onChange:onCodeChanged">
 
                         </td>
                         <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
@@ -100,7 +100,7 @@
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input class="easyui-combotree" id="channel"  style="width:200px" data-options="
-                                        url:$apiBaseURL + 'ocr-productcenter/catelog-mgr/get_channel?context=3|3|lj|aaa',
+                                        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
                                         method:'get',
                                         panelHeight:'auto',
                                         onSelect: channelSel,
@@ -135,7 +135,7 @@
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
                              <input id="restocking_warehose" class="easyui-combobox" style="width:200px;" data-options="
-                                        url:$apiBaseURL + 'ocr-productcenter/catelog-mgr/get_supplywarehouse?context=3|3|lj|aaa',
+                                        url:$channelURL + 'ocr-channel-manager/supplyrelation-mgr/get_supplywarehouses?context=3|3|lj|aaa',
                                         method:'get',
                                         valueField:'code',
                                         textField:'name',
@@ -235,7 +235,7 @@
     <div class="easyui-layout" data-options="fit:true">
         <div data-options="region:'west',split:true" style="width:120px">
             <ul class="easyui-tree" id="catelogTree"  style="width:100%" data-options="
-                                            url:$apiBaseURL + 'ocr-productcenter/catelog-mgr/get_catelogs?context=3|3|lj|aaa',
+                                            url:$goodsURL + 'ocr-goods-center/sales-catelog-mgr/findtree?context=3|3|lj|aaa',
                                             method:'get',
                                             onSelect: catelogTreeSel"
                                             />

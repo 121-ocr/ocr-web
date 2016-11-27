@@ -1,7 +1,7 @@
 
 //加载应用模块
 function loadAppModules(){
-	$.get($apiBaseURL + "ocr-productcenter/catelog-mgr/getmodules?context=3|3|lj|aaa",
+	$.get($channelURL + "/ocr-channel-manager/channel-org-mgr/getmodules?context=3|3|lj|aaa",
 		function(data,status){
 			if(status == "success"){
 				$.each(data, function(i, item) {
