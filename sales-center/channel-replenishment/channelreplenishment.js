@@ -166,19 +166,55 @@ function dgListSetting(){
     });
 }
 
+var targetAcct;
+var targetWh;
 function onWhSelected (rowIndex, rowData) {
     //initialized = true;
 
-    replenishmentObjIndex = rowIndex;
-    replenishmentObj = rowData.obj;
+    var warehouseInfo = rowData.obj.ba_warehouses;
 
-    //克隆数据
-    cloneReplenishmentObj = cloneJsonObject(replenishmentObj);
+    targetAcct = warehouseInfo.account;
+    targetWh = warehouseInfo.code;
 
-    bindSelectedDataToCard(cloneReplenishmentObj);
-    bindSelectedDataToSubDetail(cloneReplenishmentObj.details);
+    var query = {
+        goodaccount: $account,
+        warehousecode: warehouseInfo.code
+    };
 
-    //initialized = false;
+    $.ajax({
+        method : 'POST',
+        url : $invcenterURL + "/ocr-inventorycenter/stockonhand_mgr/query?context=" + $account + "|" + warehouseInfo.account + "|lj|aaa",
+        async : true,
+        data: JSON.stringify(query),
+        dataType : 'json',
+        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
+        success : function(data) {
+            bindReplenishmentDetail(data);
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
+
+}
+
+//绑定补货详情工作区Datagrid
+function bindReplenishmentDetail(data){
+    var viewModel = new Array();
+    for ( var i in data.result) {
+        var dataItem = data.result[i];
+        var row_data = {
+            product_sku_code : dataItem.sku,
+            title : dataItem.goods.title,
+            sales_catelog: dataItem.goods.sales_catelogs,
+            specifications: dataItem.goods.product_sku.product_specifications,
+            base_unit: dataItem.goods.product_sku.product_spu.base_unit,
+            quantity_onhand: dataItem.onhandnum,
+            obj: dataItem
+        };
+        viewModel.push(row_data);
+    }
+    $('#detailDg').datagrid('loadData',viewModel);
 }
 
 
@@ -307,10 +343,9 @@ function loadChannelWarehouses(ddv, channelAccount){
         warehouse_account: channelAccount
     }
 
-    //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $channelURL + "ocr-channel-manager/supplyrelation-mgr/bc_vmi_relations.get?context=3|3|lj|aaa",
+        url : $channelURL + "ocr-channel-manager/supplyrelation-mgr/bc_vmi_relations.get?context=" + $account + "|" + $account + "|lj|aaa",
         async : true,
         data: JSON.stringify(condStr),
         dataType : 'json',
@@ -342,6 +377,69 @@ function bindChannelWhDg(ddv, data){
 }
 
 
+function computeRepNum(){
+
+    var condStr = {
+        to_account: targetAcct,
+        to_warehouse_code: targetWh
+    }
+
+    $.ajax({
+        method : 'POST',
+        url : $channelURL + "ocr-channel-manager/supplyrelation-mgr/bc_replenishment_relations.get?context=" + $account + "|" + $account + "|lj|aaa",
+        async : true,
+        data: JSON.stringify(condStr),
+        dataType : 'json',
+        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
+        success : function(data) {
+
+            var dgList = $("#detailDg");
+            var rows = dgList.datagrid('getRows');
+            for(var index in rows) {
+                var row = rows[index];
+                /*                var dgList = $('#detailDg');
+                 var row = dgList.datagrid('getSelected');
+                 var index = dgList.datagrid('getRowIndex', row);*/
+
+                var query = {
+                    //                   account: data.result[0].from_account,
+                    warehousecode: data.result[0].from_warehouse_code,
+                    sku: row.obj.sku
+                }
+
+                queryFromWhOnHand(query, dgList, row, index);
+
+            }
+
+
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
+
+
+}
+
+function queryFromWhOnHand(query, dgList, row, index){
+    $.ajax({
+        method: 'POST',
+        url: $invcenterURL + "/ocr-inventorycenter/stockonhand_mgr/query?context=" + $account + "|" + $account + "|lj|aaa",
+        async: true,
+        data: JSON.stringify(query),
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+            var onhandNum = data.result[0].onhandnum;
+            row['supply_onhand'] = onhandNum;
+            dgList.datagrid('refreshRow', index);
+        }
+    });
+
+}
+
 //行选择事件
 
 var initialized = false;
@@ -360,12 +458,9 @@ function onRowSelected (rowIndex, rowData) {
     initialized = false;
 }
 
-
-
-
 function detailListSetting(){
     $('#detailDg').datagrid({
-        title : '商品缺货情况',
+        title : '商品补货处理',
         iconCls : 'icon-a_detail',
         fit : true,
         fitColumns : false,
@@ -416,7 +511,7 @@ function detailListSetting(){
                     text: '自动补货计算',
                     iconCls : 'icon-sum',
                     handler : function() {
-                        removeDetail();
+                        computeRepNum();
                     }
                 },
                 {
