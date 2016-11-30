@@ -383,8 +383,16 @@ function detailListSetting(){
         onEndEdit: onEndEdit,
         onSelect: onDetailRowSelected,  //行选择事件
         toolbar :
-            [   {
-                    text : '新增',
+            [
+                {
+                    text : '查看补货关系',
+                    iconCls : 'icon-search',
+                    handler : function() {
+                        append();
+                    }
+                },
+                {
+                    text : '从补货仓加入',
                     iconCls : 'icon-add',
                     handler : function() {
                         append();
@@ -405,22 +413,22 @@ function detailListSetting(){
                     }
                 },
                 {
-                    text: '撤销',
-                    iconCls : 'icon-undo',
+                    text: '自动补货计算',
+                    iconCls : 'icon-sum',
                     handler : function() {
-                        rejectDetail();
+                        removeDetail();
                     }
                 },
                 {
-                    text: '自动匹配存量',
-                    iconCls : 'icon-filter',
+                    text: '使用建议补货量',
+                    iconCls : 'icon-ok',
                     handler : function() {
                         removeDetail();
                     }
                 },
                 {
                     text: '通知发货',
-                    iconCls : 'icon-ok',
+                    iconCls : 'icon-redo',
                     handler : function() {
                         rejectDetail();
                     }
