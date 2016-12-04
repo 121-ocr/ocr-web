@@ -211,6 +211,27 @@ function onBeforeSelect(index,row){
     return true;
 }
 
+var restockingWarehoseLoader = function(param,success,error){
+
+    $.ajax({
+        method : 'POST',
+        url : $invcenterURL + "ocr-inventorycenter/invorg-mgr/query?context=" + $account + "|" + $account + "|lj|aaa",
+        async : true,
+        data: JSON.stringify({}),
+        dataType : 'json',
+        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
+        success : function(data) {
+            success(data.result);
+        },
+        error: function (x, e) {
+            var args = [];
+            args.push(e);
+            error.apply(this, args);
+        }
+    });
+}
+
+
 //商品参照
 $.extend($.fn.datagrid.defaults.editors, {
     goodsRef : {
@@ -625,7 +646,6 @@ function bindDgListData(data){
             req_send_date: dataItem.req_send_date,
             req_code : dataItem.req_code,
             channel_name: dataItem.channel.name,
-            restocking_warehose: dataItem.restocking_warehose.name,
             is_completed: dataItem.is_completed,
             obj: dataItem
         };
@@ -880,10 +900,13 @@ function bindDetailData(data){
         }*/
 
         var row_data = {
+            restocking_warehose: dataItem.restocking_warehose.name,
             product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
             bar_code : dataItem.goods.product_sku.bar_code,
+            invbatchcode: dataItem.invbatchcode,
+            shelf_life: dataItem.shelf_life,
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
             quantity: dataItem.quantity,

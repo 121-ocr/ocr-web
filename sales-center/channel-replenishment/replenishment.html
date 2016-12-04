@@ -129,21 +129,6 @@
                         </td>
                     </tr>
                     <tr style="height: 35px">
-                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
-                            补货仓库
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-
-                             <input id="restocking_warehose" class="easyui-combobox" style="width:200px;" data-options="
-                                        url:$channelURL + 'ocr-channel-manager/supplyrelation-mgr/get_supplywarehouses?context=3|3|lj|aaa',
-                                        method:'get',
-                                        valueField:'code',
-                                        textField:'name',
-                                        panelHeight:'auto',
-                                        onSelect: warehoseSelected,
-                                        required:true">
-
-                        </td>
                         <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px" >
                             申请人
                         </td>
@@ -172,12 +157,27 @@
                        title="渠道补货单明细" data-options="">
                     <thead>
                     <tr>
+                        <th field="restocking_warehose" width="80px" formatter="formatCellTooltip"
+                                                            data-options="editor:{
+                                                            type:'combobox',
+                                                            options: {
+                                                                loader: restockingWarehoseLoader,
+                                                                mode: 'remote',
+                                                                valueField:'code',
+                                                                textField:'name',
+                                                                panelHeight:'auto',
+                                                                onSelect: warehoseSelected,
+                                                                required:true
+                                                            }
+                                                          }">仓库</th>
                         <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
                         <th field="title" width="100px" formatter="formatCellTooltip"
                                                             data-options="editor:{type:'goodsRef'}">商品名</th>
                         <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
                         <th field="bar_code" width="80px" formatter="formatCellTooltip">条码</th>
                         <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
+                        <th field="invbatchcode" width="50px" formatter="formatCellTooltip">批次</th>
+                        <th field="shelf_life" width="80px" formatter="formatCellTooltip">保质期</th>
                         <th field="base_unit" width="80px" formatter="formatCellTooltip">单位</th>
                         <th field="quantity" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDigit" editor="{
                                                                     type:'numberbox',
