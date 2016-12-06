@@ -473,7 +473,7 @@ function onClickCell(index, field){
 }
 
 function onEndEdit(index, row) {
-    //对于合计行进行处理
+
     var ed = $(this).datagrid('getEditor', {
         index: index,
         field: 'quantity'

@@ -60,27 +60,24 @@ function dgListSetting(){
 }
 
 
-var targetAcct;
-var targetWh;
+var targetWarehouse;
+
 function onWhSelected (rowIndex, rowData) {
     //initialized = true;
 
-    var warehouseInfo = rowData.obj.ba_warehouses;
+    targetWarehouse = rowData.obj.ba_warehouses;
 
     var gridPanel = $("#detailDg").datagrid("getPanel");//先获取panel对象
-    gridPanel.panel('setTitle', "[" + warehouseInfo.name + "] 补货处理");//再通过panel对象去修改title
-
-    targetAcct = warehouseInfo.account;
-    targetWh = warehouseInfo.code;
+    gridPanel.panel('setTitle', "[" + targetWarehouse.name + "] 补货处理");//再通过panel对象去修改title
 
     var query = {
         goodaccount: $account,
-        warehousecode: warehouseInfo.code
+        warehousecode: targetWarehouse.code
     };
 
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/query?context=" + $account + "|" + warehouseInfo.account + "|lj|aaa",
+        url : $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/query?context=" + $account + "|" + targetWarehouse.account + "|lj|aaa",
         async : true,
         data: JSON.stringify(query),
         dataType : 'json',
@@ -306,8 +303,8 @@ function computeRepNum(){
             var row = rows[index];
 
             var query = {
-                to_account: targetAcct,
-                to_warehouse_code: targetWh,
+                to_account: targetWarehouse.account,
+                to_warehouse_code: targetWarehouse.code,
                 sku: row.obj.sku
             }
 
@@ -346,17 +343,27 @@ function formatSupplyOnHand(value){
                 '<td style="text-align: center">保质期</td>' +
                 '<td style="text-align: center">存量</td>' +
                 '<td style="text-align: center">发货量</td>' +
+                '<td style="text-align: center">供货价</td>' +
+                '<td style="text-align: center">零售价</td>' +
+                '<td style="text-align: center">佣金</td>' +
             '</tr>';
 
     for(var i in value.sub_nums){
         var warehouseInfo = value.sub_nums[i];
+        var supply_price = (warehouseInfo.supply_price==undefined)?0.00: warehouseInfo.supply_price.price.currency.money.toFixed(2);
+        var retail_price = (warehouseInfo.retail_price==undefined)?0.00:warehouseInfo.retail_price.price.currency.money.toFixed(2);
+        var commission = (warehouseInfo.commission==undefined)?0.00:warehouseInfo.commission.commission_value.currency.money.toFixed(2);
+
         var trHtml = '<tr style="height: 16px; background-color: ivory">' +
-        '<td style="text-align: center">' + warehouseInfo.warehouses.name + '</td>' +
-        '<td style="text-align: center">' + warehouseInfo.invbatchcode + '</td>' +
-        '<td style="text-align: center">' + warehouseInfo.shelf_life + '</td>' +
-        '<td style="text-align: center">' + warehouseInfo.onhandnum + '</td>' +
-        '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehouses.code + '" batch_code="' + warehouseInfo.invbatchcode
-                    + '" style="width:50px" onchange="onStockNumChanged(this);"></td>' +
+            '<td style="text-align: center">' + warehouseInfo.warehouses.name + '</td>' +
+            '<td style="text-align: center">' + warehouseInfo.invbatchcode + '</td>' +
+            '<td style="text-align: center">' + warehouseInfo.shelf_life + '</td>' +
+            '<td style="text-align: center">' + warehouseInfo.onhandnum + '</td>' +
+            '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehouses.code + '" batch_code="' + warehouseInfo.invbatchcode
+                        + '" style="width:50px" onchange="onStockNumChanged(this);"></td>' +
+            '<td style="text-align: center">' + supply_price + '</td>' +
+            '<td style="text-align: center">' + retail_price + '</td>' +
+            '<td style="text-align: center">' + commission + '</td>' +
         '</tr>';
         html += trHtml;
     }
@@ -637,11 +644,15 @@ function buildReplenishmentObj(rows){
     var theDate = new Date();
     var theDateStr = theDate.format("yyyy-MM-dd");
 
+    delete targetWarehouse._id;
+    delete currentChannelRow._id;
+
     var replenishmentObj = {
         req_date: theDateStr,
         req_send_date: theDateStr,
         req_code: "",
         channel: currentChannelRow,
+        target_warehose: targetWarehouse,
         is_completed: false,
         completed_date: "",
         details: []
@@ -655,21 +666,25 @@ function buildReplenishmentObj(rows){
             var deliveryItem = deliveryNumInfo.sub_nums[i];
             if(deliveryItem.rep_quantity != null &&
                 deliveryItem.rep_quantity != undefined) {
+                var supply_price = (deliveryItem.supply_price==undefined)?null:deliveryItem.supply_price;
+                var retail_price = (deliveryItem.retail_price==undefined)?null:deliveryItem.retail_price;
+                var commission = (deliveryItem.commission==undefined)?null:deliveryItem.commission;
                 var detailItem = {
                     restocking_warehose: {
                         code: deliveryItem.warehouses.code,
-                        name: deliveryItem.warehouses.name
+                        name: deliveryItem.warehouses.name,
+                        account: $account
                     },
                     detail_code: i,
                     goods: row.obj.goods,
                     invbatchcode: deliveryItem.invbatchcode,
                     shelf_life: deliveryItem.shelf_life,
                     quantity: deliveryItem.rep_quantity,
-                    supply_price: {},
-                    retail_price: {},
+                    supply_price: supply_price,
+                    retail_price: retail_price,
                     supply_amount: {},
                     retail_amount: {},
-                    commission: {}
+                    commission: commission
                 }
 
                 replenishmentObj.details.push(detailItem);
