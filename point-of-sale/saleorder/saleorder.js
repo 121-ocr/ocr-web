@@ -394,6 +394,10 @@ function onClickCell(index, field){
 
 }
 
+function onAfterEdit(index, row){
+    var a = 0;
+}
+
 function onEndEdit(index, row) {
     //对于合计行进行处理
     var ed = $(this).datagrid('getEditor', {
@@ -574,6 +578,59 @@ function reject(){
 //单元格加提示信息
 function formatCellTooltip(value){
     return "<span title='" + value + "'>" + value + "</span>";
+}
+
+//通过条码查询商品
+function queryGoods(value){
+    if(value == ""){
+        return;
+    }
+    var condition = {
+        "goods": {
+            "product_sku": {
+                "bar_code": value
+            }
+        }
+    };
+    var reqData = JSON.stringify(condition);
+
+    //定义查询条件
+    $.ajax({
+        method : 'POST',
+        url : $posURL + "ocr-pointofsale/posprice/getall?context=" + $token,
+        async : true,
+        data: reqData,
+        dataType : 'json',
+        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
+        success : function(data) {
+            currentDetailRowObj.goods = data.goods;
+            currentDetailRowObj.batch_code = data.invbatchcode;
+            currentDetailRowObj.detail_price = data.detail_price;
+            currentDetailRowObj.discount = data.discount;
+
+            //-------刷新关联属性------
+            var row = $('#detailDg').datagrid('getSelected');
+            var index = $('#detailDg').datagrid('getRowIndex', row);
+
+            row['product_sku_code'] = data.product_sku_code;
+            row['title'] = data.title;
+            row['sales_catelog'] = data.sales_catelogs;
+            row['bar_code'] = data.product_sku.bar_code;
+            if(selectdData.product_sku.product_specifications != null)
+                row['specifications'] = selectdData.product_sku.product_specifications;
+
+            row['base_unit'] = selectdData.product_sku.product_spu.base_unit;
+
+            if(selectdData.product_sku.product_spu.brand != null) {
+                row['brand'] = selectdData.product_sku.product_spu.brand.name;
+                row['manufacturer'] = selectdData.product_sku.product_spu.brand.manufacturer.name;
+            }
+
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
 }
 
 //绑定列表行数据
