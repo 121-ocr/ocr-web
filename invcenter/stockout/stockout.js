@@ -1119,7 +1119,7 @@ function onshipping(){
                 alert(e.toString(), 0, "友好提醒");
             }
         });
-	
+}
 	
 	
 }
