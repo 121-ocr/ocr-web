@@ -1076,7 +1076,7 @@ function onshipping() {
             dgList.datagrid('refreshRow', index);
 
             resetState();
-            alert_autoClose('提示', '发货成功!');
+            alert_autoClose('提示', '拣货打印成功!');
 
         },
         error: function (x, e) {

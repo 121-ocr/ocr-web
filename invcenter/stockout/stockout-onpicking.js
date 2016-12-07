@@ -1080,7 +1080,7 @@ function pickout() {
             dgList.datagrid('refreshRow', index);
 
             resetState();
-            alert_autoClose('提示', '拣货成功!');
+            alert_autoClose('提示', '拣货完成!');
 
         },
         error: function (x, e) {
