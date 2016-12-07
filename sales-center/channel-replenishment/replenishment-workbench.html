@@ -61,22 +61,19 @@
     <div data-options="region:'center'">
 
         <table id="detailDg" class="easyui-datagrid" style="border:0px"
-               title="商品缺货情况" data-options="">
+               title="商品补货处理" >
             <thead>
                 <tr>
                     <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
                     <th field="title" width="100px" formatter="formatCellTooltip">商品名</th>
-                    <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
+                    <th field="sales_catelog" width="60px" formatter="formatCatelogsCol">品类</th>
                     <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
-                    <th field="base_unit" width="60px" formatter="formatCellTooltip">单位</th>
+                    <th field="base_unit" width="40px" formatter="formatCellTooltip">单位</th>
                     <th field="quantity_onhand" width="70px" formatter="formatCellTooltip" sortable="true" sorter="compareDigit" >现存量</th>
                     <th field="quantity_safe" width="70px" formatter="formatCellTooltip" sortable="true" sorter="compareDigit" >安全库存</th>
                     <th field="packing_unit" width="80px" formatter="formatCellTooltip">补货包装单位</th>
                     <th field="quantity_advice" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDigit" >建议补货量</th>
-                    <th field="supply_onhand" width="180px" formatter="formatSupplyOnHand" >补货仓存量</th>
-                    <th field="supply_price" width="70px" formatter="formatCellTooltip">供货价</th>
-                    <th field="retail_price" width="70px" formatter="formatCellTooltip">零售价</th>
-                    <th field="commission" width="70px" formatter="formatCellTooltip">佣金</th>
+                    <th field="supply_onhand" width="400px" formatter="formatSupplyOnHand" >补货仓补货</th>
                 </tr>
             </thead>
         </table>

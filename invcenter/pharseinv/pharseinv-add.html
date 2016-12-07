@@ -12,14 +12,9 @@
     <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
     <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
     <script type="text/javascript" src="../../js/constant.js"></script>
-    <script type="text/javascript" src="../../js/utility.js"></script>
-    <script type="text/javascript" src="allotinv.js"></script>
+    <script type="text/javascript" src="pharseinv.js"></script>
     <style type="text/css">
-        .subtotal {
-            font-weight: bold;
-        }
-
-        /*合计单元格样式*/
+        .subtotal { font-weight: bold; }/*合计单元格样式*/
     </style>
 </head>
 <body>
@@ -29,174 +24,142 @@
             <table cellpadding="0" cellspacing="0" style="width:100%">
                 <tr>
                     <td style="padding-left:2px">
-                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick="save();">保存</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="add()">新增</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick ="save()">保存</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-edit">修改</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
-                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-undo"
-                           onclick="reject();">撤销</a>
-                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-ok" onclick="receive();">收货</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove">删除</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help"></a>
                     </td>
                     <td style="text-align:right;padding-right:2px">
-                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'"
-                               style="width:200px"/>
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
                     </td>
                 </tr>
             </table>
         </div>
 
     </div>
-    <div data-options="region:'west',split:true" style="width:310px">
-        <table id="dgList" class="easyui-datagrid" style="width:600px;height:100%"
-               title="Load Data" iconCls="icon-save">
-            <thead>
-            <tr>
-                <th field="bo_id" width="80px" formatter="formatCellTooltip">入库单号</th>
-                <th field="request_date" width="80px" formatter="formatCellTooltip" sortable="true"
-                    sorter="compareDatetime">要货日期
-                </th>
-                <th field="supply_date" width="80px" formatter="formatCellTooltip" sortable="true">补货日期</th>
-                <th field="restocking_warehouse" width="80px" formatter="formatCellTooltip" sortable="true">补货仓库</th>
-            </tr>
-            </thead>
-        </table>
-
-    </div>
+   
     <div data-options="region:'center'">
         <div class="easyui-layout" data-options="fit:true" style="border:0px">
             <div data-options="region:'north',split:true" style="height:170px;border:0px;">
-                <table id="header" cellpadding="0" cellspacing="0" style="width:100%">
+                <table cellpadding="0" cellspacing="0" style="width:100%">
                     <tr style="height: 50px">
-                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">补货入库单</strong></td>
+                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">采购入库单</strong></td>
                     </tr>
                     <tr style="height: 35px">
                         <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
-                            入库单号
+                            补货单编码
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-textbox" id="bo_id" style="width:200px"
-                                   data-options="label:'Name:',required:true,onChange:onCodeChanged">
-
-                        </td>
-                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
-                            补货单号
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-
-                            <input class="easyui-textbox" id="replenishment_code" style="width:200px"
-                                   data-options="label:'Name:',required:false,onChange:onReplenishmentCodeChanged">
+                            <input class="easyui-textbox" id="code" style="width:200px" data-options="label:'Name:',required:true">
 
                         </td>
                         <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
-                            补货日期
+                            要货单号
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-datebox" id="supply_date" style="width:200px;"
-                                   data-options="required:true,
-                                   parser: function (date) { return new Date(Date.parse(date.replace(/-/g, '/'))); },
-                                   onSelect: onSupplyDateSel
-                                    ">
+                            <input class="easyui-textbox" id="req_code" style="width:200px" data-options="label:'Email:',required:false">
 
                         </td>
-                    </tr>
-                    <tr style="height: 35px">
                         <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
                             要货日期
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
-                            <input class="easyui-datebox" id="request_date" style="width:200px;"
+                            <input class="easyui-datebox" id="req_date" style="width:200px;"
                                    data-options="required:true,
                                    parser: function (date) { return new Date(Date.parse(date.replace(/-/g, '/'))); },
-                                   onSelect: onSendDateSel
                                     ">
                         </td>
+                    </tr>
+                    <tr style="height: 35px">
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            渠道名
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-combotree" id="channel"  style="width:200px" data-options="
+                                        url:$apiBaseURL + 'ocr-productcenter/catelog-mgr/get_channel?context=3|3|lj|aaa',
+                                        method:'get',
+                                        panelHeight:'auto',
+                                        onSelect: channelSel,
+                                        required:true">
+                        </td>
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            渠道类型
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="channel_type" style="width:200px" editable="false" data-options="required:false">
+ <!--                           <input id="channel_type" class="easyui-combobox" style="width:200px;" data-options="
+                                        url:$apiBaseURL + 'ocr-productcenter/catelog-mgr/get_channeltype?context=3|3|lj|aaa',
+                                        method:'get',
+                                        valueField:'code',
+                                        textField:'name',
+                                        panelHeight:'auto',
+                                        required:true">-->
+                        </td>
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            客户
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="customer" style="width:200px" editable="false" data-options="required:false">
+
+                        </td>
+                    </tr>
+                    <tr style="height: 35px">
                         <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
                             补货仓库
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input id="restocking_warehouse" class="easyui-combobox" style="width:200px;" data-options="
-                                        loader: restockingWarehoseLoader, 
-                                        mode: 'remote',   
+                             <input id="restocking_warehose" class="easyui-combobox" style="width:200px;" data-options="
+                                        url:$apiBaseURL + 'ocr-productcenter/catelog-mgr/get_supplywarehouse?context=3|3|lj|aaa',
+                                        method:'get',
                                         valueField:'code',
                                         textField:'name',
                                         panelHeight:'auto',
-                                        onSelect: onResWarehoseSelected,
                                         required:true">
 
                         </td>
-                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
-                            收货仓库
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px" >
+                            申请人
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input id="warehouse" class="easyui-combobox" style="width:200px;" data-options="
-                                        loader: warehoseLoader, 
-                                        mode: 'remote',
-                                        valueField:'code',
-                                        textField:'name',
-                                        panelHeight:'auto',
-                                        onSelect: onWarehoseSelected,
-                                        required:true">
+                            <input class="easyui-textbox" name="email" style="width:200px" data-options="required:false">
+
                         </td>
-                    </tr>
-                    <tr style="height: 35px">
                         <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
-                            收货日期
+                            申请发货日期
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
-                            <input class="easyui-datebox" id="confirm_date" style="width:200px;"
-                                   data-options="required:true,
+
+                            <input class="easyui-datebox" id="req_send_date" style="width:200px;"
+                                   data-options="required:false,
                                    parser: function (date) { return new Date(Date.parse(date.replace(/-/g, '/'))); },
-                                   onSelect: onConfirmDateSel
                                     ">
+
                         </td>
                     </tr>
                 </table>
             </div>
             <div data-options="region:'center'" style="border:0px">
                 <table id="detailDg" class="easyui-datagrid" style="border:0px"
-                       title="补货入库单明细" data-options="">
+                       title="渠道补货单明细" data-options="">					
                     <thead>
                     <tr>
-                        <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
-                        <th field="title" width="100px" formatter="formatCellTooltip"
-                            data-options="editor:{type:'goodsRef'}">商品名
-                        </th>
-                        <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
-                        <th field="bar_code" width="80px" formatter="formatCellTooltip">条码</th>
-                        <th field="batch_code" width="80px" formatter="formatCellTooltip">批次号</th>
-                        <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
-                        <th field="base_unit" width="80px" formatter="formatCellTooltip">单位</th>
-                        <th field="quantity_should" width="80px" formatter="formatCellTooltip" sortable="true"
-                            sorter="compareDigit" editor="{
-                                                                    type:'numberbox',
-                                                                    options:{
-                                                                        precision:0,
-                                                                        required:true
-                                                                    }
-                                                                }">应收数量
-                        </th>
-                        <th field="quantity_fact" width="80px" formatter="formatCellTooltip" sortable="true"
-                            sorter="compareDigit" editor="{
-                                                                    type:'numberbox',
-                                                                    options:{
-                                                                        precision:0,
-                                                                        required:true
-                                                                    }
-                                                                }">实收数量
-                        </th>
-                        <th field="quantity_reject" width="80px" formatter="formatCellTooltip" sortable="true"
-                            sorter="compareDigit" editor="{
-                                                                    type:'numberbox',
-                                                                    options:{
-                                                                        precision:0,
-                                                                        required:true
-                                                                    }
-                                                                }">退回数量
-                        </th>
+					    <th field="id"  width="80px" formatter="formatCellTooltip" checkbox=true>行号</th>
+                        <th field="product_sku_code" width="80px" formatter="formatCellTooltip"  title="">SKU</th>
+                        <th field="title" width="80px" formatter="formatCellTooltip"
+                                                            data-options="editor:{type:'goodsRef'}">商品名</th>
+                        <th field="sales_catelog" width="80px" formatter="formatCatelogsCol" editor="text" >品类</th>
+                        <th field="bar_code" width="80px" formatter="formatCellTooltip" editor="text">条码</th>
+                        <th field="specifications" width="80px" formatter="formatSpecificationCol" editor="text" >规格</th>
+                        <th field="base_unit" width="80px" formatter="formatCellTooltip" editor="text">单位</th>
+                        <th field="quantity" width="80px" formatter="formatCellTooltip">数量</th>
                         <th field="supply_price" width="80px" formatter="formatCellTooltip">供货价</th>
                         <th field="retail_price" width="80px" formatter="formatCellTooltip">零售价</th>
                         <th field="commission" width="80px" formatter="formatCellTooltip">佣金</th>
@@ -205,6 +168,7 @@
                     </tr>
                     </thead>
                 </table>
+
             </div>
             <div data-options="region:'south',split:true" style="height:80px;">
                 <table cellpadding="0" cellspacing="0" style="width:100%;margin-top: 10px">
@@ -214,8 +178,7 @@
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-textbox" name="operator" style="width:200px"
-                                   data-options="label:'Name:',required:false">
+                            <input class="easyui-textbox" name="name" style="width:200px" data-options="label:'Name:',required:false">
 
                         </td>
                         <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
@@ -223,8 +186,7 @@
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-textbox" name="bill_date" style="width:200px"
-                                   data-options="label:'Email:',required:false">
+                            <input class="easyui-textbox" name="email" style="width:200px" data-options="label:'Email:',required:false">
 
                         </td>
                         <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
@@ -246,11 +208,11 @@
      style="width:600px;height:400px;padding:5px;">
     <div class="easyui-layout" data-options="fit:true">
         <div data-options="region:'west',split:true" style="width:120px">
-            <ul class="easyui-tree" id="catelogTree" style="width:100%" data-options="
-                                            url:$goodsURL + 'ocr-goods-center/sales-catelog-mgr/findtree?context=3|3|lj|aaa',
+            <ul class="easyui-tree" id="catelogTree"  style="width:100%" data-options="
+                                            url:$apiBaseURL + 'ocr-productcenter/catelog-mgr/get_catelogs?context=3|3|lj|aaa',
                                             method:'get',
                                             onSelect: catelogTreeSel"
-            />
+                                            />
         </div>
         <div data-options="region:'center',split:true" style="padding:10px;">
             <table id="goodsDg" class="easyui-datagrid" style="width:100%;height:100%"
@@ -276,8 +238,7 @@
         </div>
         <div data-options="region:'south',border:false" style="text-align:right;padding:5px 0 0;">
             <!--<a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="goodsRefReturn();" style="width:80px">Ok</a>-->
-            <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0)"
-               onclick="closeGoodsRef();" style="width:80px">Cancel</a>
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0)" onclick="closeGoodsRef();" style="width:80px">Cancel</a>
         </div>
     </div>
 </div>
@@ -288,5 +249,6 @@
     dgListSetting();
     detailListSetting();
     loadDgList();
+
 </script>
 </html>
