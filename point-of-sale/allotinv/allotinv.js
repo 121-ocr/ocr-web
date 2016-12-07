@@ -744,8 +744,9 @@ function bindSelectedDataToCard(data) {
     $('#bo_id').textbox('setValue', data.bo_id);
     $('#replenishment_code').textbox('setValue', data.replenishment_code);
     $('#supply_date').datebox('setValue', data.supply_date);
-    $('#send_date').datebox('setValue', data.send_date);
-    $('#confirm_date').datebox('setValue', data.confirm_date);
+    $('#request_date').datebox('setValue', data.request_date);
+    if(data.confirm_date != undefined)
+        $('#confirm_date').datebox('setValue', data.confirm_date);
 
     if (data.restocking_warehouse != null) {
         $('#restocking_warehouse').combobox('setValue', data.restocking_warehouse.code);

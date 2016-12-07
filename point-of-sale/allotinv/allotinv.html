@@ -52,10 +52,10 @@
             <thead>
             <tr>
                 <th field="bo_id" width="80px" formatter="formatCellTooltip">入库单号</th>
-                <th field="supply_date" width="80px" formatter="formatCellTooltip" sortable="true"
-                    sorter="compareDatetime">补货日期
+                <th field="request_date" width="80px" formatter="formatCellTooltip" sortable="true"
+                    sorter="compareDatetime">要货日期
                 </th>
-                <th field="send_date" width="80px" formatter="formatCellTooltip" sortable="true">发货日期</th>
+                <th field="supply_date" width="80px" formatter="formatCellTooltip" sortable="true">补货日期</th>
                 <th field="restocking_warehouse" width="80px" formatter="formatCellTooltip" sortable="true">补货仓库</th>
             </tr>
             </thead>
@@ -103,10 +103,10 @@
                     </tr>
                     <tr style="height: 35px">
                         <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
-                            发货日期
+                            要货日期
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
-                            <input class="easyui-datebox" id="send_date" style="width:200px;"
+                            <input class="easyui-datebox" id="request_date" style="width:200px;"
                                    data-options="required:true,
                                    parser: function (date) { return new Date(Date.parse(date.replace(/-/g, '/'))); },
                                    onSelect: onSendDateSel
