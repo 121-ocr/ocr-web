@@ -57,6 +57,22 @@ function dgListSetting(){
             $('#dgList').datagrid('fixDetailRowHeight',index);
         }
     });
+
+    $('#allowCatalogDg').datagrid({
+        loadMsg: "正在加载，请稍等...",
+        iconCls : 'icon-a_detail',
+        fit : true,
+        fitColumns : false,
+        remoteSort: false,
+        rownumbers : true,
+        pagination : true,
+        pageNumber: 1, //初始化的页码编号,默认1
+        pageSize: 2, //每页的数据条数，默认10
+        pageList: [2, 10, 20, 50, 100], //页面数据条数选择清单
+        singleSelect : true,
+        border : true,
+        onSelect: onGoodsSelected  //行选择事件
+    });
 }
 
 
@@ -453,14 +469,14 @@ function detailListSetting(){
                     text : '查看补货关系',
                     iconCls : 'icon-search',
                     handler : function() {
-                        append();
+                        showRelations();
                     }
                 },
                 {
-                    text : '从补货仓加入',
+                    text : '添加商品',
                     iconCls : 'icon-add',
                     handler : function() {
-                        append();
+                        appendGoods();
                     }
                 },
                 {
@@ -516,6 +532,128 @@ function detailListSetting(){
         border : true,
         onSelect: onGoodsSelected  //行选择事件
      });
+}
+
+//打开允销目录，添加商品
+function appendGoods(){
+
+    if(targetWarehouse == null || targetWarehouse.account == undefined){
+        alert_autoClose('提示','请先选择渠道仓库!');
+        return;
+    }
+
+    loadAllowCatalogs();
+
+    $('#allowCatalogDialog').window('open');
+}
+
+//绑定允销商品datagrid
+function bindAllowCatalogDg(data) {
+    var dgLst = $('#allowCatalogDg');
+    var viewModel = new Array();
+    for (var i in data.datas) {
+        var dataItem = data.datas[i].goods;
+        var row_data = {
+            product_sku_code: dataItem.product_sku_code,
+            title: dataItem.title,
+            sales_catelog: dataItem.sales_catelogs,
+            bar_code: dataItem.product_sku.bar_code,
+            specifications: dataItem.product_sku.product_specifications,
+            base_unit: dataItem.product_sku.product_spu.base_unit,
+            //quantity: dataItem.quantity,
+            brand: dataItem.product_sku.product_spu.brand.name,
+            manufacturer: dataItem.product_sku.product_spu.brand.manufacturer.name,
+            obj: dataItem
+        };
+        viewModel.push(row_data);
+    }
+
+    dgLst.datagrid('loadData',{
+        total: data.total,
+        rows: viewModel
+    });
+
+}
+
+
+//构建分页条件
+function buildAllowCatalogQueryCond(total, pageNum) {
+    var condition = {
+        paging: {
+            sort_field: "_id",
+            sort_direction: -1,
+            page_number: pageNum,
+            page_size: 2,
+            total: total,
+            total_page: -1
+        },
+        query: {'channel.account':targetWarehouse.account}
+    };
+    var reqData = JSON.stringify(condition);
+    return reqData;
+}
+
+//加载允销目录
+function loadAllowCatalogs() {
+
+    //定义查询条件
+    var condition = buildAllowCatalogQueryCond(0, 1);
+
+    $.ajax({
+        method: 'POST',
+        url: $channelURL + "ocr-channel-manager/allowcatalog-mgr/find_pagination?context=3|3|lj|aaa",
+        data: condition,
+        async: true,
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+
+            bindAllowCatalogDg(data);
+
+            $('#allowCatalogDg').datagrid('getPager').pagination({
+                displayMsg: '第 {from} - {to} 条 共 {total} 条',
+                onBeforeRefresh: function () {
+                    var thisDg = $('#allowCatalogDg');
+                    thisDg.pagination('loading...');
+                    alert('before refresh');
+                    thisDg.pagination('loaded');
+                },
+                onSelectPage: function (pPageIndex, pPageSize) {
+                    //改变opts.pageNumber和opts.pageSize的参数值，用于下次查询传给数据层查询指定页码的数据
+                    var gridOpts = $('#allowCatalogDg').datagrid('options');
+                    gridOpts.pageNumber = pPageIndex;
+                    gridOpts.pageSize = pPageSize;
+
+                    condition = buildAllowCatalogQueryCond(0, pPageIndex);
+
+                    //定义查询条件
+                    $.ajax({
+                        method: 'POST',
+                        url:  $channelURL + "ocr-channel-manager/allowcatalog-mgr/find_pagination?context=3|3|lj|aaa",
+                        data: condition,
+                        async: true,
+                        dataType: 'json',
+                        beforeSend: function (x) {
+                            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                        },
+                        success: function (data) {
+
+                            bindAllowCatalogDg(data);
+                        },
+                        error: function (x, e) {
+                            alert(e.toString(), 0, "友好提醒");
+                        }
+                    });
+                }
+            });
+
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
 }
 
 function bindSkuBatchs(ddv, row){
