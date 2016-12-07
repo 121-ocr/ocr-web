@@ -556,11 +556,7 @@ function bindSelectedDataToCard(data) {
     $('#replenishment_code').textbox('setValue', data.replenishment_code);
     $('#supply_date').datebox('setValue', data.supply_date);
     $('#request_date').datebox('setValue', data.request_date);
-<<<<<<< HEAD
-    if (data.confirm_date != undefined)
-=======
     if(data.confirm_date != undefined) {
->>>>>>> branch 'develop' of https://github.com/121-ocr/ocr-web.git
         $('#confirm_date').datebox('setValue', data.confirm_date);
     }else{
         var theDate = new Date();
