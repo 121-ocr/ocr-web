@@ -115,7 +115,7 @@ function resetState(){
 function dgListSetting(){
     $('#dgList').datagrid({
         loadMsg: "正在加载，请稍等...",
-        title : '待拣货列表',
+        title : '拣货完毕列表',
         iconCls : 'icon-a_detail',
         fit : true,
         fitColumns : false,
@@ -1079,7 +1079,7 @@ function shippingout() {
             dgList.datagrid('refreshRow', index);
 
             resetState();
-            alert_autoClose('提示', '发货成功!');
+            alert_autoClose('提示', '出库成功!');
 
         },
         error: function (x, e) {
