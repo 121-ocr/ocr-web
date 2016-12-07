@@ -18,7 +18,7 @@ function save() {
     if (isHeadChanged || isBodyChanged || isNewRep) {
         $.ajax({
             method: 'POST',
-            url: $posURL + "ocr-pointofsale/allotinv/confirm?context=" + $token,
+            url: $posURL + "ocr-pointofsale/allotinv/confirm?context=" + $token_pos,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -63,7 +63,7 @@ function removeRep() {
 
             $.ajax({
                 method: 'DELETE',
-                url: $posURL + "ocr-pointofsale/allotinv/remove?context=" + $token,
+                url: $posURL + "ocr-pointofsale/allotinv/remove?context=" + $token_pos,
                 data: JSON.stringify(cloneAllotInvObj),
                 async: true,
                 dataType: 'json',
@@ -612,7 +612,7 @@ function loadDgList() {
     //定义查询条件
     $.ajax({
         method: 'POST',
-        url: $posURL + "ocr-pointofsale/allotinv/getall?context=" + $token,
+        url: $posURL + "ocr-pointofsale/allotinv/getall?context=" + $token_pos,
         async: true,
         data: condStr,
         dataType: 'json',
@@ -649,7 +649,7 @@ function loadDgList() {
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $posURL + "ocr-pointofsale/allotinv/getall?context=" + $token,
+                            url: $posURL + "ocr-pointofsale/allotinv/getall?context=" + $token_pos,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -677,7 +677,7 @@ function loadDgList() {
 var restockingWarehoseLoader = function (param, success, error) {
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/query?context=" + $account + "|" + $account + "|lj|aaa",
+        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/query?context=" + $account_pos + "|" + $account_pos + "|lj|aaa",
         async: true,
         data: JSON.stringify({}),
         dataType: 'json',
@@ -698,7 +698,7 @@ var restockingWarehoseLoader = function (param, success, error) {
 var warehoseLoader = function (param, success, error) {
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/query?context=" + $account + "|" + $account + "|lj|aaa",
+        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/query?context=" + $account_pos + "|" + $account_pos + "|lj|aaa",
         async: true,
         data: JSON.stringify({}),
         dataType: 'json',

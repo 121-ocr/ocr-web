@@ -660,7 +660,8 @@ function buildRepsQueryCond(total, pageNum) {
             page_size: 5,
             total: total,
             total_page: -1
-        }
+        },
+        status: "created"
     };
     var reqData = JSON.stringify(condition);
     return reqData;
@@ -1047,79 +1048,41 @@ function compareDigit(a,b){
 }
 
 
-function shippingout(){
-  
-        $.ajax({
-            method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/shippingout?context=3|3|lj|aaa",
-            data: JSON.stringify(cloneAllotInvObj),
-            async: true,
-            dataType: 'json',
-            beforeSend: function (x) {
-                x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-            },
-            success: function (data) {
+function onshipping() {
 
-                //-------刷新关联属性------
-                cloneAllotInvObj = data;
-                allotInvObj = cloneAllotInvObj;
+    $.ajax({
+        method: 'POST',
+        url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/onshipping?context=3|3|lj|aaa",
+        data: JSON.stringify(cloneAllotInvObj),
+        async: true,
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
 
-                var dgList = $('#dgList');
-                var row = dgList.datagrid('getSelected');
-                var index = dgList.datagrid('getRowIndex', row);
-				
-                row['code'] = data.code;
-               
-                row['send_date'] = data.send_date;
-                row.obj = allotInvObj;
-                dgList.datagrid('refreshRow', index);
+            //-------刷新关联属性------
+            cloneAllotInvObj = data;
+            allotInvObj = cloneAllotInvObj;
 
-                resetState();
-                alert_autoClose('提示','发货成功!');
+            var dgList = $('#dgList');
+            var row = dgList.datagrid('getSelected');
+            var index = dgList.datagrid('getRowIndex', row);
 
-            },
-            error: function (x, e) {
-                alert(e.toString(), 0, "友好提醒");
-            }
-        });
+            row['code'] = data.code;
 
-    
-function onshipping(){
-  
-        $.ajax({
-            method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/onshipping?context=3|3|lj|aaa",
-            data: JSON.stringify(cloneAllotInvObj),
-            async: true,
-            dataType: 'json',
-            beforeSend: function (x) {
-                x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-            },
-            success: function (data) {
+            row['send_date'] = data.send_date;
+            row.obj = allotInvObj;
+            dgList.datagrid('refreshRow', index);
 
-                //-------刷新关联属性------
-                cloneAllotInvObj = data;
-                allotInvObj = cloneAllotInvObj;
+            resetState();
+            alert_autoClose('提示', '发货成功!');
 
-                var dgList = $('#dgList');
-                var row = dgList.datagrid('getSelected');
-                var index = dgList.datagrid('getRowIndex', row);
-				
-                row['code'] = data.code;
-               
-                row['send_date'] = data.send_date;
-                row.obj = allotInvObj;
-                dgList.datagrid('refreshRow', index);
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
 
-                resetState();
-                alert_autoClose('提示','发货成功!');
 
-            },
-            error: function (x, e) {
-                alert(e.toString(), 0, "友好提醒");
-            }
-        });
-}
-	
-	
 }

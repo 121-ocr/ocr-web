@@ -18,7 +18,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $posURL + "ocr-pointofsale/saleorder/create?context=" + $token_pos,
+            url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/create?context=3|3|lj|aaa",
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -34,9 +34,9 @@ function save(){
                 var dgList = $('#dgList');
                 var row = dgList.datagrid('getSelected');
                 var index = dgList.datagrid('getRowIndex', row);
-                row['bo_id'] = data.bo_id;
-                row['sale_date'] = data.sale_date;
-                row['salesman'] = data.salesman;
+                row['code'] = data.code;
+               
+                row['send_date'] = data.send_date;
                 row.obj = allotInvObj;
                 dgList.datagrid('refreshRow', index);
 
@@ -52,6 +52,59 @@ function save(){
     }
 }
 
+function edit() {
+    $("#header input").removeAttr("disabled");
+}
+
+function removeRep(){
+
+    if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}
+
+    $.messager.confirm('删除警告', '是否确认删除?', function(r){
+        if (r){
+
+            $.ajax({
+                method: 'DELETE',
+                url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/remove?context=3|3|lj|aaa",
+                data: JSON.stringify(cloneAllotInvObj),
+                async: true,
+                dataType: 'json',
+                beforeSend: function (x) {
+                    x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                },
+                success: function (data) {
+                    //$.messager.alert('提示','删除成功!');
+                    resetState();
+
+                    var dgList = $('#dgList');
+                    dgList.datagrid('deleteRow', allotInvObjIndex);
+                    currentRowIndex = undefined;
+
+                    //$.messager.alert('提示','删除成功!');
+                    alert_autoClose('提示','删除成功!');
+
+                    //当前指针指向正确的位置
+                    var rowCount = dgList.datagrid('getRows').length + 1;
+                    if(rowCount > 0){
+                        if(allotInvObjIndex == 0){
+                            dgList.datagrid('selectRow',allotInvObjIndex);
+                        }else{
+                            if(allotInvObjIndex == rowCount -1){
+                                dgList.datagrid('selectRow',allotInvObjIndex-1);
+                            }else{
+                                dgList.datagrid('selectRow',allotInvObjIndex+1);
+                            }
+                        }
+                    }
+                },
+                error: function (x, e) {
+                    alert(e.toString(), 0, "友好提醒");
+                }
+            });
+        }
+    });
+}
+
 function resetState(){
     editIndex = undefined;
     isNewRep = false;
@@ -62,7 +115,7 @@ function resetState(){
 function dgListSetting(){
     $('#dgList').datagrid({
         loadMsg: "正在加载，请稍等...",
-        title : '补货入库单列表',
+        title : '待拣货列表',
         iconCls : 'icon-a_detail',
         fit : true,
         fitColumns : false,
@@ -114,6 +167,13 @@ function detailListSetting(){
                     }
                 },
                 {
+                    text: '修改',
+                    iconCls : 'icon-edit',
+                    handler : function() {
+
+                    }
+                },
+                {
                     text: '删除',
                     iconCls : 'icon-remove',
                     handler : function() {
@@ -146,6 +206,11 @@ function detailListSetting(){
         onSelect: onGoodsSelected  //行选择事件
      });
 }
+
+function pageSetting(){
+    $("#header input").attr("disabled","true");
+}
+
 function onBeforeSelect(index,row){
     if(isBodyChanged || isHeadChanged){
         $.messager.alert('数据变化提示','当前数据已经变化，请先保存或取消!');
@@ -394,40 +459,18 @@ function onClickCell(index, field){
 
 }
 
-function onAfterEdit(index, row){
-    var a = 0;
-}
-
 function onEndEdit(index, row) {
     //对于合计行进行处理
     var ed = $(this).datagrid('getEditor', {
         index: index,
         field: 'quantity'
     });
-    if (ed != null && ed != undefined) {
+    if(ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
         row.quantity = newValue; //设置当前行的数量值
         currentDetailRowObj.quantity = newValue; //设置当前行对象的值
+        refreshSubTotalRows(); //刷新小计列
     }
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'retail_amount'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.retail_amount = newValue; //设置当前行的数量值
-        currentDetailRowObj.retail_amount = newValue; //设置当前行对象的值
-    }
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'discount_amount'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.discount_amount = newValue; //设置当前行的数量值
-        currentDetailRowObj.discount_amount = newValue; //设置当前行对象的值
-    }
-    refreshSubTotalRows(); //刷新小计列
 }
 
 function append(){
@@ -437,14 +480,11 @@ function append(){
             detail_code: "",
             goods: {},
             quantity: 0,
-            batch_code: "",
+            supply_price: {},
             retail_price: {},
-            retail_amount: {},
-            discount: "",
-            discount_amount: {},
-            note: ""
+            commission: {}
         };
-        cloneAllotInvObj.detail.push(newDetailObj);
+        cloneAllotInvObj.details.push(newDetailObj);
 
         var rowData = {
             product_sku_code : "",
@@ -453,12 +493,10 @@ function append(){
             bar_code : "",
             specifications: {},
             base_unit: "",
-            batch_code: "",
             quantity: 0,
+            supply_price: 0.00,
             retail_price: 0.00,
-            retail_amount: 0.00,
-            discount: 0.00,
-            discount_amount: 0.00,
+            commission: 0.00,
             brand: "",
             manufacturer: "",
             obj: newDetailObj
@@ -492,22 +530,26 @@ function newRep(){
         var dgList =  $('#dgList');
         var newObjIndex = dgList.datagrid('getRows').length;
         var newObj = {
-            bo_id: "",
-            member_code:"",
-            sale_date: theDateStr,
-            salesman: "",
+            code: "",
+            replenishment_code:"",
+          
+            send_date: "",
+            pickout_date: theDateStr,
+            warehouse: {},
             warehouse:{},
-            note: "",
-            "detail": []
+          
+            "details": []
         };
 
         var rowData = {
-            bo_id: "",
-            member_code:"",
-            sale_date: "",
-            salesman: "",
+            code : "",
+            replenishment_code:"",
+           
+            send_date: "",
+            pickout_date: "",
+            warehouse: "",
             warehouse:{},
-            note: "",
+          
             obj: newObj
         };
 
@@ -518,6 +560,8 @@ function newRep(){
         //data.originalRows.push(rowData);
 
         dgList.datagrid('selectRow', newObjIndex);
+
+        $("#header input").removeAttr("disabled");
 
         isNewRep = true;
 
@@ -580,58 +624,6 @@ function formatCellTooltip(value){
     return "<span title='" + value + "'>" + value + "</span>";
 }
 
-//通过条码查询商品
-function queryGoods(value){
-    if(value == ""){
-        return;
-    }
-    var condition = {
-        "goods.product_sku.bar_code": value
-    };
-    var reqData = JSON.stringify(condition);
-
-    //定义查询条件
-
-    $.ajax({
-        method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token_pos,
-        async : true,
-        data: reqData,
-        dataType : 'json',
-        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
-        success : function(result) {
-            var data = result.result[0];
-            currentDetailRowObj.goods = data.goods;
-            currentDetailRowObj.batch_code = data.invbatchcode;
-            currentDetailRowObj.detail_price = data.detail_price;
-            currentDetailRowObj.discount = data.discount;
-
-            //-------刷新关联属性------
-            var row = $('#detailDg').datagrid('getSelected');
-            var index = $('#detailDg').datagrid('getRowIndex', row);
-
-            row['product_sku_code'] = data.goods.product_sku_code;
-            row['title'] = data.goods.title;
-            row['sales_catelog'] = data.goods.sales_catelogs.name;
-            row['bar_code'] = data.goods.product_sku.bar_code;
-            if(data.goods.product_sku.product_specifications != null)
-                row['specifications'] = data.goods.product_sku.product_specifications;
-
-            row['base_unit'] = data.goods.product_sku.product_spu.base_unit;
-
-            if(data.goods.product_sku.product_spu.brand != null) {
-                row['brand'] = data.goods.product_sku.product_spu.brand.name;
-                row['manufacturer'] = data.goods.product_sku.product_spu.brand.manufacturer.name;
-            }
-            row['retail_price'] = data.retail_price.price_including_tax.currency.price;
-
-        },
-        error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
-        }
-    });
-}
-
 //绑定列表行数据
 function bindDgListData(data){
     var dgLst = $('#dgList');
@@ -639,9 +631,14 @@ function bindDgListData(data){
     for ( var i in data.datas) {
         var dataItem = data.datas[i].bo;
         var row_data = {
-            bo_id: dataItem.bo_id,
-            sale_date: dataItem.sale_date,
-            salesman: dataItem.salesman,
+		
+           
+            replenishment_code : dataItem.replenishment_code, //补货单号
+            
+			pickout_date: dataItem.confirm_date, //拣货日期
+            warehouse_code: dataItem.warehouse.name, //发货仓库
+            customer_code:  dataItem.channel.name,//客户
+          
             obj: dataItem
         };
         viewModel.push(row_data);
@@ -651,26 +648,7 @@ function bindDgListData(data){
                 rows: viewModel
             });
 }
-var warehoseLoader = function (param, success, error) {
-    $.ajax({
-        method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/query?context=" + $account_pos + "|" + $account_pos + "|lj|aaa",
-        async: true,
-        data: JSON.stringify({}),
-        dataType: 'json',
-        beforeSend: function (x) {
-            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        },
-        success: function (data) {
-            success(data.result);
-        },
-        error: function (x, e) {
-            var args = [];
-            args.push(e);
-            error.apply(this, args);
-        }
-    });
-}
+
 
 //构建分页条件
 function buildRepsQueryCond(total, pageNum) {
@@ -682,7 +660,8 @@ function buildRepsQueryCond(total, pageNum) {
             page_size: 5,
             total: total,
             total_page: -1
-        }
+        },
+        status: "pickouted"
     };
     var reqData = JSON.stringify(condition);
     return reqData;
@@ -696,7 +675,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/saleorder/getall?context=" + $token_pos,
+        url : $invcenterURL + "ocr-inventorycenter/stockout-mgr/query?context=3|3|lj|aaa",
         async : true,
         data: condStr,
         dataType : 'json',
@@ -731,7 +710,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $posURL + "ocr-pointofsale/saleorder/getall?context=" + $token_pos,
+                            url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/query?context=3|3|lj|aaa",
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -783,24 +762,39 @@ function onDetailRowSelected(rowIndex, detailRowData){
 
 //绑定当前选择行的数据
 function bindSelectedDataToCard(data){
-    $('#bo_id').textbox('setValue',data.bo_id);
-    $('#salesman').textbox('setValue',data.salesman);
-    $('#member_code').textbox('setValue',data.member_code);
-    $('#note').textbox('setValue',data.note);
-    $('#sale_date').datebox('setValue',data.sale_date);
+			
+	$('#code').textbox('setValue', data.bo_id);
+    $('#replenishment_code').textbox('setValue', data.replenishment_code);
+    $('#pickout_date').datebox('setValue', data.confirm_date);
+   
 
-    if(data.warehouse != null) {
-        $('#warehouse').combobox('setValue', data.warehouse.code);
+    if (data.channel != null) {
+        $('#customer_code').textbox('setValue', data.channel.code);
     }
-    else{
-        $('#warehouse').combobox('setValue', "");
+    else {
+        $('#customer_code').textbox('setValue', "");
     }
-}
-
-function onMemberChanged() {
-    if(initialized) return;
-    cloneAllotInvObj.member_code = newValue;
-    isBodyChanged = true;
+    if (data.warehouse != null) {
+        $('#warehouse_code').textbox('setValue', data.warehouse.code);
+    }
+    else {
+        $('#warehouse_code').textbox('setValue', "");
+    }
+	
+	 if (data.locations != null) {
+        $('#location_code').textbox('setValue', data.locations.code);
+    }
+    else {
+        $('#location_code').textbox('setValue', "");
+    }
+	
+	 if (data.locations != null) {
+        $('#location_name').textbox('setValue', data.locations.name);
+    }
+    else {
+        $('#location_name').textbox('setValue', "");
+    }
+			
 }
 
 //卡片内容变更后刷新父列表
@@ -816,36 +810,60 @@ function updateParentListRow(field, value){
 
 function onCodeChanged(newValue,oldValue){
     if(initialized) return;
-    cloneAllotInvObj.bo_id = newValue;
+    cloneAllotInvObj.code = newValue;
     isBodyChanged = true;
 
     //-------刷新关联属性------
-    updateParentListRow('bo_id', newValue);
+    updateParentListRow('code', newValue);
 }
 
-function onSaleManChanged(newValue,oldValue){
+function onReplenishmentCodeChanged(newValue,oldValue){
     if(initialized) return;
-    cloneAllotInvObj.salesman = newValue;
+    cloneAllotInvObj.replenishment_code = newValue;
     isBodyChanged = true;
 
     //-------刷新关联属性------
-    updateParentListRow('salesman', newValue);
+    //updateParentListRow('req_code', newValue);
 }
 
 
-function onSaleDateSel(date){
+function onSupplyDateSel(date){
     if(initialized) return;
-    cloneAllotInvObj.sale_date = date.format("yyyy-MM-dd");
+   
     isBodyChanged = true;
 
     //-------刷新关联属性------
-    updateParentListRow('sale_date', cloneAllotInvObj.sale_date);
+   
 }
 
-function onNoteChanged(newValue,oldValue){
+function onSendDateSel(date){
     if(initialized) return;
-    cloneAllotInvObj.note = newValue;
+    cloneAllotInvObj.send_date = date.format("yyyy-MM-dd");
     isBodyChanged = true;
+
+    //-------刷新关联属性------
+    updateParentListRow('send_date', cloneAllotInvObj.send_date);
+}
+
+function onConfirmDateSel(date){
+    if(initialized) return;
+    cloneAllotInvObj.pickout_date = date.format("yyyy-MM-dd");
+    isBodyChanged = true;
+
+    //-------刷新关联属性------
+    updateParentListRow('pickout_date', cloneAllotInvObj.pickout_date);
+}
+
+//补货仓库选择
+function onResWarehoseSelected(record){
+    if(initialized) return;
+    cloneAllotInvObj.warehouse = {
+        code: record.code,
+        name: record.name
+    };
+    isBodyChanged = true;
+    //-------刷新关联属性------
+    updateParentListRow('warehouse', record.name);
 }
 
 //仓库选择
@@ -887,20 +905,19 @@ function bindDetailData(data){
         }*/
 
         var row_data = {
-            product_sku_code : dataItem.goods.product_sku_code,
+			
+			product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
             bar_code : dataItem.goods.product_sku.bar_code,
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
-            bath_code: dataItem.batch_code,
-            quantity: dataItem.quantity,
-            retail_price: (dataItem.retail_price.price_including_tax==undefined)?0.00:dataItem.retail_price.price_including_tax.currency.price,
-            retail_amount: (dataItem.retail_amount.money_including_tax==undefined)?0.00:dataItem.retail_amount.money_including_tax.currency.money,
-            discount: dataItem.discount,
-            discount_amount: (dataItem.discount_amount.money_including_tax==undefined)?0.00:dataItem.discount_amount.money_including_tax.currency.money,
-            brand: dataItem.goods.product_sku.product_spu.brand.name,
-            manufacturer: dataItem.goods.product_sku.product_spu.brand.manufacturer.name,
+            quantity_should: dataItem.quantity_should,
+			 batch_code: dataItem.batch_code,
+			 shelf_life: dataItem.shelf_life,
+             location_code: dataItem.location_code,
+            location_name: dataItem.location_name,
+		
             obj: dataItem
         };
         viewModel.push(row_data);
@@ -967,19 +984,17 @@ function pagerFilter(data){
 function buildSubTotalRow(data) {
     var subTotal = {
             product_sku_code: '<span class="subtotal">合计</span>',
-            quantity: '<span class="subtotal">' + compute(data, "quantity") + '</span>',
-            retail_amount: '<span class="subtotal">' + compute(data, "retail_amount") + '</span>',
-            discount_amount: '<span class="subtotal">' + compute(data, "discount_amount") + '</span>',
-            title : '',
-            sales_catelog: '',
-            bar_code : '',
-            specifications: '',
-            base_unit: '',
-            batch_code: '',
-            retail_price: '',
-            discount: '',
-            brand: '',
-            manufacturer: ''
+           
+          
+title:'',
+sales_catelog:'',
+specifications:'',
+base_unit:'',
+quantity_should: '<span class="subtotal">' + compute(data, "quantity_should") + '</span>',
+batch_code:'',
+shelf_life:'',
+location_code:'',
+location_name:'',
         };
     return subTotal;
 }
@@ -998,8 +1013,6 @@ function refreshSubTotalRows(){
     var footerRows = $('#detailDg').datagrid('getFooterRows');
     var rows = $("#detailDg").datagrid("getRows"); //获取当前页的所有行。
     footerRows[0]['quantity'] = '<span class="subtotal">' + computeForRows(rows, "quantity") + '</span>';
-    footerRows[0]['retail_amount'] = '<span class="subtotal">' + computeForRows(rows, "retail_amount") + '</span>';
-    footerRows[0]['discount_amount'] = '<span class="subtotal">' + computeForRows(rows, "discount_amount") + '</span>';
     $('#detailDg').datagrid('reloadFooter');
 }
 
@@ -1032,4 +1045,45 @@ function compareDigit(a,b){
     if (a == b)
         return 0;
     return (a>b ? 1 : -1);
+}
+
+function print(){
+
+}
+
+function shippingout() {
+
+    $.ajax({
+        method: 'POST',
+        url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/shippingout?context=3|3|lj|aaa",
+        data: JSON.stringify(cloneAllotInvObj),
+        async: true,
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+
+            //-------刷新关联属性------
+            cloneAllotInvObj = data;
+            allotInvObj = cloneAllotInvObj;
+
+            var dgList = $('#dgList');
+            var row = dgList.datagrid('getSelected');
+            var index = dgList.datagrid('getRowIndex', row);
+
+            row['code'] = data.code;
+
+            row['send_date'] = data.send_date;
+            row.obj = allotInvObj;
+            dgList.datagrid('refreshRow', index);
+
+            resetState();
+            alert_autoClose('提示', '发货成功!');
+
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
 }
