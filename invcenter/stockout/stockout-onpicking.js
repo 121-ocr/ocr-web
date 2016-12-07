@@ -115,7 +115,7 @@ function resetState(){
 function dgListSetting(){
     $('#dgList').datagrid({
         loadMsg: "正在加载，请稍等...",
-        title : '待拣货列表',
+        title : '拣货中列表',
         iconCls : 'icon-a_detail',
         fit : true,
         fitColumns : false,

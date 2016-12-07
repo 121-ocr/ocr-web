@@ -574,7 +574,7 @@ function bindDgListData(data) {
             bo_id: dataItem.bo_id,
             replenishment_code: dataItem.replenishment_code,
             supply_date: dataItem.supply_date,
-            send_date: dataItem.send_date,
+            request_date: dataItem.request_date,
             restocking_warehouse: dataItem.restocking_warehouse.name,
             warehouse: dataItem.warehouse.name,
             obj: dataItem
@@ -745,8 +745,13 @@ function bindSelectedDataToCard(data) {
     $('#replenishment_code').textbox('setValue', data.replenishment_code);
     $('#supply_date').datebox('setValue', data.supply_date);
     $('#request_date').datebox('setValue', data.request_date);
-    if(data.confirm_date != undefined)
+    if(data.confirm_date != undefined) {
         $('#confirm_date').datebox('setValue', data.confirm_date);
+    }else{
+        var theDate = new Date();
+        var theDateStr = theDate.format("yyyy-MM-dd");
+        $('#confirm_date').datebox('setValue', theDateStr);
+    }
 
     if (data.restocking_warehouse != null) {
         $('#restocking_warehouse').combobox('setValue', data.restocking_warehouse.code);
