@@ -156,6 +156,98 @@ function onBeforeSelect(index,row){
 
 //商品参照
 $.extend($.fn.datagrid.defaults.editors, {
+    barcodeEditor : {
+        init: function(container, options)
+        {
+            var editorContainer = $('<div/>');
+            //参照的编辑框
+            var input = $("<input class='easyui-textbox' id='barcodeEditor' style='width:100px' onchange='barcodeChanged(this);'>");
+            editorContainer.append(input)
+            editorContainer.appendTo(container);
+            return input;
+        },
+        getValue: function(target)
+        {
+            return $(target).val();
+            //return $(target).children("input").val();
+        },
+        setValue: function(target, value)
+        {
+            $(target).val(value);
+            //$(target).children("input").val(value);
+        },
+        resize: function(target, width)
+        {
+            var span = $(target);
+            if ($.boxModel == true){
+                span.width(width - (span.outerWidth() - span.width()) - 30);
+            } else {
+                span.width(width - 30);
+            }
+        }
+
+    }
+});
+
+//通过条码查询商品
+function barcodeChanged(theInput){
+    var value = theInput.value;
+    if(value == ""){
+        return;
+    }
+    var condition = {
+        "goods.product_sku.bar_code": value
+    };
+    var reqData = JSON.stringify(condition);
+
+    //定义查询条件
+
+    $.ajax({
+        method : 'POST',
+        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token_pos,
+        async : true,
+        data: reqData,
+        dataType : 'json',
+        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
+        success : function(result) {
+            var data = result.result[0];
+            currentDetailRowObj.goods = data.goods;
+            currentDetailRowObj.batch_code = data.invbatchcode;
+            currentDetailRowObj.detail_price = data.detail_price;
+            currentDetailRowObj.discount = data.discount;
+
+            //-------刷新关联属性------
+            var detailDg = $('#detailDg');
+            var row = detailDg.datagrid('getSelected');
+            var index = detailDg.datagrid('getRowIndex', row);
+
+            row['product_sku_code'] = data.goods.product_sku_code;
+            row['title'] = data.goods.title;
+            row['sales_catelog'] = data.goods.sales_catelogs.name;
+            row['bar_code'] = data.goods.product_sku.bar_code;
+            if(data.goods.product_sku.product_specifications != null)
+                row['specifications'] = data.goods.product_sku.product_specifications;
+
+            row['base_unit'] = data.goods.product_sku.product_spu.base_unit;
+
+            if(data.goods.product_sku.product_spu.brand != null) {
+                row['brand'] = data.goods.product_sku.product_spu.brand.name;
+                row['manufacturer'] = data.goods.product_sku.product_spu.brand.manufacturer.name;
+            }
+            row['retail_price'] = data.retail_price.price_including_tax.currency.price;
+
+            detailDg.datagrid('refreshRow', index);
+
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
+}
+
+
+//商品参照
+$.extend($.fn.datagrid.defaults.editors, {
     goodsRef : {
         init: function(container, options)
         {
@@ -475,6 +567,7 @@ function append(){
             .datagrid('beginEdit', editIndex);
 
         isBodyChanged = true;
+
     }
 }
 
@@ -581,7 +674,7 @@ function formatCellTooltip(value){
 }
 
 //通过条码查询商品
-function queryGoods(value){
+/*function queryGoods(value){
     if(value == ""){
         return;
     }
@@ -630,7 +723,7 @@ function queryGoods(value){
             alert(e.toString(), 0, "友好提醒");
         }
     });
-}
+}*/
 
 //绑定列表行数据
 function bindDgListData(data){
