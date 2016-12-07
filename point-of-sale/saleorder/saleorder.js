@@ -586,23 +586,21 @@ function queryGoods(value){
         return;
     }
     var condition = {
-        "goods": {
-            "product_sku": {
-                "bar_code": value
-            }
-        }
+        "goods.product_sku.bar_code": value
     };
     var reqData = JSON.stringify(condition);
 
     //定义查询条件
+
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/getall?context=" + $token,
+        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token,
         async : true,
         data: reqData,
         dataType : 'json',
         beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
-        success : function(data) {
+        success : function(result) {
+            var data = result.result[0];
             currentDetailRowObj.goods = data.goods;
             currentDetailRowObj.batch_code = data.invbatchcode;
             currentDetailRowObj.detail_price = data.detail_price;
@@ -612,19 +610,20 @@ function queryGoods(value){
             var row = $('#detailDg').datagrid('getSelected');
             var index = $('#detailDg').datagrid('getRowIndex', row);
 
-            row['product_sku_code'] = data.product_sku_code;
-            row['title'] = data.title;
-            row['sales_catelog'] = data.sales_catelogs;
-            row['bar_code'] = data.product_sku.bar_code;
-            if(selectdData.product_sku.product_specifications != null)
-                row['specifications'] = selectdData.product_sku.product_specifications;
+            row['product_sku_code'] = data.goods.product_sku_code;
+            row['title'] = data.goods.title;
+            row['sales_catelog'] = data.goods.sales_catelogs.name;
+            row['bar_code'] = data.goods.product_sku.bar_code;
+            if(data.goods.product_sku.product_specifications != null)
+                row['specifications'] = data.goods.product_sku.product_specifications;
 
-            row['base_unit'] = selectdData.product_sku.product_spu.base_unit;
+            row['base_unit'] = data.goods.product_sku.product_spu.base_unit;
 
-            if(selectdData.product_sku.product_spu.brand != null) {
-                row['brand'] = selectdData.product_sku.product_spu.brand.name;
-                row['manufacturer'] = selectdData.product_sku.product_spu.brand.manufacturer.name;
+            if(data.goods.product_sku.product_spu.brand != null) {
+                row['brand'] = data.goods.product_sku.product_spu.brand.name;
+                row['manufacturer'] = data.goods.product_sku.product_spu.brand.manufacturer.name;
             }
+            row['retail_price'] = data.retail_price.price_including_tax.currency.price;
 
         },
         error: function (x, e) {
