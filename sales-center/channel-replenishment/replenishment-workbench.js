@@ -790,6 +790,11 @@ function notifyDelivery(){
     var dgList = $('#detailDg');
     var rows = dgList.datagrid('getRows');
 
+    if(rows.length <= 0){
+        alert_autoClose('提示','没有补货内容!');
+        return;
+    }
+
     var replenishmentObj = buildReplenishmentObj(rows);
 
     var replenishmentJson = JSON.stringify(replenishmentObj);
