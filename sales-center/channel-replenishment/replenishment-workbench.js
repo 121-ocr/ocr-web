@@ -17,6 +17,7 @@ function dgListSetting(){
         pageList: [5, 10, 20, 50, 100], //页面数据条数选择清单
         border : false,
         //onBeforeSelect: onBeforeSelect,
+        onSelect: channelSelected,  //行选择事件
         onLoadSuccess: function (data) {
             if (data.total > 0) {
                 var dg = $(this);
@@ -71,8 +72,64 @@ function dgListSetting(){
         pageList: [2, 10, 20, 50, 100], //页面数据条数选择清单
         singleSelect : true,
         border : true,
-        onSelect: onGoodsSelected  //行选择事件
+        onSelect: onAllowCatalogSelected  //行选择事件
     });
+}
+
+function channelSelected(){
+    targetWarehouse = undefined;
+
+}
+
+function closeAllowCatalogDlg(){
+    $('#allowCatalogDialog').window('close');
+}
+
+//选择允许销商品
+function onAllowCatalogSelected (index, rowData) {
+
+    var selectdData = rowData.obj;
+
+    //检查是否重复添加
+    var dgList = $('#detailDg');
+    var rows = dgList.datagrid('getRows');
+    for(var index in rows) {
+        var row = rows[index];
+        if(row.obj.sku == selectdData.product_sku_code){
+            alert_autoClose('提示','选择重复!');
+            return;
+        }
+    }
+
+    //设置商品到当前表体行对象上
+    delete selectdData._id;
+
+    appendAllowGoods(selectdData);
+
+}
+
+
+
+function appendAllowGoods(selectdData){
+
+    var newDetailObj = {
+        sku: selectdData.product_sku_code,
+        goods: selectdData
+    };
+
+    var rowData = {
+        product_sku_code : selectdData.product_sku_code,
+        title : selectdData.title,
+        sales_catelog: selectdData.sales_catelogs,
+        bar_code : selectdData.product_sku.bar_code,
+        specifications: selectdData.product_sku.product_specifications,
+        base_unit: selectdData.product_sku.product_spu.base_unit,
+        brand: selectdData.product_sku.product_spu.brand.name,
+        manufacturer: selectdData.product_sku.product_spu.brand.manufacturer.name,
+        obj: newDetailObj
+    };
+
+    $('#detailDg').datagrid('appendRow',rowData);
 }
 
 
@@ -430,6 +487,7 @@ function detailListSetting(){
         showFooter: true,
         autoUpdateDetail: false,
         view: detailview,
+        onSelect: onDetailRowSelected,  //行选择事件
         detailFormatter:function(index,row){
             return '<div style="padding:2px"><table class="ddv"></table></div>';
         },
@@ -466,7 +524,7 @@ function detailListSetting(){
         toolbar :
             [
                 {
-                    text : '查看补货关系',
+                    text : '查看补货仓库',
                     iconCls : 'icon-search',
                     handler : function() {
                         showRelations();
@@ -477,13 +535,6 @@ function detailListSetting(){
                     iconCls : 'icon-add',
                     handler : function() {
                         appendGoods();
-                    }
-                },
-                {
-                    text: '修改',
-                    iconCls : 'icon-edit',
-                    handler : function() {
-
                     }
                 },
                 {
@@ -504,7 +555,7 @@ function detailListSetting(){
                     text: '使用建议补货量',
                     iconCls : 'icon-ok',
                     handler : function() {
-                        removeDetail();
+
                     }
                 },
                 {
@@ -517,35 +568,81 @@ function detailListSetting(){
             ]
     });
 
-    $('#goodsDg').datagrid({
-        loadMsg: "正在加载，请稍等...",
-        iconCls : 'icon-a_detail',
-        fit : true,
-        fitColumns : false,
-        remoteSort: false,
-        rownumbers : true,
-        pagination : true,
-        pageNumber: 1, //初始化的页码编号,默认1
-        pageSize: 2, //每页的数据条数，默认10
-        pageList: [2, 10, 20, 50, 100], //页面数据条数选择清单
-        singleSelect : true,
-        border : true,
-        onSelect: onGoodsSelected  //行选择事件
-     });
+
+    $('#warehouseList').datalist({
+        textField: 'name'
+    });
 }
 
-//打开允销目录，添加商品
-function appendGoods(){
+function showRelations(){
 
     if(targetWarehouse == null || targetWarehouse.account == undefined){
         alert_autoClose('提示','请先选择渠道仓库!');
         return;
     }
 
-    loadAllowCatalogs();
+    loadRepRelations();
 
-    $('#allowCatalogDialog').window('open');
+    $('#repRelDialog').window('open');
 }
+
+//绑定供货仓库列表
+function bindRepRelationsDg(data) {
+    var dgLst = $('#warehouseList');
+    var viewModel = new Array();
+    for (var i in data.result) {
+        var dataItem = data.result[i].ba_warehouses;
+        var row_data = {
+            name: dataItem.name
+        };
+        viewModel.push(row_data);
+    }
+
+    dgLst.datalist('loadData',viewModel);
+
+}
+
+function loadRepRelations(){
+    //定义查询条件
+    var condition = {
+        to_warehouse_code: targetWarehouse.code,
+        to_account: targetWarehouse.account
+    }
+
+    var reqData = JSON.stringify(condition);
+
+    $.ajax({
+        method: 'POST',
+        url: $channelURL + "ocr-channel-manager/supplyrelation-mgr/bc_replenishment_warehouses.get?context=3|3|lj|aaa",
+        data: reqData,
+        async: true,
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+
+            bindRepRelationsDg(data);
+
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
+
+}
+
+var currentRowIndex = -1;
+function onDetailRowSelected(rowIndex, detailRowData){
+    currentRowIndex = rowIndex;
+}
+
+function removeDetail(){
+    if (currentRowIndex == undefined){return}
+    $('#detailDg').datagrid('deleteRow', currentRowIndex);
+    currentRowIndex = undefined;
+}
+
 
 //绑定允销商品datagrid
 function bindAllowCatalogDg(data) {
@@ -591,6 +688,18 @@ function buildAllowCatalogQueryCond(total, pageNum) {
     };
     var reqData = JSON.stringify(condition);
     return reqData;
+}
+
+//打开允销目录，添加商品
+function appendGoods(){
+
+    if(targetWarehouse == null || targetWarehouse.account == undefined){
+        alert_autoClose('提示','请先选择渠道仓库!');
+        return;
+    }
+    loadAllowCatalogs();
+
+    $('#allowCatalogDialog').window('open');
 }
 
 //加载允销目录
@@ -834,77 +943,6 @@ function buildReplenishmentObj(rows){
 }
 
 
-//商品参照
-$.extend($.fn.datagrid.defaults.editors, {
-    goodsRef : {
-        init: function(container, options)
-        {
-            var editorContainer = $('<div/>');
-            //参照的编辑框
-            var input = $("<input class='easyui-textbox' id='goodsEditor' style='width:100px'>");
-            //参照按钮
-            var button = $("<button style='width: 23px; height: 23px' onclick='showGoodsRefDialog();'>...</button>");
-
-            editorContainer.append(input).append(button);
-            editorContainer.appendTo(container);
-            return input;
-        },
-        getValue: function(target)
-        {
-            return $(target).val();
-            //return $(target).children("input").val();
-        },
-        setValue: function(target, value)
-        {
-            $(target).val(value);
-            //$(target).children("input").val(value);
-        },
-        resize: function(target, width)
-        {
-            var span = $(target);
-            if ($.boxModel == true){
-                span.width(width - (span.outerWidth() - span.width()) - 30);
-            } else {
-                span.width(width - 30);
-            }
-        }
-
-    }
-});
-
-//显示商品选择对话框
-function showGoodsRefDialog() {
-    $('#goodsRefDialog').window('open');
-}
-
-//绑定商品datagrid
-function bindGoodsDg(data) {
-    var dgLst = $('#goodsDg');
-    var viewModel = new Array();
-    for (var i in data.datas) {
-        var dataItem = data.datas[i];
-        var row_data = {
-            product_sku_code: dataItem.product_sku_code,
-            title: dataItem.title,
-            sales_catelog: dataItem.sales_catelogs,
-            bar_code: dataItem.product_sku.bar_code,
-            specifications: dataItem.product_sku.product_specifications,
-            base_unit: dataItem.product_sku.product_spu.base_unit,
-            //quantity: dataItem.quantity,
-            brand: dataItem.product_sku.product_spu.brand.name,
-            manufacturer: dataItem.product_sku.product_spu.brand.manufacturer.name,
-            obj: dataItem
-        };
-        viewModel.push(row_data);
-    }
-
-    dgLst.datagrid('loadData',{
-        total: data.total,
-        rows: viewModel
-    });
-
-}
-
 //商品分类字段格式化
 function formatCatelogsCol(catelogArray){
     //计算规格字符串
@@ -917,269 +955,6 @@ function formatCatelogsCol(catelogArray){
             ret += ',' + item.name;
     }
     return "<span title='" + ret + "'>" + ret + "</span>";
-}
-
-
-
-//构建分页条件
-function buildGoodsQueryCond(total, pageNum, cateLog) {
-    var condition = {
-        paging: {
-            sort_field: "_id",
-            sort_direction: -1,
-            page_number: pageNum,
-            page_size: 2,
-            total: total,
-            total_page: -1
-        },
-        query: {'sales_catelogs.inner_code':cateLog}
-    };
-    var reqData = JSON.stringify(condition);
-    return reqData;
-}
-
-//品类树选择，查询商品列表
-function catelogTreeSel(node) {
-
-    var catelog = node.attributes.inner_code;
-
-    //定义查询条件
-    var condition = buildGoodsQueryCond(0, 1, catelog);
-
-    $.ajax({
-        method: 'POST',
-        url: $goodsURL + "ocr-goods-center/goods-mgr/findall?context=3|3|lj|aaa",
-        data: condition,
-        async: true,
-        dataType: 'json',
-        beforeSend: function (x) {
-            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        },
-        success: function (data) {
-
-             bindGoodsDg(data);
-
-            $('#goodsDg').datagrid('getPager').pagination({
-                displayMsg: '第 {from} - {to} 条 共 {total} 条',
-                onBeforeRefresh: function () {
-                    var thisDg = $('#goodsDg');
-                    thisDg.pagination('loading...');
-                    alert('before refresh');
-                    thisDg.pagination('loaded');
-                },
-                onSelectPage: function (pPageIndex, pPageSize) {
-                        //改变opts.pageNumber和opts.pageSize的参数值，用于下次查询传给数据层查询指定页码的数据
-                        var gridOpts = $('#goodsDg').datagrid('options');
-                        gridOpts.pageNumber = pPageIndex;
-                        gridOpts.pageSize = pPageSize;
-
-                        condition = buildGoodsQueryCond(0, pPageIndex, catelog);
-
-                        //定义查询条件
-                        $.ajax({
-                            method: 'POST',
-                            url: $goodsURL + "ocr-goods-center/goods-mgr/findall?context=3|3|lj|aaa",
-                            data: condition,
-                            async: true,
-                            dataType: 'json',
-                            beforeSend: function (x) {
-                                x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-                            },
-                            success: function (data) {
-
-                                bindGoodsDg(data);
-                            },
-                            error: function (x, e) {
-                                alert(e.toString(), 0, "友好提醒");
-                            }
-                        });
-                }
-            });
-
-        },
-        error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
-        }
-    });
-}
-
-//选择商品
-function onGoodsSelected (index, rowData) {
-    $('#goodsRefDialog').window('close');
-    var selectdData = rowData.obj;
-    $('#goodsEditor').val(selectdData.title);
-
-    //设置商品到当前表体行对象上
-    delete selectdData._id;
-    currentDetailRowObj.goods = selectdData;
-
-    //-------刷新关联属性------
-    var row = $('#detailDg').datagrid('getSelected');
-    var index = $('#detailDg').datagrid('getRowIndex', row);
-
-    row['product_sku_code'] = selectdData.product_sku_code;
-    row['title'] = selectdData.title;
-    row['sales_catelog'] = selectdData.sales_catelogs;
-    row['bar_code'] = selectdData.product_sku.bar_code;
-    if(selectdData.product_sku.product_specifications != null)
-        row['specifications'] = selectdData.product_sku.product_specifications;
-
-    row['base_unit'] = selectdData.product_sku.product_spu.base_unit;
-
-    if(selectdData.product_sku.product_spu.brand != null) {
-        row['brand'] = selectdData.product_sku.product_spu.brand.name;
-        row['manufacturer'] = selectdData.product_sku.product_spu.brand.manufacturer.name;
-    }
-}
-
-$.extend($.fn.datagrid.methods, {
-    editCell: function(jq,param){
-        return jq.each(function(){
-            var opts = $(this).datagrid('options');
-            var fields = $(this).datagrid('getColumnFields',true).concat($(this).datagrid('getColumnFields'));
-            for(var i=0; i<fields.length; i++){
-                var col = $(this).datagrid('getColumnOption', fields[i]);
-                col.editor1 = col.editor;
-                if (fields[i] != param.field){
-                    col.editor = null;
-                }
-            }
-            $(this).datagrid('beginEdit', param.index);
-            for(var i=0; i<fields.length; i++){
-                var col = $(this).datagrid('getColumnOption', fields[i]);
-                col.editor = col.editor1;
-            }
-        });
-    }
-});
-
-
-function append(){
-    if (endEditing()){
-
-        var newDetailObj = {
-            detail_code: "",
-            goods: {},
-            quantity: 0,
-            supply_price: {},
-            retail_price: {},
-            commission: {}
-        };
-        cloneReplenishmentObj.details.push(newDetailObj);
-
-        var rowData = {
-            product_sku_code : "",
-            title : "",
-            sales_catelog: {},
-            bar_code : "",
-            specifications: {},
-            base_unit: "",
-            quantity: 0,
-            supply_price: 0.00,
-            retail_price: 0.00,
-            commission: 0.00,
-            brand: "",
-            manufacturer: "",
-            obj: newDetailObj
-        };
-
-        $('#detailDg').datagrid('appendRow',rowData);
-
-        //必须加入到originalRows中，否则翻页会有问题
-        var data = $("#detailDg").datagrid('getData');
-        data.originalRows.push(rowData);
-
-        editIndex = $('#detailDg').datagrid('getRows').length-1;
-        $('#detailDg').datagrid('selectRow', editIndex)
-            .datagrid('beginEdit', editIndex);
-
-        isBodyChanged = true;
-    }
-}
-
-function newRep(){
-
-    if (endEditing()){
-        if(isBodyChanged || isHeadChanged){
-            $.messager.alert('数据变化提示','当前数据已经变化，请先保存或取消!');
-            return;
-        }
-
-        var theDate = new Date();
-        var theDateStr = theDate.format("yyyy-MM-dd");
-
-        var dgList =  $('#dgList');
-        var newObjIndex = dgList.datagrid('getRows').length;
-        var newObj = {
-            bo_id: "",
-            req_date: theDateStr,
-            req_send_date: theDateStr,
-            req_code: "",
-            channel: {},
-            restocking_warehose: {},
-            "is_completed": "",
-            "completed_date": "",
-            "details": []
-        };
-
-        var rowData = {
-            code : "",
-            req_date : "",
-            req_send_date: "",
-            req_code : "",
-            channel_name: "",
-            restocking_warehose: "",
-            is_completed: "",
-            obj: newObj
-        };
-
-        dgList.datagrid('appendRow',rowData);
-
-        //必须加入到originalRows中，否则翻页会有问题
-        //var data = dgList.datagrid('getData');
-        //data.originalRows.push(rowData);
-
-        dgList.datagrid('selectRow', newObjIndex);
-
-        isNewRep = true;
-
-        isBodyChanged = true;
-
-    }
-}
-
-function removeDetail(){
-    if (currentRowIndex == undefined){return}
-    $('#detailDg').datagrid('cancelEdit', currentRowIndex)
-        .datagrid('deleteRow', currentRowIndex);
-    currentRowIndex = undefined;
-
-    isBodyChanged = true;
-}
-/*function accept(){
-    if (endEditing()){
-        $('#detailDg').datagrid('acceptChanges');
-    }
-}*/
-
-
-//回退整个单据
-function reject(){
-    $('#detailDg').datagrid('rejectChanges');
-    editIndex = undefined;
-
-    if(isNewRep){
-        removeRep();
-    }else {
-        //重新克隆
-        cloneReplenishmentObj = cloneJsonObject(replenishmentObj);
-        bindSelectedDataToCard(cloneReplenishmentObj)
-        bindSelectedDataToSubDetail(cloneReplenishmentObj.details);
-
-        isHeadChanged = false;
-        isBodyChanged = false;
-        isNewRep = false;
-    }
 }
 
 
