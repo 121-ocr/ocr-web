@@ -133,20 +133,8 @@
                         <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
                         <th field="batch_code" width="80px" formatter="formatCellTooltip">批次号</th>
                         <th field="base_unit" width="80px" formatter="formatCellTooltip">单位</th>
-                        <th field="quantity" width="80px" formatter="formatCellTooltip" editor="{
-                                                                    type:'numberbox',
-                                                                    options:{
-                                                                        precision:0,
-                                                                        required:true
-                                                                    }
-                                                                }">数量</th>
-                        <th field="retail_price" width="80px" formatter="formatCellTooltip" editor="{
-                                                                    type:'numberbox',
-                                                                    options:{
-                                                                        precision:0,
-                                                                        required:true
-                                                                    }
-                                                                }">零售价</th>
+                        <th field="quantity" width="80px" formatter="formatCellTooltip" data-options="editor:{type:'quantityEditor'}">数量</th>
+                        <th field="retail_price" width="80px" formatter="formatCellTooltip">零售价</th>
                         <th field="retail_amount" width="80px" formatter="formatCellTooltip" editor="{
                                                                     type:'numberbox',
                                                                     options:{

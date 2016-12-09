@@ -154,7 +154,83 @@ function onBeforeSelect(index,row){
     return true;
 }
 
-//商品参照
+//数量编辑器
+$.extend($.fn.datagrid.defaults.editors, {
+    quantityEditor : {
+        init: function(container, options)
+        {
+            var editorContainer = $('<div/>');
+            //参照的编辑框
+            var input = $("<input class='easyui-numberbox' id='quantityEditor' style='width:100px' onchange='quantityChanged(this);'>");
+            editorContainer.append(input);
+            editorContainer.appendTo(container);
+            return input;
+        },
+        getValue: function(target)
+        {
+            return $(target).val();
+            //return $(target).children("input").val();
+        },
+        setValue: function(target, value)
+        {
+            $(target).val(value);
+            //$(target).children("input").val(value);
+        },
+        resize: function(target, width)
+        {
+            var span = $(target);
+            if ($.boxModel == true){
+                span.width(width - (span.outerWidth() - span.width()) - 30);
+            } else {
+                span.width(width - 30);
+            }
+        }
+
+    }
+});
+
+//计算金额
+function quantityChanged(theInput){
+    var quantity = theInput.value;
+    if(quantity == ""){
+        return;
+    }
+    //通过数量计算金额
+    var detailDg = $('#detailDg');
+    var row = detailDg.datagrid('getSelected');
+    var index = detailDg.datagrid('getRowIndex', row);
+
+    var retail_price = currentDetailRowObj.retail_price;
+    var retail_amount = {
+        money_including_tax: {  //含税金额
+            currency: {		  //本币
+                currency_type: retail_price.price_including_tax.currency.currency_type,
+                money: retail_price.price_including_tax.currency.money * quantity
+            },
+            original_currency:  { //原币
+                currency_type: retail_price.price_including_tax.original_currency.currency_type,
+                    money: retail_price.price_including_tax.original_currency.money * quantity
+            }
+        },
+        money: {  //无税金额
+            currency: {
+                currency_type: retail_price.price.currency.currency_type,
+                    money: retail_price.price.currency.money * quantity
+            },
+            original_currency:  {
+                currency_type: retail_price.price.original_currency.currency_type,
+                    money: retail_price.price.original_currency.money * quantity
+            }
+        }
+    };
+    currentDetailRowObj.retail_amount = retail_amount;
+    row['retail_amount'] = retail_amount.money_including_tax.currency.money;
+    row['quantity'] = quantity;
+    currentDetailRowObj.quantity = quantity;
+    detailDg.datagrid('refreshRow', index);
+}
+
+//条码编辑器
 $.extend($.fn.datagrid.defaults.editors, {
     barcodeEditor : {
         init: function(container, options)
@@ -162,7 +238,7 @@ $.extend($.fn.datagrid.defaults.editors, {
             var editorContainer = $('<div/>');
             //参照的编辑框
             var input = $("<input class='easyui-textbox' id='barcodeEditor' style='width:100px' onchange='barcodeChanged(this);'>");
-            editorContainer.append(input)
+            editorContainer.append(input);
             editorContainer.appendTo(container);
             return input;
         },
@@ -213,7 +289,7 @@ function barcodeChanged(theInput){
             var data = result.result[0];
             currentDetailRowObj.goods = data.goods;
             currentDetailRowObj.batch_code = data.invbatchcode;
-            currentDetailRowObj.detail_price = data.detail_price;
+            currentDetailRowObj.retail_price = data.retail_price;
             currentDetailRowObj.discount = data.discount;
 
             //-------刷新关联属性------
@@ -223,7 +299,7 @@ function barcodeChanged(theInput){
 
             row['product_sku_code'] = data.goods.product_sku_code;
             row['title'] = data.goods.title;
-            row['sales_catelog'] = data.goods.sales_catelogs.name;
+            row['sales_catelog'] = data.goods.sales_catelogs;
             row['bar_code'] = data.goods.product_sku.bar_code;
             if(data.goods.product_sku.product_specifications != null)
                 row['specifications'] = data.goods.product_sku.product_specifications;
@@ -234,7 +310,7 @@ function barcodeChanged(theInput){
                 row['brand'] = data.goods.product_sku.product_spu.brand.name;
                 row['manufacturer'] = data.goods.product_sku.product_spu.brand.manufacturer.name;
             }
-            row['retail_price'] = data.retail_price.price_including_tax.currency.price;
+            row['retail_price'] = data.retail_price.price_including_tax.currency.money;
 
             detailDg.datagrid('refreshRow', index);
 
@@ -890,7 +966,7 @@ function bindSelectedDataToCard(data){
     }
 }
 
-function onMemberChanged() {
+function onMemberChanged(newValue,oldValue) {
     if(initialized) return;
     cloneAllotInvObj.member_code = newValue;
     isBodyChanged = true;
@@ -968,17 +1044,6 @@ function bindDetailData(data){
     for ( var i in data) {
         var dataItem = data[i];
 
- /*       //计算规格字符串
-        var specifications = '';
-        var specArray = dataItem.goods.product_sku.product_specifications;
-        for(var specIdx in specArray){
-            var specItem = specArray[specIdx];
-            if(specIdx == 0)
-                specifications = specItem.specification_name + ':' + specItem.specification_value;
-            else
-                specifications += ',' + specItem.specification_name + ':' + specItem.specification_value;
-        }*/
-
         var row_data = {
             product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
@@ -986,9 +1051,9 @@ function bindDetailData(data){
             bar_code : dataItem.goods.product_sku.bar_code,
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
-            bath_code: dataItem.batch_code,
+            batch_code: dataItem.batch_code,
             quantity: dataItem.quantity,
-            retail_price: (dataItem.retail_price.price_including_tax==undefined)?0.00:dataItem.retail_price.price_including_tax.currency.price,
+            retail_price: (dataItem.retail_price.price_including_tax==undefined)?0.00:dataItem.retail_price.price_including_tax.currency.money,
             retail_amount: (dataItem.retail_amount.money_including_tax==undefined)?0.00:dataItem.retail_amount.money_including_tax.currency.money,
             discount: dataItem.discount,
             discount_amount: (dataItem.discount_amount.money_including_tax==undefined)?0.00:dataItem.discount_amount.money_including_tax.currency.money,
