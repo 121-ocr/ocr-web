@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DataGrid Selection - jQuery EasyUI Demo</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/plugins/datagrid-detailview.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="channel-shipment.js"></script>
+    <style type="text/css">
+        .subtotal { font-weight: bold; }/*合计单元格样式*/
+    </style>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-ok" onclick="confirm();">确认发货</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="reject();">撤销</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help"></a>
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:310px">
+        <table id="dgList" class="easyui-datagrid" style="width:600px;height:100%"
+               title="Load Data" iconCls="icon-save">
+            <thead>
+            <tr>
+                <th field="code" width="80px" formatter="formatCellTooltip">补货单编码</th>
+                <th field="req_date" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDatetime">申请时间</th>
+                <th field="req_send_date" width="80px" formatter="formatCellTooltip" sortable="true">申请发货时间</th>
+                <th field="req_code" width="80px" formatter="formatCellTooltip">请购单号</th>
+                <th field="channel_name" width="80px" formatter="formatCellTooltip" sortable="true">渠道名</th>
+                <th field="restocking_warehose" width="80px" formatter="formatCellTooltip" sortable="true">补货仓库</th>
+                <th field="is_completed" width="80px" formatter="formatCellTooltip" sortable="true">是否完成</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+    <div data-options="region:'center'">
+
+        <table id="detailDg" class="easyui-datagrid" style="border:0px"
+               title="渠道补货单明细" data-options="">
+            <thead>
+            <tr>
+                <th field="restocking_warehose" width="80px" formatter="formatCellTooltip">仓库</th>
+                <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
+                <th field="title" width="100px" formatter="formatCellTooltip"
+                                                    data-options="editor:{type:'goodsRef'}">商品名</th>
+                <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
+                <th field="bar_code" width="80px" formatter="formatCellTooltip">条码</th>
+                <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
+                <th field="invbatchcode" width="50px" formatter="formatCellTooltip">批次</th>
+                <th field="base_unit" width="80px" formatter="formatCellTooltip">单位</th>
+                <th field="quantity" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDigit" editor="{
+                                                            type:'numberbox',
+                                                            options:{
+                                                                precision:0,
+                                                                required:true
+                                                            }
+                                                        }">数量</th>
+                <th field="pick_quantity" width="80px" formatter="formatCellTooltip">拣货量</th>
+                <th field="pick_completed" width="80px" formatter="formatCellTooltip">拣货完成</th>
+                <th field="ship_completed" width="80px" formatter="formatCellTooltip">发货完成</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+</div>
+
+
+</body>
+
+<script type="text/javascript">
+    dgListSetting();
+    detailListSetting();
+
+    loadDgList();
+
+</script>
+</html>

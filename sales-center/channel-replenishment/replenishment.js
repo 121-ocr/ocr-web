@@ -254,7 +254,7 @@ $.extend($.fn.datagrid.defaults.editors, {
         },
         setValue: function(target, value)
         {
-            $(target).val(value);
+            $(target).val(value).focus().select();
             //$(target).children("input").val(value);
         },
         resize: function(target, width)

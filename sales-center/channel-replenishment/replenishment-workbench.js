@@ -1,5 +1,6 @@
 ﻿
 var currentChannelRow;
+var hasChanged = false;
 
 function dgListSetting(){
     $('#dgList').datagrid({
@@ -37,7 +38,8 @@ function dgListSetting(){
                 rownumbers:true,
                 loadMsg:'',
                 height:'auto',
-                onSelect: onWhSelected,  //行选择事件
+                onBeforeSelect: onBeforeSelect,
+                onSelect: onWhSelected,  //仓库行选择事件
                 columns:[[
                     {field:'warehouse_code',title:'仓库编码',width:'60px'},
                     {field:'name',title:'仓库名称',width:'100px',align:'left'},
@@ -132,11 +134,29 @@ function appendAllowGoods(selectdData){
     $('#detailDg').datagrid('appendRow',rowData);
 }
 
+function onBeforeSelect(index,row){
+    if(hasChanged){
+        $.messager.alert('提示','有未提交的补货记录，请先提交或取消!');
+        return false;
+    }
+    return true;
+}
+
+//回退整个单据
+function reject(){
+
+    onWhSelected (whRowIndex, whRow);
+    hasChanged = false;
+}
+
 
 var targetWarehouse;
+var whRowIndex;
+var whRow;
 
 function onWhSelected (rowIndex, rowData) {
-    //initialized = true;
+    whRowIndex = rowIndex;
+    whRow = rowData;
 
     targetWarehouse = rowData.obj.ba_warehouses;
 
@@ -448,6 +468,9 @@ function formatSupplyOnHand(value){
 
 //补货数量填写响应事件
 function onStockNumChanged(theInput){
+
+    hasChanged = true;
+
     var theValue = theInput.value;
     if(theValue == null || theValue == undefined || theValue == "") return;
 
@@ -556,6 +579,13 @@ function detailListSetting(){
                     iconCls : 'icon-ok',
                     handler : function() {
 
+                    }
+                },
+                {
+                    text: '刷新并撤销',
+                    iconCls : 'icon-reload',
+                    handler : function() {
+                        reject();
                     }
                 },
                 {
@@ -830,6 +860,7 @@ function notifyDelivery(){
             }else {
                 alert_autoClose('提示', "提交仓库拣货成功！");
             }
+            hasChanged = false;
         },
         error: function (x, e) {
             alert(e.toString(), 0, "友好提醒");
@@ -921,17 +952,23 @@ function buildReplenishmentObj(rows){
                 var supply_price = (deliveryItem.supply_price==undefined)?null:deliveryItem.supply_price;
                 var retail_price = (deliveryItem.retail_price==undefined)?null:deliveryItem.retail_price;
                 var commission = (deliveryItem.commission==undefined)?null:deliveryItem.commission;
+
+                var detailCode = String(replenishmentObj.details.length + 1);
+
                 var detailItem = {
                     restocking_warehose: {
                         code: deliveryItem.warehouses.code,
                         name: deliveryItem.warehouses.name,
                         account: $account
                     },
-                    detail_code: i,
+                    detail_code: detailCode,
                     goods: row.obj.goods,
                     invbatchcode: deliveryItem.invbatchcode,
                     shelf_life: deliveryItem.shelf_life,
                     quantity: deliveryItem.rep_quantity,
+                    ship_completed: false,
+                    pick_completed: false,
+                    pick_quantity: 0,
                     supply_price: supply_price,
                     retail_price: retail_price,
                     supply_amount: {},

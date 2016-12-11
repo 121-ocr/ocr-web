@@ -913,10 +913,10 @@ function bindDetailData(data){
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
             quantity_should: dataItem.quantity_should,
-			 batch_code: dataItem.batch_code,
-			 shelf_life: dataItem.shelf_life,
-             location_code: dataItem.location_code,
-            location_name: dataItem.location_name,
+			batch_code: dataItem.batch_code,
+			shelf_life: dataItem.shelf_life,
+            location_code: dataItem.location_code,
+            rep_detail_code: dataItem.rep_detail_code,
 		
             obj: dataItem
         };

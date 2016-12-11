@@ -913,10 +913,10 @@ function bindDetailData(data){
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
             quantity_should: dataItem.quantity_should,
-			 batch_code: dataItem.batch_code,
-			 shelf_life: dataItem.shelf_life,
-             location_code: dataItem.location_code,
-            location_name: dataItem.location_name,
+			batch_code: dataItem.batch_code,
+			shelf_life: dataItem.shelf_life,
+            location_code: dataItem.location_code,
+            rep_detail_code: dataItem.rep_detail_code,
 		
             obj: dataItem
         };
@@ -1061,22 +1061,46 @@ function onshipping() {
         },
         success: function (data) {
 
-            //-------刷新关联属性------
-            cloneAllotInvObj = data;
-            allotInvObj = cloneAllotInvObj;
+            /*
+             //-------刷新关联属性------
+             cloneAllotInvObj = data;
+             allotInvObj = cloneAllotInvObj;
+
+             var dgList = $('#dgList');
+             var row = dgList.datagrid('getSelected');
+             var index = dgList.datagrid('getRowIndex', row);
+
+             row['code'] = data.code;
+
+             row['send_date'] = data.send_date;
+             row.obj = allotInvObj;
+             dgList.datagrid('refreshRow', index);
+             */
 
             var dgList = $('#dgList');
-            var row = dgList.datagrid('getSelected');
-            var index = dgList.datagrid('getRowIndex', row);
+            dgList.datagrid('deleteRow', allotInvObjIndex);
+            currentRowIndex = undefined;
 
-            row['code'] = data.code;
+            //$.messager.alert('提示','删除成功!');
+            alert_autoClose('提示','拣货打印成功!');
 
-            row['send_date'] = data.send_date;
-            row.obj = allotInvObj;
-            dgList.datagrid('refreshRow', index);
+            //当前指针指向正确的位置
+            var rowCount = dgList.datagrid('getRows').length + 1;
+            if(rowCount > 0){
+                if(allotInvObjIndex == 0){
+                    dgList.datagrid('selectRow',allotInvObjIndex);
+                }else{
+                    if(allotInvObjIndex == rowCount -1){
+                        dgList.datagrid('selectRow',allotInvObjIndex-1);
+                    }else{
+                        dgList.datagrid('selectRow',allotInvObjIndex+1);
+                    }
+                }
+            }
 
+/*
             resetState();
-            alert_autoClose('提示', '拣货打印成功!');
+            alert_autoClose('提示', '拣货打印成功!');*/
 
         },
         error: function (x, e) {
