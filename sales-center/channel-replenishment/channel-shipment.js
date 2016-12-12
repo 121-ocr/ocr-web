@@ -572,14 +572,14 @@ function bindDgListData(data){
     var dgLst = $('#dgList');
     var viewModel = new Array();
     for ( var i in data.datas) {
-        var dataItem = data.datas[i].bo;
+        var dataItem = data.datas[i];
         var row_data = {
-            code : dataItem.bo_id,
-            req_date : dataItem.req_date,
-            req_send_date: dataItem.req_send_date,
-            req_code : dataItem.req_code,
-            channel_name: dataItem.channel.name,
-            is_completed: dataItem.is_completed,
+            code : dataItem.bo.bo_id,
+            req_date : dataItem.bo.req_date,
+            req_send_date: dataItem.bo.req_send_date,
+            req_code : dataItem.bo.req_code,
+            channel_name: dataItem.bo.channel.name,
+            is_completed: dataItem.bo.is_completed,
             obj: dataItem
         };
         viewModel.push(row_data);
@@ -686,7 +686,7 @@ function onRowSelected (rowIndex, rowData) {
     replenishmentObj = rowData.obj;
 
     cloneReplenishmentObj = cloneJsonObject(replenishmentObj);
-    bindSelectedDataToSubDetail(cloneReplenishmentObj.details);
+    bindSelectedDataToSubDetail(cloneReplenishmentObj.bo.details);
 
     initialized = false;
 }
