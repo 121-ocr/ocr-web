@@ -635,7 +635,7 @@ function bindDgListData(data){
         var row_data = {
 		
            
-            replenishment_code : dataItem.replenishment_code, //补货单号
+            replenishment_code : dataItem.bo_id, //补货单号
             
 			pickout_date: dataItem.confirm_date, //拣货日期
             warehouse_code: dataItem.warehouse.name, //发货仓库

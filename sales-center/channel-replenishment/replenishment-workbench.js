@@ -92,15 +92,9 @@ function onAllowCatalogSelected (index, rowData) {
 
     var selectdData = rowData.obj;
 
-    //检查是否重复添加
-    var dgList = $('#detailDg');
-    var rows = dgList.datagrid('getRows');
-    for(var index in rows) {
-        var row = rows[index];
-        if(row.obj.sku == selectdData.product_sku_code){
-            alert_autoClose('提示','选择重复!');
-            return;
-        }
+    if(checkSkuRepeat(selectdData.product_sku_code)){
+        alert_autoClose('提示','选择重复!');
+        return;
     }
 
     //设置商品到当前表体行对象上
@@ -108,6 +102,19 @@ function onAllowCatalogSelected (index, rowData) {
 
     appendAllowGoods(selectdData);
 
+}
+
+//检查商品是否重复添加
+function checkSkuRepeat(newSku){
+    var dgList = $('#detailDg');
+    var rows = dgList.datagrid('getRows');
+    for(var index in rows) {
+        var row = rows[index];
+        if(row.obj.goods.product_sku_code == newSku){
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -144,7 +151,6 @@ function onBeforeSelect(index,row){
 
 //回退整个单据
 function reject(){
-
     onWhSelected (whRowIndex, whRow);
     hasChanged = false;
 }
@@ -163,21 +169,25 @@ function onWhSelected (rowIndex, rowData) {
     var gridPanel = $("#detailDg").datagrid("getPanel");//先获取panel对象
     gridPanel.panel('setTitle', "[" + targetWarehouse.name + "] 补货处理");//再通过panel对象去修改title
 
-    var query = {
-        goodaccount: $account,
-        warehousecode: targetWarehouse.code
+    var queryParam = {
+        query: {
+            warehousecode: targetWarehouse.code,
+            goodaccount: $account
+        },
+        group_keys: ["warehousecode","sku","invbatchcode","shelf_life"],
+        need_goods: true
     };
 
     $.ajax({
         method : 'POST',
         url : $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/query?context=" + $account + "|" + targetWarehouse.account + "|lj|aaa",
         async : true,
-        data: JSON.stringify(query),
+        data: JSON.stringify(queryParam),
         dataType : 'json',
         beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
         success : function(data) {
             groupBySKU(data);
-            bindReplenishmentDetail(data);
+            bindReplenishmentDetail(data.result);
         },
         error: function (x, e) {
             alert(e.toString(), 0, "友好提醒");
@@ -190,18 +200,18 @@ function onWhSelected (rowIndex, rowData) {
 function groupBySKU(data){
     var skuMap = new Object();
     var skuList = [];
-    for ( var i in data.result) {
-        var dataItem = data.result[i];
+    for ( var i in data) {
+        var dataItem = data[i];
         var skuObj;
-        if (dataItem.sku in skuMap) {
-            skuObj = skuMap[dataItem.sku];
+        if (dataItem._id.sku in skuMap) {
+            skuObj = skuMap[dataItem._id.sku];
             skuObj.batchDetails.push(dataItem);
             skuObj.onhandnum += dataItem.onhandnum;
         } else {
             var temp = cloneJsonObject(dataItem);
             temp.batchDetails = [];
             temp.batchDetails.push(dataItem);
-            skuMap[dataItem.sku] = temp;
+            skuMap[dataItem._id.sku] = temp;
             skuList.push(temp);
         }
     }
@@ -210,12 +220,13 @@ function groupBySKU(data){
 
 
 //绑定补货详情工作区Datagrid
-function bindReplenishmentDetail(data){
+function bindReplenishmentDetail(groupStocks){
     var viewModel = new Array();
-    for ( var i in data.result) {
-        var dataItem = data.result[i];
+    for ( var i in groupStocks) {
+        var dataItem = groupStocks[i];
+        var sku = dataItem._id.sku;
         var row_data = {
-            product_sku_code : dataItem.sku,
+            product_sku_code : sku,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
             specifications: dataItem.goods.product_sku.product_specifications,
@@ -398,7 +409,7 @@ function computeRepNum(){
             var query = {
                 to_account: targetWarehouse.account,
                 to_warehouse_code: targetWarehouse.code,
-                sku: row.obj.sku
+                sku: row.obj.goods.product_sku_code
             }
 
             queryFromWhOnHand(query, dgList, row, index);
@@ -429,17 +440,40 @@ function queryFromWhOnHand(query, dgList, row, index){
 function formatSupplyOnHand(value){
     if(value == undefined) return "";
 
-    var html = '<table cellpadding="0" cellspacing="0" style="width:100%">'+
-            '<tr style="height: 14px; background-color: #EAEDF1">' +
-                '<td style="text-align: center">仓库</td>' +
-                '<td style="text-align: center">批次</td>' +
-                '<td style="text-align: center">保质期</td>' +
-                '<td style="text-align: center">存量</td>' +
-                '<td style="text-align: center">发货量</td>' +
-                '<td style="text-align: center">供货价</td>' +
-                '<td style="text-align: center">零售价</td>' +
-                '<td style="text-align: center">佣金</td>' +
-            '</tr>';
+    if(!value.exist_batch_price){
+        var html = '<table cellpadding="0" cellspacing="0" style="width:100%">'+
+            '<tr style="height: 20px; background-color: ivory">' +
+                '<td style="text-align: left; width: 62px"><input type="checkbox" onclick="onFIFOCheck(this);">FIFO</td>' +
+                '<td style="text-align: left; width: 20px">数量:</td>' +
+                '<td style="text-align: left"><input style="width:70px" onchange="" disabled="disabled"></td>' +
+            '</tr>' +
+            '<tr style="height: 20px; background-color: ivory">' +
+                '<td style="text-align: left" colspan="3">' +
+                    generateStockoutTable(value) +
+                '</td>' +
+            '</tr>' +
+         '</table>';
+
+        return html;
+
+    }else{
+        return generateStockoutTable(value);
+    }
+}
+
+function generateStockoutTable(value){
+
+    var html = '<table border="0.5" cellpadding="0" cellspacing="0" style="width:100%">'+
+        '<tr style="height: 14px; background-color: #EAEDF1">' +
+            '<td style="text-align: center">仓库</td>' +
+            '<td style="text-align: center">批次</td>' +
+            '<td style="text-align: center">保质期</td>' +
+            '<td style="text-align: center">存量</td>' +
+            '<td style="text-align: center">发货量</td>' +
+            '<td style="text-align: center">供货价</td>' +
+            '<td style="text-align: center">零售价</td>' +
+            '<td style="text-align: center">佣金</td>' +
+        '</tr>';
 
     for(var i in value.sub_nums){
         var warehouseInfo = value.sub_nums[i];
@@ -448,22 +482,39 @@ function formatSupplyOnHand(value){
         var commission = (warehouseInfo.commission==undefined)?0.00:warehouseInfo.commission.commission_value.currency.money.toFixed(2);
 
         var trHtml = '<tr style="height: 16px; background-color: ivory">' +
-            '<td style="text-align: center">' + warehouseInfo.warehouses.name + '</td>' +
-            '<td style="text-align: center">' + warehouseInfo.invbatchcode + '</td>' +
-            '<td style="text-align: center">' + warehouseInfo.shelf_life + '</td>' +
-            '<td style="text-align: center">' + warehouseInfo.onhandnum + '</td>' +
-            '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehouses.code + '" batch_code="' + warehouseInfo.invbatchcode
-                        + '" style="width:50px" onchange="onStockNumChanged(this);"></td>' +
-            '<td style="text-align: center">' + supply_price + '</td>' +
-            '<td style="text-align: center">' + retail_price + '</td>' +
-            '<td style="text-align: center">' + commission + '</td>' +
-        '</tr>';
+                '<td style="text-align: center">' + warehouseInfo.warehousename + '</td>' +
+                '<td style="text-align: center">' + warehouseInfo.invbatchcode + '</td>' +
+                '<td style="text-align: center">' + warehouseInfo.shelf_life + '</td>' +
+                '<td style="text-align: center">' + warehouseInfo.onhandnum + '</td>' +
+                '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehousecode + '" batch_code="' + warehouseInfo.invbatchcode
+                + '" style="width:50px" onchange="onStockNumChanged(this);"></td>' +
+                '<td style="text-align: center">' + supply_price + '</td>' +
+                '<td style="text-align: center">' + retail_price + '</td>' +
+                '<td style="text-align: center">' + commission + '</td>' +
+            '</tr>';
         html += trHtml;
     }
 
     html += '</table>';
 
     return html;
+}
+
+function onFIFOCheck(ck){
+    if(ck.checked){
+        var inputObj = ck.parentNode.parentNode.cells[2].childNodes[0];
+        inputObj.disabled = "";
+        var tableObj = ck.parentNode.parentNode.parentNode;
+        tableObj.rows[1].hidden = true;
+
+    }else{
+        var inputObj = ck.parentNode.parentNode.cells[2].childNodes[0];
+        inputObj.disabled = "disabled";
+
+        var tableObj = ck.parentNode.parentNode.parentNode;
+        tableObj.rows[1].hidden = false;
+
+    }
 }
 
 //补货数量填写响应事件
@@ -483,7 +534,7 @@ function onStockNumChanged(theInput){
 
     for(var i in warehouseStockInfo.sub_nums){
         var warehouseInfo = warehouseStockInfo.sub_nums[i];
-        if(warehouseInfo.warehouses.code == whCode
+        if(warehouseInfo.warehousecode == whCode
             && warehouseInfo.invbatchcode == batchCode){
             //warehouseInfo.warehouses.
             warehouseInfo.rep_quantity = parseFloat(theValue);
@@ -802,8 +853,8 @@ function bindSkuBatchs(ddv, row){
         for (var i in batchDetails) {
             var dataItem = batchDetails[i];
             var row_data = {
-                invbatchcode: dataItem.invbatchcode,
-                shelf_life: dataItem.shelf_life,
+                invbatchcode: dataItem._id.invbatchcode,
+                shelf_life: dataItem._id.shelf_life,
                 onhandnum: dataItem.onhandnum
             };
             viewModel.push(row_data);
@@ -853,9 +904,9 @@ function notifyDelivery(){
                     }
                 }
                 errMsg += "</ul>";
-                if(hasErr)
-                    alert_autoClose('提示', errMsg);
-                else
+                if(hasErr) {
+                    $.messager.alert('提示', errMsg);
+                }else
                     alert_autoClose('提示', "提交仓库拣货成功！");
             }else {
                 alert_autoClose('提示', "提交仓库拣货成功！");
@@ -957,8 +1008,8 @@ function buildReplenishmentObj(rows){
 
                 var detailItem = {
                     restocking_warehose: {
-                        code: deliveryItem.warehouses.code,
-                        name: deliveryItem.warehouses.name,
+                        code: deliveryItem.warehousecode,
+                        name: deliveryItem.warehousename,
                         account: $account
                     },
                     detail_code: detailCode,
