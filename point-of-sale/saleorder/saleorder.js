@@ -225,6 +225,31 @@ function quantityChanged(theInput){
     };
     currentDetailRowObj.retail_amount = retail_amount;
     row['retail_amount'] = retail_amount.money_including_tax.currency.money;
+    //计算折扣
+    var discount = currentDetailRowObj.discount;
+    var discount_amount = {
+        money_including_tax: {  //含税金额
+            currency: {		  //本币
+                currency_type: retail_price.price_including_tax.currency.currency_type,
+                money: discount * quantity
+            },
+            original_currency:  { //原币
+                currency_type: retail_price.price_including_tax.original_currency.currency_type,
+                money: discount * quantity
+            }
+        },
+        money: {  //无税金额
+            currency: {
+                currency_type: retail_price.price.currency.currency_type,
+                money: discount * quantity
+            },
+            original_currency:  {
+                currency_type: retail_price.price.original_currency.currency_type,
+                money: discount * quantity
+            }
+        }
+    };
+
     row['quantity'] = quantity;
     currentDetailRowObj.quantity = quantity;
     detailDg.datagrid('refreshRow', index);
