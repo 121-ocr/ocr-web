@@ -154,40 +154,36 @@ function detailListSetting(){
         onClickCell: onClickCell,
         onEndEdit: onEndEdit,
         onSelect: onDetailRowSelected,  //行选择事件
-        view: detailview,
-        detailFormatter:function(index,row){
-            return '<div style="padding:2px"><table class="ddv"></table></div>';
-        },
-        onExpandRow: function(index,row){
-            currentRowIndex = index;
-            var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
-            ddv.datagrid({
-                fitColumns:true,
-                singleSelect:true,
-                rownumbers:true,
-                loadMsg:'',
-                height:'auto',
-                columns:[[
-                    {field:'ship_quantity',title:'发货数量',width:'60px',editor:'shipQuantityEditor'},
-                    {field:'ship_date',title:'发货日期',width:'100px',align:'left'},
-                    {field:'ship_actor',title:'发货人',width:'60xp',align:'left'},
-                    {field:'ship_code',title:'发货单号',width:'100px',align:'left'},
-                    {field:'logistics_code',title:'物流单号',width:'100xp',align:'left', editor:'logisticsCodeEditor'},
-                    {field:'is_shipped',title:'已发货',width:'100xp',align:'left'}
-                ]],
-                onResize:function(){
-                    $('#detailDg').datagrid('fixDetailRowHeight',index);
+        toolbar :
+            [   {
+                    text : '新增',
+                    iconCls : 'icon-add',
+                    handler : function() {
+                        append();
+                    }
                 },
-                onLoadSuccess:function(){
-                    setTimeout(function(){
-                        $('#detailDg').datagrid('fixDetailRowHeight',index);
-                    },0);
+                {
+                    text: '修改',
+                    iconCls : 'icon-edit',
+                    handler : function() {
+
+                    }
+                },
+                {
+                    text: '删除',
+                    iconCls : 'icon-remove',
+                    handler : function() {
+                        removeDetail();
+                    }
+                },
+                {
+                    text: '撤销',
+                    iconCls : 'icon-undo',
+                    handler : function() {
+                        rejectDetail();
+                    }
                 }
-            });
-            //currentChannelRow = row.obj;
-            loadShipmentInfos(ddv, row.obj.shipments);
-            $('#detailDg').datagrid('fixDetailRowHeight',index);
-        }
+            ]
     });
 
     $('#goodsDg').datagrid({
@@ -205,25 +201,6 @@ function detailListSetting(){
         border : true,
         onSelect: onGoodsSelected  //行选择事件
      });
-}
-
-function loadShipmentInfos(ddv, data){
-    var viewModel = new Array();
-    for ( var i in data) {
-        var dataItem = data[i];
-        var isShipped = (dataItem.is_shipped)?"是":"否";
-        var row_data = {
-            ship_quantity: dataItem.ship_quantity,
-            ship_date : dataItem.ship_date,
-            ship_code : dataItem.ship_code,
-            logistics_code : dataItem.logistics_code,
-            is_shipped: isShipped,
-            obj: dataItem
-        };
-        viewModel.push(row_data);
-    }
-
-    ddv.datagrid('loadData',viewModel);
 }
 
 function onBeforeSelect(index,row){
@@ -705,7 +682,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $salesURL + "ocr-sales-center/channel-restocking/find_shipped?context=3|3|lj|aaa",
+        url : $salesURL + "ocr-sales-center/channel-restocking/findcreated?context=3|3|lj|aaa",
         async : true,
         data: condStr,
         dataType : 'json',

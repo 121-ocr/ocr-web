@@ -14,7 +14,7 @@
     <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
     <script type="text/javascript" src="../../js/constant.js"></script>
     <script type="text/javascript" src="../../js/utility.js"></script>
-    <script type="text/javascript" src="replenishment.js"></script>
+    <script type="text/javascript" src="shipment.js"></script>
     <style type="text/css">
         .subtotal { font-weight: bold; }/*合计单元格样式*/
     </style>
@@ -48,10 +48,8 @@
                title="Load Data" iconCls="icon-save">
             <thead>
             <tr>
-                <th field="code" width="80px" formatter="formatCellTooltip">补货单编码</th>
-                <th field="req_date" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDatetime">申请时间</th>
-                <th field="req_send_date" width="80px" formatter="formatCellTooltip" sortable="true">申请发货时间</th>
-                <th field="req_code" width="80px" formatter="formatCellTooltip">请购单号</th>
+                <th field="code" width="80px" formatter="formatCellTooltip">发货单编码</th>
+                <th field="req_date" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDatetime">发货时间</th>
                 <th field="channel_name" width="80px" formatter="formatCellTooltip" sortable="true">渠道名</th>
                 <th field="restocking_warehose" width="80px" formatter="formatCellTooltip" sortable="true">补货仓库</th>
                 <th field="is_completed" width="80px" formatter="formatCellTooltip" sortable="true">是否完成</th>
