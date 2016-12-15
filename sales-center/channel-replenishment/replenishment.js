@@ -571,7 +571,7 @@ function newRep(){
             req_send_date: theDateStr,
             req_code: "",
             channel: {},
-            restocking_warehose: {},
+            restocking_warehouse: {},
             "is_completed": "",
             "completed_date": "",
             "details": []
@@ -583,7 +583,7 @@ function newRep(){
             req_send_date: "",
             req_code : "",
             channel_name: "",
-            restocking_warehose: "",
+            restocking_warehouse: "",
             is_completed: "",
             obj: newObj
         };
@@ -809,11 +809,11 @@ function bindSelectedDataToCard(data){
 
     $('#req_send_date').datebox('setValue',data.req_send_date);
 
-    if(data.restocking_warehose != null) {
-        $('#restocking_warehose').combobox('setValue', data.restocking_warehose.code);
+    if(data.restocking_warehouse != null) {
+        $('#restocking_warehouse').combobox('setValue', data.restocking_warehouse.code);
     }
     else{
-        $('#restocking_warehose').combobox('setValue', "");
+        $('#restocking_warehouse').combobox('setValue', "");
     }
 }
 
@@ -887,13 +887,13 @@ function channelSel(record){
 //仓库选择
 function warehoseSelected(record){
     if(initialized) return;
-    cloneReplenishmentObj.restocking_warehose = {
+    cloneReplenishmentObj.restocking_warehouse = {
         code: record.code,
         name: record.name
     };
     isBodyChanged = true;
     //-------刷新关联属性------
-    updateParentListRow('restocking_warehose', record.name);
+    updateParentListRow('restocking_warehouse', record.name);
 }
 
 
@@ -923,7 +923,7 @@ function bindDetailData(data){
         }*/
 
         var row_data = {
-            restocking_warehose: dataItem.restocking_warehose.name,
+            restocking_warehouse: dataItem.restocking_warehouse.name,
             product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,

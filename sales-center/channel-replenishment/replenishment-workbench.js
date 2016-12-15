@@ -1088,7 +1088,7 @@ function buildReplenishmentObj(rows){
         req_send_date: theDateStr,
         req_code: "",
         channel: currentChannelRow,
-        target_warehose: targetWarehouse,
+        target_warehouse: targetWarehouse,
         is_completed: false,
         completed_date: "",
         details: []
@@ -1119,7 +1119,7 @@ function buildReplenishmentObj(rows){
                 var detailCode = String(replenishmentObj.details.length + 1);
 
                 var detailItem = {
-                    restocking_warehose: {
+                    restocking_warehouse: {
                         code: deliveryItem.warehousecode,
                         name: deliveryItem.warehousename,
                         account: $account

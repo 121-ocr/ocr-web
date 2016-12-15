@@ -200,6 +200,10 @@ function autoAddShipmentInfoForRow() {
 
 function addShipmentInfoForRow(detailDg, row, index){
     if(row != null) {
+        if(row.obj.pick_quantity <=0){
+            return;
+        }
+
         detailDg.datagrid('expandRow', index);
 
         var ddv = detailDg.datagrid('getRowDetail', index).find('table.ddv');
@@ -442,9 +446,9 @@ function checkTotalQuantity(){
         sumNum += shipment.ship_quantity;
     }
 
-    if(sumNum >  row.obj.quantity){
+    if(sumNum >  row.obj.pick_quantity){
         return 1;
-    }else if(sumNum ==  row.obj.quantity){
+    }else if(sumNum ==  row.obj.pick_quantity){
         return 0;
     }
     return -1;
@@ -751,7 +755,7 @@ function bindDetailData(data){
         var shipCompleted = (dataItem.ship_completed)?"是":"否";
 
         var row_data = {
-            restocking_warehose: dataItem.restocking_warehose.name,
+            restocking_warehouse: dataItem.restocking_warehouse.name,
             product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
