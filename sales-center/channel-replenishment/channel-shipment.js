@@ -26,21 +26,18 @@ function confirm(){
             },
             success: function (data) {
 
-                //-------刷新关联属性------
-                cloneReplenishmentObj = data;
-                replenishmentObj = cloneReplenishmentObj;
-
                 var dgList = $('#dgList');
                 var row = dgList.datagrid('getSelected');
                 var index = dgList.datagrid('getRowIndex', row);
-                row['code'] = data.bo_id;
-                row['req_date'] = data.req_date;
-                row['req_send_date'] = data.req_send_date;
-                row.obj = replenishmentObj;
-                dgList.datagrid('refreshRow', index);
+/*                 row['req_date'] = data.req_date;
+                row['req_send_date'] = data.req_send_date;*/
+                row.obj = data;
+                //dgList.datagrid('refreshRow', index);
+
+                onRowSelected(index, row);
 
                 resetState();
-                alert_autoClose('提示','保存成功!');
+                alert_autoClose('提示','提交发货成功!');
 
             },
             error: function (x, e) {
@@ -203,6 +200,10 @@ function autoAddShipmentInfoForRow() {
 
 function addShipmentInfoForRow(detailDg, row, index){
     if(row != null) {
+        if(row.obj.pick_quantity <=0){
+            return;
+        }
+
         detailDg.datagrid('expandRow', index);
 
         var ddv = detailDg.datagrid('getRowDetail', index).find('table.ddv');
@@ -419,12 +420,41 @@ function shipQuantityChanged(theInput){
     if(editIndex != undefined && editIndex != null) {
         var rows = $(subGrid).datagrid('getRows');
         var row = rows[editIndex];
-        row['ship_quantity'] = value;
-        row.obj.ship_quantity = value;
 
+        var oldValue = row.obj.ship_quantity;
+        row.obj.ship_quantity = parseFloat(value);
+
+        if(checkTotalQuantity()>0){
+            row.obj.ship_quantity = oldValue;
+            row['ship_quantity'] = oldValue;
+            alert_autoClose("提示","数量不能超过应发量");
+        }else{
+            row['ship_quantity'] = parseFloat(value);
+        }
         $(subGrid).datagrid('refreshRow', editIndex);
     }
 }
+
+function checkTotalQuantity(){
+    var rows =  $('#detailDg').datagrid('getRows');
+    var row = rows[currentRowIndex];
+    var shipments = row.obj.shipments;
+
+    var sumNum = 0.00;
+    for(var i in shipments){
+        var shipment = shipments[i];
+        sumNum += shipment.ship_quantity;
+    }
+
+    if(sumNum >  row.obj.pick_quantity){
+        return 1;
+    }else if(sumNum ==  row.obj.pick_quantity){
+        return 0;
+    }
+    return -1;
+}
+
+
 
 function onShipmentSelected(rowIndex, detailRowData){
     editIndex = rowIndex;
@@ -460,6 +490,18 @@ function onClickCell(index, field){
 }
 
 function append(ddv, index){
+
+    var rows =  $('#detailDg').datagrid('getRows');
+    var row = rows[currentRowIndex];
+    if(row.obj.ship_completed != undefined && row.obj.ship_completed){
+        alert_autoClose("提示", "已经达到应发数量，不能添加");
+        return;
+    }else{
+        if(checkTotalQuantity()>=0){
+            alert_autoClose("提示", "已经达到应发数量，不能添加");
+            return;
+        }
+    }
 
     subGrid = ddv;
 
@@ -713,7 +755,7 @@ function bindDetailData(data){
         var shipCompleted = (dataItem.ship_completed)?"是":"否";
 
         var row_data = {
-            restocking_warehose: dataItem.restocking_warehose.name,
+            restocking_warehouse: dataItem.restocking_warehouse.name,
             product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,

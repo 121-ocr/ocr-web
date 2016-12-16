@@ -633,7 +633,7 @@ function bindDgListData(data){
         var row_data = {
 		
            
-            replenishment_code : dataItem.replenishment_code, //补货单号
+            replenishment_code : dataItem.bo_id, //补货单号
             
 			pickout_date: dataItem.confirm_date, //拣货日期
             warehouse_code: dataItem.warehouse.name, //发货仓库
@@ -994,7 +994,7 @@ quantity_should: '<span class="subtotal">' + compute(data, "quantity_should") + 
 batch_code:'',
 shelf_life:'',
 location_code:'',
-location_name:'',
+location_name:''
         };
     return subTotal;
 }
