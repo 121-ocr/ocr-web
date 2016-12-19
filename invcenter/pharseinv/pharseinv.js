@@ -87,8 +87,15 @@ function dgListSetting(){
     });
 }
 
+
 function detailListSetting(){
-    $('#detailDg').datagrid({
+	$('#win').window({
+    width:600,
+    height:400,
+    modal:true
+});
+
+ $('#detailDg').datagrid({
         title : '采购入库单详情',
         iconCls : 'icon-a_detail',
         fit : true,
@@ -111,7 +118,7 @@ function detailListSetting(){
                     text : '新增',
                     iconCls : 'icon-add',
                     handler : function() {
-                        append();
+                        appendgoods();
                     }
                 },
                 {
@@ -160,9 +167,24 @@ function detailListSetting(){
         pageList: [2, 10, 20, 50, 100], //页面数据条数选择清单
         singleSelect : true,
         border : true,
-        onSelect: onLocationsSelected  //行选择事件
+	    //rowStyler:function(index,row){    
+        //if (row.locationref_plusnum>0){    
+          //  return 'background-color:pink;color:blue;font-weight:bold;';    
+        //}    
+        //}   ,
+        onSelect: onLocationsSelected//行选择事件
+	
+		
      });
 }
+function formatPrice(val,row){    
+    if (val < 20){    
+        return '<span style="color:red;">'+val+'</span>';    
+    } else {    
+        return val;    
+    }    
+}    
+
 function onBeforeSelect(index,row){
     if(isBodyChanged || isHeadChanged){
         $.messager.alert('数据变化提示','当前数据已经变化，请先保存或取消!');
@@ -433,35 +455,6 @@ function catelogTreeSel(node) {
     });
 }
 
-//选择商品
-function onGoodsSelected (index, rowData) {
-    $('#goodsRefDialog').window('close');
-    var selectdData = rowData.obj;
-    $('#goodsEditor').val(selectdData.title);
-
-    //设置商品到当前表体行对象上
-    delete selectdData._id;
-    currentDetailRowObj.goods = selectdData;
-
-    //-------刷新关联属性------
-    var row = $('#detailDg').datagrid('getSelected');
-    var index = $('#detailDg').datagrid('getRowIndex', row);
-
-    row['product_sku_code'] = selectdData.product_sku_code;
-    row['title'] = selectdData.title;
-    row['batch_code']=selectdData.invbatchcode;
-    row['sales_catelog'] = selectdData.sales_catelogs;
-    row['bar_code'] = selectdData.product_sku.bar_code;
-    if(selectdData.product_sku.product_specifications != null)
-        row['specifications'] = selectdData.product_sku.product_specifications;
-
-    row['base_unit'] = selectdData.product_sku.product_spu.base_unit;
-
-    if(selectdData.product_sku.product_spu.brand != null) {
-        row['brand'] = selectdData.product_sku.product_spu.brand.name;
-        row['manufacturer'] = selectdData.product_sku.product_spu.brand.manufacturer.name;
-    }
-}
 
 
 
@@ -635,7 +628,15 @@ function onEndEdit(index, row) {
     refreshSubTotalRows(); //刷新小计列
 }
 
+function appendgoods(){
+	
+	$('#win').window('open'); // open a window
+}
+
+
+	
 function append(){
+
     if (endEditing()){
 
         var theDate = new Date();
@@ -726,6 +727,7 @@ function newRep(){
             purchase_org:{},
             supplier_user:"",
             transportation:"",
+			transportationfee:"",
             purchase_user:"",
             deliver_nation:"",
             deliver_area:"",
@@ -744,6 +746,7 @@ function newRep(){
             purchase_org:{},
             supplier_user:"",
             transportation:"",
+			transportationfee:"",
             purchase_user:"",
             deliver_nation:"",
             deliver_area:"",
@@ -1053,7 +1056,8 @@ function bindSelectedDataToCard(data){
     $('#inv_org').textbox('setValue',data.inv_org.name);
     $('#purchase_user').textbox('setValue',data.purchase_user);
     $('#transportation').textbox('setValue',data.transportation);
-    $('#supplier_user').textbox('setValue',data.supplier_user);
+    $('#transportationfee').textbox('setValue',data.transportationfee);
+	$('#supplier_user').textbox('setValue',data.supplier_user);
     $('#deliver_nation').textbox('setValue',data.deliver_nation);
     $('#deliver_area').textbox('setValue',data.deliver_area);
     $('#purchase_org').textbox('setValue',data.purchase_org.name);
@@ -1149,6 +1153,13 @@ function onTransportationChanged(newValue,oldValue) {
     updateParentListRow('transportation', newValue);
 }
 
+function onTransportationfeeChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.transportationfee= newValue;
+    isBodyChanged = true;
+
+    updateParentListRow('transportationfee', newValue);
+}
 function onSupUserChanged(newValue,oldValue) {
     if(initialized) return;
     cloneAllotInvObj.supplier_user= newValue;
@@ -1470,14 +1481,42 @@ $.extend($.fn.datagrid.defaults.editors, {
     }
 });
 
+function locatonsTreeSel(node){
+	if(node.id=="fixed"){
+		
+		 $("#locationsDg").datagrid('showColumn', 'locationref_warehousecode');			
+		 $("#locationsDg").datagrid('showColumn', 'locationref_locationcode');
+		 $("#locationsDg").datagrid('showColumn', 'locationref_sku');
+		 $("#locationsDg").datagrid('showColumn', 'locationref_invbatchcode');
+		 $("#locationsDg").datagrid('showColumn', 'locationref_onhandnum');
+		 $("#locationsDg").datagrid('showColumn', 'locationref_locationnum');
+		 $("#locationsDg").datagrid('showColumn', 'locationref_plusnum');
+         $("#locationsDg").datagrid('showColumn', 'locationref_packageunit');		 
+		
+	}if(node.id=="free"){
+			
+		 $("#locationsDg").datagrid('showColumn', 'locationref_warehousecode');			
+		 $("#locationsDg").datagrid('showColumn', 'locationref_locationcode');
+		 $("#locationsDg").datagrid('showColumn', 'locationref_sku');
+		 $("#locationsDg").datagrid('showColumn', 'locationref_invbatchcode');
+		 $("#locationsDg").datagrid('showColumn', 'locationref_onhandnum');
+		 $("#locationsDg").datagrid('hideColumn', 'locationref_locationnum');
+		 $("#locationsDg").datagrid('hideColumn', 'locationref_plusnum');
+         $("#locationsDg").datagrid('showColumn', 'locationref_packageunit');	
+	
+	}
+	
+	
+	locatonsTreeSelone(node); 
+      
+  
+}
+					
 
 //品类树选择，查询货位列表
-function locatonsTreeSel(node) {
-      if(node.id==2){
-          return ;
-      }
-
-    var catelog = node.id;
+function locatonsTreeSelone(node) {
+ 	
+    var type = node.id;
 	
     var row = $('#detailDg').datagrid('getSelected');
 	
@@ -1486,8 +1525,10 @@ function locatonsTreeSel(node) {
 	if(product_sku_code==null||product_sku_code==""){
 		return;
 	}
+	
+	//var warehouse=$('#warehouse');
     //定义查询条件
-    var condition = buildLocationsQueryCond(0, 1, product_sku_code);
+    var condition = buildLocationsQueryCond(0, 1, product_sku_code,type);
 
     $.ajax({
         method: 'POST',
@@ -1519,7 +1560,7 @@ function locatonsTreeSel(node) {
     });
 }
 //构建分页条件
-function buildLocationsQueryCond(total, pageNum, sku) {
+function buildLocationsQueryCond(total, pageNum,sku,type) {
     var condition = {
         paging: {
             sort_field: "_id",
@@ -1529,7 +1570,7 @@ function buildLocationsQueryCond(total, pageNum, sku) {
             total: total,
             total_page: -1
         },
-        query: {'sku':sku}
+        query: {'sku':sku,'type':type}
     };
     var reqData = JSON.stringify(condition);
     return reqData;
@@ -1540,7 +1581,7 @@ function onLocationsSelected (index, rowData) {
     $('#locationsRefDialog').window('close');
  //   var selectdData = rowData.obj;
    // $('#locationsEditor').val(selectdData.title);
-
+   
     //设置商品到当前表体行对象上
    // delete selectdData._id;
     currentDetailRowObj.locations = rowData.locationref_locationcode;
@@ -1550,7 +1591,7 @@ function onLocationsSelected (index, rowData) {
     var index = $('#detailDg').datagrid('getRowIndex', row);
 
     row['locations'] = rowData.locationref_locationcode;
-   
+    $('#detailDg').datagrid('refreshRow', index);
    
 }
 
@@ -1568,7 +1609,7 @@ function bindLocationDg(data) {
             locationref_invbatchcode:dataItem.invbatchcode,
             locationref_onhandnum: dataItem.onhandnum,
             locationref_locationnum: dataItem.locationnum,
-            locationref_resevednum: dataItem.resevednum,
+			locationref_plusnum: dataItem.plusnum,
             locationref_packageunit: dataItem.packageunit,
             obj: dataItem
         };
@@ -1580,4 +1621,68 @@ function bindLocationDg(data) {
         rows: viewModel
     });
 
+}
+
+
+//选择商品
+function onGoodsSelected (index, rowData) {
+    $('#goodsRefDialog').window('close');
+    var selectdData = rowData.obj;
+    $('#ref_nynum').val(selectdData.title);
+
+   var dg= $('#addNewGoodsDg');
+     var r= $('#addNewGoodsDg').contents().find("#ref_nynum");
+	 $('#addNewGoodsDg').contents().find("#ref_nynum").textbox('setValue','text')
+	
+
+}
+
+
+
+function goodsRefReturnAppend(){
+	
+ $('#addNewGoodsDg').window('close');
+ 
+  delete selectdData._id;
+    currentDetailRowObj.goods = selectdData;
+
+    //-------刷新关联属性------
+    var row = $('#detailDg').datagrid('getSelected');
+    var index = $('#detailDg').datagrid('getRowIndex', row);
+
+    row['product_sku_code'] = selectdData.product_sku_code;
+    row['title'] = selectdData.title;
+    row['batch_code']=selectdData.invbatchcode;
+    row['sales_catelog'] = selectdData.sales_catelogs;
+    row['bar_code'] = selectdData.product_sku.bar_code;
+    if(selectdData.product_sku.product_specifications != null)
+        row['specifications'] = selectdData.product_sku.product_specifications;
+
+    row['base_unit'] = selectdData.product_sku.product_spu.base_unit;
+
+    if(selectdData.product_sku.product_spu.brand != null) {
+        row['brand'] = selectdData.product_sku.product_spu.brand.name;
+        row['manufacturer'] = selectdData.product_sku.product_spu.brand.manufacturer.name;
+    }
+	//增行开始
+	
+	
+    var newDetailObj = {
+        sku: selectdData.product_sku_code,
+        goods: selectdData
+    };
+
+    var rowData = {
+        product_sku_code : selectdData.product_sku_code,
+        title : selectdData.title,
+        sales_catelog: selectdData.sales_catelogs,
+        bar_code : selectdData.product_sku.bar_code,
+        specifications: selectdData.product_sku.product_specifications,
+        base_unit: selectdData.product_sku.product_spu.base_unit,
+        brand: selectdData.product_sku.product_spu.brand.name,
+        manufacturer: selectdData.product_sku.product_spu.brand.manufacturer.name,
+        obj: newDetailObj
+    };
+
+    $('#detailDg').datagrid('appendRow',rowData);
 }
