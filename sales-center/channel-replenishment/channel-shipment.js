@@ -657,7 +657,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $salesURL + "ocr-sales-center/channel-restocking/query4ReadyShip?context=3|3|lj|aaa",
+        url : $salesURL + "ocr-sales-center/channel-restocking/query4readyship?context=3|3|lj|aaa",
         async : true,
         data: condStr,
         dataType : 'json',
@@ -692,7 +692,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $salesURL + "ocr-sales-center/channel-restocking/query4ReadyShip?context=3|3|lj|aaa",
+                            url: $salesURL + "ocr-sales-center/channel-restocking/query4readyship?context=3|3|lj|aaa",
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -754,14 +754,23 @@ function bindDetailData(data){
         var pickCompleted = (dataItem.pick_completed)?"是":"否";
         var shipCompleted = (dataItem.ship_completed)?"是":"否";
 
+        var shelfLife = "";
+        if(dataItem.shelf_life != undefined && dataItem.shelf_life != null) {
+            shelfLife = dataItem.shelf_life;
+        }
+        var invbatchcode = "";
+        if(dataItem.invbatchcode != undefined && dataItem.invbatchcode != null){
+            invbatchcode = dataItem.invbatchcode;
+        }
+
         var row_data = {
             restocking_warehouse: dataItem.restocking_warehouse.name,
             product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
             bar_code : dataItem.goods.product_sku.bar_code,
-            invbatchcode: dataItem.invbatchcode,
-            shelf_life: dataItem.shelf_life,
+            invbatchcode: invbatchcode,
+            shelf_life: shelfLife,
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
             quantity: dataItem.quantity,

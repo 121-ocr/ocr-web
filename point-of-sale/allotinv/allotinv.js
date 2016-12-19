@@ -34,7 +34,7 @@ function confirm(){
                 row.obj = data;
                 //dgList.datagrid('refreshRow', index);
 
-                onRowSelected(index, row);
+                //onRowSelected(index, row);
 
                 resetState();
                 alert_autoClose('提示','提交发货成功!');
@@ -58,7 +58,7 @@ function resetState(){
 function dgListSetting(){
     $('#dgList').datagrid({
         loadMsg: "正在加载，请稍等...",
-        title : '补货单列表',
+        title : '待收货补货单',
         iconCls : 'icon-a_detail',
         fit : true,
         fitColumns : false,
@@ -110,13 +110,12 @@ function dgListSetting(){
                 }
             });
             currentChannelRow = row.obj;
-            loadShipments(ddv, row.obj.shipments);
-            $('#dgList').datagrid('fixDetailRowHeight',index);
+            loadShipments(ddv, row.obj.shipments, index);
         }
     });
 }
 
-function loadShipments(ddv, shipments){
+function loadShipments(ddv, shipments, index){
 
     for(var i in shipments){
         var shipmentId = shipments[i];
@@ -133,6 +132,7 @@ function loadShipments(ddv, shipments){
             beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
             success : function(data) {
                 bindShipmentDg(ddv, data);
+                $('#dgList').datagrid('fixDetailRowHeight',index);
             },
             error: function (x, e) {
                 alert(e.toString(), 0, "友好提醒");
@@ -180,19 +180,32 @@ function showShipmentDetail(rowIndex, rowData) {
     for(var i in shipmentObj.details) {
         var shipmentDetail = shipmentObj.details[i];
 
+        var shelfLife = "";
+        if(shipmentDetail.shelf_life != undefined && shipmentDetail.shelf_life != null) {
+            shelfLife = shipmentDetail.shelf_life;
+        }
+        var invbatchcode = "";
+        if(shipmentDetail.invbatchcode != undefined && shipmentDetail.invbatchcode != null){
+            invbatchcode = shipmentDetail.invbatchcode;
+        }
+
+        //shipmentDetail.accept_info.accept_quantity,
+        //shipmentDetail.accept_info.reject_quantity,
         var rowData = {
             product_sku_code : shipmentDetail.goods.product_sku_code,
             title : shipmentDetail.goods.title,
             sales_catelog: shipmentDetail.goods.sales_catelogs,
             bar_code : shipmentDetail.goods.product_sku.bar_code,
-            invbatchcode: shipmentDetail.invbatchcode,
-            shelf_life: shipmentDetail.shelf_life,
+            invbatchcode: invbatchcode,
+            shelf_life: shelfLife,
             specifications: shipmentDetail.goods.product_sku.product_specifications,
             base_unit: shipmentDetail.goods.product_sku.product_spu.base_unit,
             quantity: shipmentDetail.quantity,
             supply_price: shipmentDetail.supply_price.price.currency.money,
             retail_price: shipmentDetail.retail_price.price.currency.money,
-
+            accept_quantity: 0,
+            reject_quantity: 0,
+            accept_actor: "",
             obj: shipmentDetail
         };
 
@@ -202,6 +215,69 @@ function showShipmentDetail(rowIndex, rowData) {
 
 }
 
+
+function acceptDetailFormatter(rowIndex, rowData){
+    return '<table style="border:0">' +
+        '<tr>' +
+        '<td style="width: 50px;border:0">实收数量</td>' +
+        '<td style="width: 90px;border:0">' +
+        '<input style="width: 80px" onchange="acceptQuantityChanged(this,' + rowIndex + ');"/>' +
+        '</td>' +
+        '<td style="width: 50px;border:0">退返数量</td>' +
+        '<td style="width: 90px;border:0">' +
+        '<input style="width: 80px" onchange="rejectQuantityChanged(this,' + rowIndex + ');"/>' +
+        '</td>' +
+            /*                            '<td style="width: 50px;border:0">' +
+             '<button style="width: 50px" onclick="">确定</button>' +
+             '</td>' +*/
+        '</tr>' +
+        '</table>';
+}
+
+//发货数量设置
+function acceptQuantityChanged(theInput, rowIndex){
+    var value = theInput.value;
+    if(value == ""){
+        return;
+    }
+
+    var detailDg = $('#detailDg');
+    var rows = detailDg.datagrid('getRows');
+    var row = rows[rowIndex];
+
+
+/*        var oldValue = row.obj.ship_quantity;
+
+        if(row.obj.accept_info == undefined || row.obj.accept_info == null){
+            row.obj.accept_info = {
+
+            }
+        }
+        row.obj.ship_quantity = parseFloat(value);
+
+        if(checkTotalQuantity()>0){
+            row.obj.ship_quantity = oldValue;
+            row['ship_quantity'] = oldValue;
+            alert_autoClose("提示","数量不能超过应发量");
+        }else{
+            row['ship_quantity'] = parseFloat(value);
+        }
+        $(subGrid).datagrid('refreshRow', editIndex);*/
+
+}
+
+function rejectQuantityChanged(theInput, rowIndex){
+    var value = theInput.value;
+    if(value == ""){
+        return;
+    }
+
+    var detailDg = $('#detailDg');
+    var rows = detailDg.datagrid('getRows');
+    var row = rows[rowIndex];
+
+
+}
 
 function detailListSetting(){
     $('#detailDg').datagrid({
@@ -223,83 +299,12 @@ function detailListSetting(){
         onEndEdit: onEndEdit,*/
         onSelect: onDetailRowSelected,  //行选择事件
         autoUpdateDetail: false,
-        view: detailview,
-        detailFormatter:function(index,row){
-            return '<div style="padding:2px"><table class="ddv"></table></div>';
-        },
-        toolbar :
-            [
-                {
-                    text : '整单签发',
-                    iconCls : 'icon-large-smartart',
-                    handler : function() {
-                        autoAddShipmentInfoForAllRow();
-                    }
-                },
-                {
-                    text : '整行签发',
-                    iconCls : 'icon-large-smartart',
-                    handler : function() {
-                        autoAddShipmentInfoForRow();
-                    }
-                }
-            ],
-        onExpandRow: function(index,row){
-            currentRowIndex = index;
-            var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
-            ddv.datagrid({
-                fitColumns:true,
-                singleSelect:true,
-                rownumbers:true,
-                loadMsg:'',
-                height:'auto',
-                onSelect: onShipmentSelected,  //行选择事件
-                onClickCell: onClickCell,
-                //onEndEdit: onEndEdit,
-                columns:[[
-                    {field:'ship_quantity',title:'发货数量',width:'60px',editor:'shipQuantityEditor'},
-                    {field:'ship_date',title:'发货日期',width:'100px',align:'left'},
-                    {field:'ship_actor',title:'发货人',width:'60xp',align:'left'},
-                    {field:'ship_code',title:'发货单号',width:'100px',align:'left'},
-                    {field:'logistics_code',title:'物流单号',width:'100xp',align:'left', editor:'logisticsCodeEditor'},
-                    {field:'is_shipped',title:'已发货',width:'100xp',align:'left'}
-                ]],
-                onResize:function(){
-                    $('#detailDg').datagrid('fixDetailRowHeight',index);
-                },
-                onLoadSuccess:function(){
-                    setTimeout(function(){
-                        $('#detailDg').datagrid('fixDetailRowHeight',index);
-                    },0);
-                },
-                toolbar :
-                [
-                    {
-                        text : '[ 发货记录 ] '
-                    },
-                    {
-                        text : '新增',
-                        iconCls : 'icon-add',
-                        handler : function() {
-                            append(ddv,index);
-                        }
-                    },
-                    {
-                        text: '删除',
-                        iconCls : 'icon-remove',
-                        handler : function() {
-                            removeDetail(ddv, index);
-                        }
-                    }
-                ]
-            });
-            //currentChannelRow = row.obj;
-            loadShipmentInfos(ddv, row.obj.shipments);
-            $('#detailDg').datagrid('fixDetailRowHeight',index);
-        }
+        view:detailview,
+        detailFormatter: acceptDetailFormatter
     });
 
 }
+
 
 function autoAddShipmentInfoForAllRow() {
     var detailDg = $('#detailDg');
@@ -415,119 +420,6 @@ function formatCatelogsCol(catelogArray){
     return "<span title='" + ret + "'>" + ret + "</span>";
 }
 
-
-$.extend($.fn.datagrid.methods, {
-    editCell: function(jq,param){
-        return jq.each(function(){
-            var opts = $(this).datagrid('options');
-            var fields = $(this).datagrid('getColumnFields',true).concat($(this).datagrid('getColumnFields'));
-            for(var i=0; i<fields.length; i++){
-                var col = $(this).datagrid('getColumnOption', fields[i]);
-                col.editor1 = col.editor;
-                if (fields[i] != param.field){
-                    col.editor = null;
-                }
-            }
-            $(this).datagrid('beginEdit', param.index);
-            for(var i=0; i<fields.length; i++){
-                var col = $(this).datagrid('getColumnOption', fields[i]);
-                col.editor = col.editor1;
-            }
-        });
-    }
-});
-
-//发货数量
-$.extend($.fn.datagrid.defaults.editors, {
-    logisticsCodeEditor : {
-        init: function(container, options)
-        {
-            var editorContainer = $('<div/>');
-            //参照的编辑框
-            var input = $("<input class='easyui-textbox' style='width:100px' onchange='logisticsCodeChanged(this);'>");
-            editorContainer.append(input)
-            editorContainer.appendTo(container);
-            return input;
-        },
-        getValue: function(target)
-        {
-            return $(target).val();
-            //return $(target).children("input").val();
-        },
-        setValue: function(target, value)
-        {
-            $(target).val(value).focus().select();
-            //$(target).children("input").val(value);
-        },
-        resize: function(target, width)
-        {
-            var span = $(target);
-            if ($.boxModel == true){
-                span.width(width - (span.outerWidth() - span.width()) - 5);
-            } else {
-                span.width(width - 5);
-            }
-        }
-
-    }
-});
-
-//物流编号设置值
-function logisticsCodeChanged(theInput){
-    var value = theInput.value;
-    if(value == ""){
-        return;
-    }
-    //-------刷新关联属性------
-    /*    var row = $(subGrid).datagrid('getSelected');
-     var index = $(subGrid).datagrid('getRowIndex', row);*/
-
-    if(editIndex != undefined && editIndex != null) {
-        var rows = $(subGrid).datagrid('getRows');
-        var row = rows[editIndex];
-        row['logistics_code'] = value;
-        row.obj.logistics_code = value;
-
-        $(subGrid).datagrid('refreshRow', editIndex);
-    }
-}
-
-//发货数量
-$.extend($.fn.datagrid.defaults.editors, {
-    shipQuantityEditor : {
-        init: function(container, options)
-        {
-            var editorContainer = $('<div/>');
-            //参照的编辑框
-            var input = $("<input class='easyui-textbox' style='width:100px' onchange='shipQuantityChanged(this);'>");
-            editorContainer.append(input)
-            editorContainer.appendTo(container);
-            return input;
-        },
-        getValue: function(target)
-        {
-            return $(target).val();
-            //return $(target).children("input").val();
-        },
-        setValue: function(target, value)
-        {
-            $(target).val(value).focus().select();
-
-            //$(target).children("input").val(value);
-        },
-        resize: function(target, width)
-        {
-            var span = $(target);
-            if ($.boxModel == true){
-                span.width(width - (span.outerWidth() - span.width()) - 5);
-            } else {
-                span.width(width - 5);
-            }
-        }
-
-    }
-});
-
 //发货数量设置
 function shipQuantityChanged(theInput){
     var value = theInput.value;
@@ -576,103 +468,6 @@ function checkTotalQuantity(){
 }
 
 
-
-function onShipmentSelected(rowIndex, detailRowData){
-    editIndex = rowIndex;
-}
-
-function endEditing(ddv){
-    if (editIndex == undefined){return true}
-    if ($(ddv).datagrid('validateRow', editIndex)){
-        $(ddv).datagrid('endEdit', editIndex);
-        editIndex = undefined;
-        return true;
-    } else {
-        return false;
-    }
-}
-
-var subGrid = undefined;
-function onClickCell(index, field){
-   var ddv = this;
-   subGrid = ddv;
-
-    var rows = $(ddv).datagrid('getRows');
-    if(rows[index].obj.is_shipped){
-        editIndex = index;
-        return;
-    }
-
-   if (endEditing(ddv)){
-       var row = $(ddv).datagrid('selectRow', index);
-       var editor = $(row).datagrid('editCell', {index:index,field:field} );
-       editIndex = index;
-    }
-}
-
-function append(ddv, index){
-
-    var rows =  $('#detailDg').datagrid('getRows');
-    var row = rows[currentRowIndex];
-    if(row.obj.ship_completed != undefined && row.obj.ship_completed){
-        alert_autoClose("提示", "已经达到应发数量，不能添加");
-        return;
-    }else{
-        if(checkTotalQuantity()>=0){
-            alert_autoClose("提示", "已经达到应发数量，不能添加");
-            return;
-        }
-    }
-
-    subGrid = ddv;
-
-    if (endEditing(ddv)){
-
-        var theDate = new Date();
-        var theDateStr = theDate.format("yyyy-MM-dd");
-
-        var shipmentObj = {
-            ship_quantity: 0,
-            ship_date: theDateStr,
-            ship_actor: $user,
-            ship_code: "",
-            logistics_code: "",
-            is_shipped: false,
-            accept_completed: false,
-            accept_quantity: 0,
-            reject_quantity: 0
-        };
-        newShipmentDetails.push(shipmentObj);
-        var repDetailItemObj = getRepDetailItemObj(index);
-        if(repDetailItemObj.shipments == undefined || repDetailItemObj.shipments == null){
-            repDetailItemObj.shipments = [];
-        }
-        repDetailItemObj.shipments.push(shipmentObj);
-
-        var rowData = {
-            ship_quantity : 0,
-            ship_date : theDateStr,
-            ship_actor: $user,
-            ship_code: "",
-            logistics_code: "",
-            is_shipped: "否",
-            obj: shipmentObj
-        };
-
-        $(ddv).datagrid('appendRow',rowData);
-
-        //必须加入到originalRows中，否则翻页会有问题
-        //var data = $("#detailDg").datagrid('getData');
-        //data.originalRows.push(rowData);
-
-        editIndex = $(ddv).datagrid('getRows').length-1;
-        $(ddv).datagrid('selectRow', editIndex)
-            .datagrid('beginEdit', editIndex);
-
-        $('#detailDg').datagrid('fixDetailRowHeight',index);
-
-    }
-}
 
 function getRepDetailItemObj(index){
     var parentDg = $('#detailDg');
@@ -876,14 +671,23 @@ function bindDetailData(data){
         var pickCompleted = (dataItem.pick_completed)?"是":"否";
         var shipCompleted = (dataItem.ship_completed)?"是":"否";
 
+        var shelfLife = "";
+        if(dataItem.shelf_life != undefined && dataItem.shelf_life != null) {
+            shelfLife = dataItem.shelf_life;
+        }
+        var invbatchcode = "";
+        if(dataItem.invbatchcode != undefined && dataItem.invbatchcode != null){
+            invbatchcode = dataItem.invbatchcode;
+        }
+
         var row_data = {
             restocking_warehouse: dataItem.restocking_warehouse.name,
             product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
             bar_code : dataItem.goods.product_sku.bar_code,
-            invbatchcode: dataItem.invbatchcode,
-            shelf_life: dataItem.shelf_life,
+            invbatchcode: invbatchcode,
+            shelf_life: shelf_life,
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
             quantity: dataItem.quantity,

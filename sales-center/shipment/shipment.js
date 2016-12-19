@@ -295,13 +295,22 @@ function bindDetailData(data){
                 specifications += ',' + specItem.specification_name + ':' + specItem.specification_value;
         }*/
 
+        var shelfLife = "";
+        if(dataItem.shelf_life != undefined && dataItem.shelf_life != null) {
+            shelfLife = dataItem.shelf_life;
+        }
+        var invbatchcode = "";
+        if(dataItem.invbatchcode != undefined && dataItem.invbatchcode != null){
+            invbatchcode = dataItem.invbatchcode;
+        }
+
         var row_data = {
             product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
             bar_code : dataItem.goods.product_sku.bar_code,
-            invbatchcode: dataItem.invbatchcode,
-            shelf_life: dataItem.shelf_life,
+            invbatchcode: invbatchcode,
+            shelf_life: shelfLife,
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
             quantity: dataItem.quantity,
