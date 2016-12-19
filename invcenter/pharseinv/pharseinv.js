@@ -327,7 +327,12 @@ $.extend($.fn.datagrid.defaults.editors, {
 
 //显示商品选择对话框
 function showGoodsRefDialog() {
-    $('#goodsRefDialog').window('open');
+    //$('#goodsRefDialog').window('open');
+
+
+    //$('#ref_nynum').val('aaaa');
+    $('#ref_nynum').textbox('setValue',"abc");
+    //refnynum.textbox('setValue','text');
 }
 
 //绑定商品datagrid
@@ -1626,14 +1631,19 @@ function bindLocationDg(data) {
 
 //选择商品
 function onGoodsSelected (index, rowData) {
-    $('#goodsRefDialog').window('close');
+/*    $('#goodsRefDialog').window('close');
     var selectdData = rowData.obj;
     $('#ref_nynum').val(selectdData.title);
 
    var dg= $('#addNewGoodsDg');
-     var r= $('#addNewGoodsDg').contents().find("#ref_nynum");
-	 $('#addNewGoodsDg').contents().find("#ref_nynum").textbox('setValue','text')
-	
+     var r= $('#addNewGoodsDg').contents().find("#ref_nynum");*/
+
+	//var refnynum = $('#addNewGoodsDg').contents().find("#ref_nynum");
+    var refnynum = $('#ref_nynum');
+    $(refnynum).val('aaaa');
+    //refnynum.textbox('setValue','text');
+
+    $('#abc').val("ssss");
 
 }
 
