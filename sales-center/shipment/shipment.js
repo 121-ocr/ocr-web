@@ -165,7 +165,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $salesURL + "ocr-sales-center/shipment/find_all?context=3|3|lj|aaa",
+        url : $salesURL + "ocr-sales-center/shipment/find_created?context=3|3|lj|aaa",
         async : true,
         data: condStr,
         dataType : 'json',
@@ -200,7 +200,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url : $salesURL + "ocr-sales-center/shipment/find_all?context=3|3|lj|aaa",
+                            url : $salesURL + "ocr-sales-center/shipment/find_created?context=3|3|lj|aaa",
                             data: condStr,
                             async: true,
                             dataType: 'json',

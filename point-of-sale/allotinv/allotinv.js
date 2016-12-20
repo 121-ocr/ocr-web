@@ -3,11 +3,14 @@
 function confirm(){
     if(isChanged){
 
-        var data = shipmentObj;;
+        var data = {
+            replenishment: currentReplenishment,
+            shipment: shipmentObj
+        };
 
         $.ajax({
             method: 'POST',
-            url: $salesURL + "ocr-sales-center/channel-restocking/ship?context=3|3|lj|aaa",
+            url : $posURL + "ocr-pointofsale/allotinv/confirm?context=" + $token_pos,
             data: JSON.stringify(data),
             async: true,
             dataType: 'json',
@@ -47,6 +50,7 @@ function confirm(){
 }
 
 var shipmentDg;
+var currentReplenishment;
 
 function dgListSetting(){
     $('#dgList').datagrid({
@@ -102,7 +106,7 @@ function dgListSetting(){
                     },0);
                 }
             });
-            currentChannelRow = row.obj;
+            currentReplenishment = row.obj;
             loadShipments(ddv, row.obj, index);
             shipmentDg = ddv;
         }
@@ -146,14 +150,15 @@ function loadShipments(ddv, replenishment, index){
 function bindShipmentDg(ddv, datas){
    var viewModel = new Array();
    for ( var i in datas) {
-        var dataItem = datas[i].bo;
+        var dataItemBo = datas[i];
+        var dataItem = dataItemBo.bo;
         var rowData = {
             bo_id: dataItem.bo_id,
             restocking_warehouse : dataItem.restocking_warehouse.name,
             target_warehouse : dataItem.target_warehouse.name,
             ship_date : dataItem.ship_date,
             is_completed: dataItem.is_completed,
-            obj: dataItem
+            obj: dataItemBo
         };
         viewModel.push(rowData);
     }
@@ -186,8 +191,8 @@ function bindShipmentDetail(shipmentObj) {
         }
     }
 
-    for(var i in shipmentObj.details) {
-        var shipmentDetail = shipmentObj.details[i];
+    for(var i in shipmentObj.bo.details) {
+        var shipmentDetail = shipmentObj.bo.details[i];
 
         var shelfLife = "";
         if(shipmentDetail.shelf_life != undefined && shipmentDetail.shelf_life != null) {
@@ -403,7 +408,8 @@ function bindDgListData(data){
     var dgLst = $('#dgList');
     var viewModel = new Array();
     for ( var i in data.datas) {
-        var replenishment = data.datas[i].bo;
+        var replenishmentBo = data.datas[i];
+        var replenishment = replenishmentBo.bo;
         var row_data = {
             code : replenishment.bo_id,
             req_date : replenishment.req_date,
@@ -411,7 +417,7 @@ function bindDgListData(data){
             req_code : replenishment.req_code,
             channel_name: replenishment.channel.name,
             is_completed: replenishment.is_completed,
-            obj: replenishment
+            obj: replenishmentBo
         };
         viewModel.push(row_data);
     }
