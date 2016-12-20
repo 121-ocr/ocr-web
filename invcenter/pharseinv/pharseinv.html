@@ -113,10 +113,12 @@
                                         onSelect: onWarehoseSelected,
                                         required:true">
                         </td>
-                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+											
+						
+                        <td  style="width: 80px;text-align: right; vertical-align: middle; padding: 5px;display:none">
                             库存组织
                         </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                        <td style="width: 180px;text-align: left; vertical-align: middle;display:none">
                             <input class="easyui-combotree" id="inv_org"  style="width:200px" data-options="
                                         url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
                                         method:'get',
@@ -131,6 +133,14 @@
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input class="easyui-textbox" id="warehouse_user" style="width:200px;" data-options="label:'Name:',required:true,onChange:onWarehouseUserChanged">
                         </td>
+						
+						 <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            运费
+                        </td>
+						 <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input id="transportationfee" class="easyui-textbox" style="width:200px;" data-options="label:'Name:',required:false,onChange:onTransportationfeeChanged">
+                        </td>
 
                     </tr>
                     
@@ -142,10 +152,10 @@
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input class="easyui-textbox" id="purchase_user" style="width:200px;" data-options="label:'Name:',required:true,onChange:onPurchaseUserChanged">
                         </td>
-                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px;display:none">
                             采购组织
                         </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                        <td style="width: 180px;text-align: left; vertical-align: middle;display:none">
 
                             <input id="purchase_org" class="easyui-combotree" style="width:200px;" data-options="
                                        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
@@ -161,17 +171,19 @@
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input class="easyui-textbox" id="purchase_dept" style="width:200px;" data-options="label:'Name:',required:false,onChange:onPurchaseDeptChanged">
                         </td>
-                    </tr>
-
-                    <tr style="height: 35px">
-
-                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+						
+						 <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
                             运输方式
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
                             <input id="transportation" class="easyui-textbox" style="width:200px;" data-options="label:'Name:',required:false,onChange:onTransportationChanged">
                         </td>
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                       
                         <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
                             发货国家
                         </td>
@@ -264,28 +276,28 @@
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
-                                                                        required:true
+                                                                       
                                                                     }
                                                                 }">单价</th>
                         <th field="retail_amount" width="80px" formatter="formatCellTooltip" editor="{
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
-                                                                        required:true
+                                                                       
                                                                     }
                                                                 }">金额</th>
                         <th field="discount" width="80px" formatter="formatCellTooltip" editor="{
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
-                                                                        required:true
+                                                                     
                                                                     }
                                                                 }">税率</th>
                         <th field="discount_amount" width="80px" formatter="formatCellTooltip" editor="{
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
-                                                                        required:true
+                                                                      
                                                                     }
                                                                 }">折扣</th>
                         <th field="brand" width="80px" formatter="formatCellTooltip">品牌</th>
@@ -372,14 +384,14 @@
 <!--商品参照-->
 <div id="locationsRefDialog" class="easyui-window" title="货位选择"
      data-options="modal:true,closed:true,iconCls:'icon-save'"
-     style="width:800px;height:400px;padding:5px;">
+     style="width:1000px;height:400px;padding:5px;">
     <div class="easyui-layout" data-options="fit:true">
         <div data-options="region:'west',split:true" style="width:120px">
             <ul class="easyui-tree" id="catelogTree" style="width:100%" data-options="
 
                                             onSelect: locatonsTreeSel"/>
-            <li id="1">固定货位</li>
-            <li id="2">自由货位</li>
+            <li id="fixed">固定货位</li>
+            <li id="free">自由货位</li>
         </div>
 
         <div data-options="region:'center',split:true" style="padding:10px;">
@@ -389,14 +401,13 @@
                 <tr>
                     <th field="locationref_warehousecode" width="80px" formatter="formatCellTooltip">仓库编码</th>
                     <th field="locationref_locationcode" width="80px" formatter="formatCellTooltip">货位编码</th>
-					<th field="locationref_sku" width="80px" formatter="formatCellTooltip">物料SKU</th>
+					<th field="locationref_sku" width="170px" formatter="formatCellTooltip">物料SKU</th>
                     <th field="locationref_invbatchcode" width="80px" formatter="formatCellTooltip">物料批次</th>
-                    <th field="locationref_onhandnum" width="80px" formatter="formatCellTooltip">现存数量</th>
-					<th field="locationref_resevednum" width="80px" formatter="formatCellTooltip">预留数量</th>
+                    <th field="locationref_onhandnum" width="80px" formatter="formatCellTooltip">现存数量</th>			
                     <th field="locationref_locationnum" width="80px" formatter="formatCellTooltip">满载数量</th>
-                    <th field="locationref_packageunit" width="80px" formatter="formatCellTooltip">包装单位</th>
+					<th field="locationref_plusnum" width="80px" formatter="formatPrice">剩余数量</th>
+                    <th field="locationref_packageunit" width="80px" formatter="formatCellTooltip">包装单位</th>					
 					
-					 <th field="locationref_warehousecode2" style="display:none;" width="80px" formatter="formatCellTooltip">仓库编码2</th>
                 </tr>
                 </thead>
             </table>	
@@ -414,6 +425,56 @@
     </div>
 </div>
 
+<div id="win" class="easyui-window" title="新增入库明细" data-options="modal:true,closed:true,iconCls:'icon-save'"
+     style="width:1000px;height:200px;padding:5px;">
+	  <table id="addNewGoodsDg"  cellpadding="0" cellspacing="0" style="width:100%">
+                    <tr style="height: 50px">
+                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">采购入库单</strong></td>
+                    </tr>
+                    <tr style="height: 35px">
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                             商品
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+								<input class='easyui-textbox' id='goodsEditor' style='width:170px'>
+								<button style='width: 23px; height: 23px' onclick='showGoodsRefDialog();'>...</button>
+                        </td>  
+					</tr>
+					<tr style="height: 35px">
+						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                             应收数量
+                        </td>
+						<td style="width: 180px;text-align: left; vertical-align: middle">
+								<input class="easyui-textbox" id="ref_nynum" style="width:200px" data-options="label:'Name:',required:true">
+					    </td>  
+					</tr>	 
+				     <tr style="height: 35px">
+						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                             实收数量
+                        </td>
+						<td style="width: 180px;text-align: left; vertical-align: middle">						
+							<input class="easyui-textbox" name="ref_nsnum" style="width:200px" data-options="label:'Name:',required:true">
+						</td> 
+					</tr>		
+							
+					<tr style="height: 35px">							
+						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            不合格数量
+                        </td>
+						 
+						 
+						 <td style="width: 180px;text-align: left; vertical-align: middle">	
+							<input class="easyui-textbox" name="ref_unqualifiednum" style="width:200px" data-options="label:'Name:',required:true">	
+						</td> 						
+                    </tr>		
+	
+	 </table>
+	 	 <div data-options="region:'south',border:false" style="text-align:right;padding:5px 0 0;">
+            <!--<a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="goodsRefReturn();" style="width:80px">Ok</a>-->
+			<a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="goodsRefReturnAppend();" style="width:80px">Ok</a>
+          
+        </div>
+</div>
 
 
 </body>
