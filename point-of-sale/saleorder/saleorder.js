@@ -290,6 +290,7 @@ $.extend($.fn.datagrid.defaults.editors, {
     }
 });
 
+
 //通过条码查询商品
 function barcodeChanged(theInput){
     var value = theInput.value;
