@@ -17,7 +17,7 @@ function confirm(){
 
         $.ajax({
             method: 'POST',
-            url: $salesURL + "ocr-sales-center/channel-restocking/ship?context=3|3|lj|aaa",
+            url: $posURL + "ocr-pointofsale/allotinv/confirm?context=" + $token_pos,
             data: JSON.stringify(cloneReplenishmentObj),
             async: true,
             dataType: 'json',

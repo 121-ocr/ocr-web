@@ -305,7 +305,7 @@ function barcodeChanged(theInput){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token_pos,
+        url : $posURL + "ocr-pointofsale/posprice/query?context=" + $token_pos,
         async : true,
         data: reqData,
         dataType : 'json',
