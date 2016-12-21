@@ -1,4 +1,4 @@
-﻿var allotInvObjIndex;
+﻿﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -18,7 +18,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/create?context=" + $token_pos,
+            url: $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/create?context=" + $token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -243,7 +243,7 @@ function barcodeChanged(theInput){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token_pos,
+        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token,
         async : true,
         data: reqData,
         dataType : 'json',
@@ -327,12 +327,7 @@ $.extend($.fn.datagrid.defaults.editors, {
 
 //显示商品选择对话框
 function showGoodsRefDialog() {
-    //$('#goodsRefDialog').window('open');
-
-
-    //$('#ref_nynum').val('aaaa');
-    $('#ref_nynum').textbox('setValue',"abc");
-    //refnynum.textbox('setValue','text');
+    $('#goodsRefDialog').window('open');
 }
 
 //绑定商品datagrid
@@ -529,8 +524,8 @@ function onEndEdit(index, row) {
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.nynum = newValue; //设置当前行的数量值
-        currentDetailRowObj.nynum = newValue; //设置当前行对象的值
+        row.nynum = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.nynum = parseFloat(newValue); //设置当前行对象的值
     }
     var ed = $(this).datagrid('getEditor', {
         index: index,
@@ -538,8 +533,8 @@ function onEndEdit(index, row) {
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.nsnum = newValue; //设置当前行的数量值
-        currentDetailRowObj.nsnum = newValue; //设置当前行对象的值
+        row.nsnum = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.nsnum = parseFloat(newValue); //设置当前行对象的值
     }
 
     var ed = $(this).datagrid('getEditor', {
@@ -548,8 +543,8 @@ function onEndEdit(index, row) {
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.unqualifiednum = newValue; //设置当前行的数量值
-        currentDetailRowObj.unqualifiednum = newValue; //设置当前行对象的值
+        row.unqualifiednum = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.unqualifiednum = parseFloat(newValue); //设置当前行对象的值
     }
 
     var ed = $(this).datagrid('getEditor', {
@@ -842,7 +837,7 @@ function formatCellTooltip(value){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token_pos,
+        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token,
         async : true,
         data: reqData,
         dataType : 'json',
@@ -918,7 +913,7 @@ function bindDgListData(data){
 var warehoseLoader = function (param, success, error) {
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/query?context=" + $account_pos + "|" + $account_pos + "|lj|aaa",
+        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/query?context=" + $account + "|" + $account + "|lj|aaa",
         async: true,
         data: JSON.stringify({}),
         dataType: 'json',
@@ -964,7 +959,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/query?context=" + $token_pos,
+        url : $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/query?context=" + $token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -1000,7 +995,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/query?context=" + $token_pos,
+                            url: $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/query?context=" + $token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -1537,7 +1532,7 @@ function locatonsTreeSelone(node) {
 
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/query_avaliable?context=" + $token_pos,
+        url: $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/query_avaliable?context=" + $token,
         data: condition,
         async: true,
         dataType: 'json',
@@ -1631,25 +1626,10 @@ function bindLocationDg(data) {
 
 //选择商品
 function onGoodsSelected (index, rowData) {
-/*    $('#goodsRefDialog').window('close');
+    $('#goodsRefDialog').window('close');
     var selectdData = rowData.obj;
-<<<<<<< HEAD
     $('#ref_good').val(selectdData.title);	
     $('#ref_goods').data(selectdData);	
-=======
-    $('#ref_nynum').val(selectdData.title);
-
-   var dg= $('#addNewGoodsDg');
-     var r= $('#addNewGoodsDg').contents().find("#ref_nynum");*/
-
-	//var refnynum = $('#addNewGoodsDg').contents().find("#ref_nynum");
-    var refnynum = $('#ref_nynum');
-    $(refnynum).val('aaaa');
-    //refnynum.textbox('setValue','text');
-
-    $('#abc').val("ssss");
-
->>>>>>> branch 'develop' of https://github.com/121-ocr/ocr-web.git
 }
 
 //构建分页条件
@@ -1666,7 +1646,7 @@ function goodsRefReturnAppend(){
 	
  $('#win').window('close');
  
- var nsnum=$('#ref_nsnum').val();//实收数量
+ var nsnum= parseFloat($('#ref_nsnum').val());//实收数量
  var selectdData= $('#ref_goods').data();
  var sku =selectdData.product_sku_code;
  
@@ -1676,7 +1656,7 @@ function goodsRefReturnAppend(){
  //根据sku ，数量 ，匹配一个或多个货位，
   $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/automatch_location?context=" + $token_pos,
+            url: $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/automatch_location?context=" + $token,
             data: con,
             async: true,
             dataType: 'json',
@@ -1714,9 +1694,9 @@ function addnewlines(dataItem,selectdData){
         brand: selectdData.product_sku.product_spu.brand.name,
         manufacturer: selectdData.product_sku.product_spu.brand.manufacturer.name,
 		batch_code: "",
-        nynum: $('#ref_nynum').val(),
-        nsnum: $('#ref_nsnum').val(),
-        unqualifiednum:  $('#ref_unqualifiednum').val(),
+        nynum: parseFloat($('#ref_nynum').val()),
+        nsnum: parseFloat($('#ref_nsnum').val()),
+        unqualifiednum:  parseFloat($('#ref_unqualifiednum').val()),
         locations:dataItem.locationcode,
         shelflife:"",
         shelflifeunit:"",
@@ -1733,9 +1713,9 @@ function addnewlines(dataItem,selectdData){
     var newDetailObj = {
             detail_code: "",
             goods: selectdData,
-            nynum: $('#ref_nynum').val(),
-			nsnum: $('#ref_nsnum').val(),
-			unqualifiednum:  $('#ref_unqualifiednum').val(),
+            nynum: parseFloat($('#ref_nynum').val()),
+			nsnum: parseFloat($('#ref_nsnum').val()),
+			unqualifiednum:  parseFloat($('#ref_unqualifiednum').val()),
             locations:dataItem.locationcode,
             shelflife: 0,
             shelflifeunit:"",
