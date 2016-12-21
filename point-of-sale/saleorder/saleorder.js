@@ -191,10 +191,12 @@ $.extend($.fn.datagrid.defaults.editors, {
 
 //计算金额
 function quantityChanged(theInput){
-    var quantity = theInput.value;
-    if(quantity == ""){
+    var theValue = theInput.value;
+    if(theValue == ""){
         return;
     }
+    var quantity = parseFloat(theValue);
+
     //通过数量计算金额
     var detailDg = $('#detailDg');
     var row = detailDg.datagrid('getSelected');
@@ -600,8 +602,8 @@ function onEndEdit(index, row) {
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.quantity = newValue; //设置当前行的数量值
-        currentDetailRowObj.quantity = newValue; //设置当前行对象的值
+        row.quantity = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.quantity = parseFloat(newValue); //设置当前行对象的值
     }
     var ed = $(this).datagrid('getEditor', {
         index: index,
@@ -609,8 +611,8 @@ function onEndEdit(index, row) {
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.retail_amount = newValue; //设置当前行的数量值
-        currentDetailRowObj.retail_amount = newValue; //设置当前行对象的值
+        row.retail_amount = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.retail_amount = parseFloat(newValue); //设置当前行对象的值
     }
     var ed = $(this).datagrid('getEditor', {
         index: index,
@@ -618,8 +620,8 @@ function onEndEdit(index, row) {
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.discount_amount = newValue; //设置当前行的数量值
-        currentDetailRowObj.discount_amount = newValue; //设置当前行对象的值
+        row.discount_amount = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.discount_amount = parseFloat(newValue); //设置当前行对象的值
     }
     refreshSubTotalRows(); //刷新小计列
 }
