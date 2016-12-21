@@ -75,7 +75,7 @@
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-textbox" id="bo_id" style="width:200px" data-options="label:'Name:',required:true,onChange:onCodeChanged">
+                            <input class="easyui-textbox" id="bo_id" style="width:200px" data-options="label:'Name:',onChange:onCodeChanged">
 
                         </td>
                         
@@ -209,8 +209,9 @@
                     <thead>
                     <tr>
                         <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
-                        <th field="title" width="100px" formatter="formatCellTooltip"
-                            data-options="editor:{type:'goodsRef'}">商品名</th>
+                        <!--<th field="title" width="100px" formatter="formatCellTooltip"
+                            data-options="editor:{type:'goodsRef'}">商品名</th>-->
+					    <th field="title" width="100px" formatter="formatCellTooltip">商品名</th>
                         <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
                         <th field="bar_code" width="80px" formatter="formatCellTooltip" data-options="editor:{type:'barcodeEditor'}">条码</th>
                         <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
@@ -436,7 +437,8 @@
                              商品
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
-								<input class='easyui-textbox' id='goodsEditor' style='width:170px'>
+								<input id="ref_good"  style='width:170px'>
+								<input type="hidden" id="ref_goods" >
 								<button style='width: 23px; height: 23px' onclick='showGoodsRefDialog();'>...</button>
                         </td>  
 					</tr>
@@ -445,7 +447,11 @@
                              应收数量
                         </td>
 						<td style="width: 180px;text-align: left; vertical-align: middle">
+<<<<<<< HEAD
+								<input id="ref_nynum" style="width:170px" value="0.0" >
+=======
 								<input class="easyui-textbox" id="ref_nynum" style="width:200px" data-options="label:'Name:',required:true">
+>>>>>>> branch 'develop' of https://github.com/121-ocr/ocr-web.git
 					    </td>  
 					</tr>	 
 				     <tr style="height: 35px">
@@ -453,7 +459,7 @@
                              实收数量
                         </td>
 						<td style="width: 180px;text-align: left; vertical-align: middle">						
-							<input class="easyui-textbox" name="ref_nsnum" style="width:200px" data-options="label:'Name:',required:true">
+							<input  id="ref_nsnum" style='width:170px' value="0.0">
 						</td> 
 					</tr>		
 							
@@ -464,7 +470,7 @@
 						 
 						 
 						 <td style="width: 180px;text-align: left; vertical-align: middle">	
-							<input class="easyui-textbox" name="ref_unqualifiednum" style="width:200px" data-options="label:'Name:',required:true">	
+							<input  id="ref_unqualifiednum" style='width:170px' value="0.0">	
 						</td> 						
                     </tr>		
 	

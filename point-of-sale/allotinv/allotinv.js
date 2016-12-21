@@ -10,8 +10,13 @@ function confirm(){
 
         $.ajax({
             method: 'POST',
+<<<<<<< HEAD
             url : $posURL + "ocr-pointofsale/allotinv/confirm?context=" + $token_pos,
             data: JSON.stringify(data),
+=======
+            url: $salesURL + "ocr-sales-center/channel-restocking/ship?context=3|3|lj|aaa",
+            data: JSON.stringify(cloneReplenishmentObj),
+>>>>>>> branch 'develop' of https://github.com/121-ocr/ocr-web.git
             async: true,
             dataType: 'json',
             beforeSend: function (x) {
