@@ -1628,50 +1628,62 @@ function bindLocationDg(data) {
 function onGoodsSelected (index, rowData) {
     $('#goodsRefDialog').window('close');
     var selectdData = rowData.obj;
-    $('#ref_nynum').val(selectdData.title);
-
-   var dg= $('#addNewGoodsDg');
-     var r= $('#addNewGoodsDg').contents().find("#ref_nynum");
-	 $('#addNewGoodsDg').contents().find("#ref_nynum").textbox('setValue','text')
-	
-
+    $('#ref_good').val(selectdData.title);	
+    $('#ref_goods').data(selectdData);	
 }
 
-
+//构建分页条件
+function buildGoodRefQueryCond(sku,nsnum) {
+    var condition = {
+		
+        query: {'sku':sku,'type':"fixed",'nsnum':nsnum}
+    };
+    var reqData = JSON.stringify(condition);
+    return reqData;
+}
 
 function goodsRefReturnAppend(){
 	
- $('#addNewGoodsDg').window('close');
+ $('#win').window('close');
  
-  delete selectdData._id;
-    currentDetailRowObj.goods = selectdData;
+ var nsnum=$('#ref_nsnum').val();//实收数量
+ var selectdData= $('#ref_goods').data();
+ var sku =selectdData.product_sku_code;
+ 
+ var con =buildGoodRefQueryCond(sku,nsnum);
 
-    //-------刷新关联属性------
-    var row = $('#detailDg').datagrid('getSelected');
-    var index = $('#detailDg').datagrid('getRowIndex', row);
-
-    row['product_sku_code'] = selectdData.product_sku_code;
-    row['title'] = selectdData.title;
-    row['batch_code']=selectdData.invbatchcode;
-    row['sales_catelog'] = selectdData.sales_catelogs;
-    row['bar_code'] = selectdData.product_sku.bar_code;
-    if(selectdData.product_sku.product_specifications != null)
-        row['specifications'] = selectdData.product_sku.product_specifications;
-
-    row['base_unit'] = selectdData.product_sku.product_spu.base_unit;
-
-    if(selectdData.product_sku.product_spu.brand != null) {
-        row['brand'] = selectdData.product_sku.product_spu.brand.name;
-        row['manufacturer'] = selectdData.product_sku.product_spu.brand.manufacturer.name;
-    }
-	//增行开始
 	
+ //根据sku ，数量 ，匹配一个或多个货位，
+  $.ajax({
+            method: 'POST',
+            url: $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/automatch_location?context=" + $token_pos,
+            data: con,
+            async: true,
+            dataType: 'json',
+            success: function (data) {
+				
+				
+				 for (var i in data) {
+					addnewlines(data[i],selectdData)
+				} 
+				
+			},
+            error: function (x, e) {
+                alert(e.toString(), 0, "友好提醒");
+            }
+        });
+			
+
+}
+
+function addnewlines(dataItem,selectdData){
 	
-    var newDetailObj = {
-        sku: selectdData.product_sku_code,
+	var theDate = new Date();
+    var theDateStr = theDate.format("yyyy-MM-dd");
+		
+  var newDetailObjs = { 
         goods: selectdData
     };
-
     var rowData = {
         product_sku_code : selectdData.product_sku_code,
         title : selectdData.title,
@@ -1681,8 +1693,52 @@ function goodsRefReturnAppend(){
         base_unit: selectdData.product_sku.product_spu.base_unit,
         brand: selectdData.product_sku.product_spu.brand.name,
         manufacturer: selectdData.product_sku.product_spu.brand.manufacturer.name,
-        obj: newDetailObj
+		batch_code: "",
+        nynum: $('#ref_nynum').val(),
+        nsnum: $('#ref_nsnum').val(),
+        unqualifiednum:  $('#ref_unqualifiednum').val(),
+        locations:dataItem.locationcode,
+        shelflife:"",
+        shelflifeunit:"",
+        expdate:"",
+        su_batch_code:"",
+        retail_price: 0.00,
+        retail_amount:  0.00,
+        discount:  0.00,
+        discount_amount: 0.00,   
+        note:"",		
+        obj: newDetailObjs
     };
-
+	
+    var newDetailObj = {
+            detail_code: "",
+            goods: selectdData,
+            nynum: $('#ref_nynum').val(),
+			nsnum: $('#ref_nsnum').val(),
+			unqualifiednum:  $('#ref_unqualifiednum').val(),
+            locations:dataItem.locationcode,
+            shelflife: 0,
+            shelflifeunit:"",
+            expdate:theDateStr,
+            su_batch_code:"",
+            batch_code: "",
+            retail_price: {},
+            retail_amount: {},
+            discount: "",
+            discount_amount: {},
+            note: ""
+        };
+        cloneAllotInvObj.detail.push(newDetailObj);
+	
     $('#detailDg').datagrid('appendRow',rowData);
+
+        //必须加入到originalRows中，否则翻页会有问题
+        var data = $("#detailDg").datagrid('getData');
+        data.originalRows.push(rowData);
+
+        editIndex = $('#detailDg').datagrid('getRows').length-1;
+        $('#detailDg').datagrid('selectRow', editIndex)
+            .datagrid('beginEdit', editIndex);
+
+        isBodyChanged = true;
 }
