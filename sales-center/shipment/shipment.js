@@ -135,9 +135,9 @@ function bindDgListData(data){
         viewModel.push(row_data);
     }
     dgLst.datagrid('loadData',{
-                total: data.total,
-                rows: viewModel
-            });
+        total: data.total,
+        rows: viewModel
+    });
 }
 
 
@@ -165,13 +165,13 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $salesURL + "ocr-sales-center/shipment/find_all?context=3|3|lj|aaa",
+        url : $salesURL + "ocr-sales-center/shipment/find-created?context=3|3|lj|aaa",
         async : true,
         data: condStr,
         dataType : 'json',
         beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
         success : function(data) {
-             bindDgListData(data);
+            bindDgListData(data);
 
             $('#dgList').datagrid('getPager').pagination({
                 displayMsg: '第 {from} - {to} 条 共 {total} 条',
@@ -200,7 +200,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url : $salesURL + "ocr-sales-center/shipment/find_all?context=3|3|lj|aaa",
+                            url : $salesURL + "ocr-sales-center/shipment/find-created?context=3|3|lj|aaa",
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -288,24 +288,33 @@ function bindDetailData(data){
     for ( var i in data) {
         var dataItem = data[i];
 
- /*       //计算规格字符串
-        var specifications = '';
-        var specArray = dataItem.goods.product_sku.product_specifications;
-        for(var specIdx in specArray){
-            var specItem = specArray[specIdx];
-            if(specIdx == 0)
-                specifications = specItem.specification_name + ':' + specItem.specification_value;
-            else
-                specifications += ',' + specItem.specification_name + ':' + specItem.specification_value;
-        }*/
+        /*       //计算规格字符串
+         var specifications = '';
+         var specArray = dataItem.goods.product_sku.product_specifications;
+         for(var specIdx in specArray){
+         var specItem = specArray[specIdx];
+         if(specIdx == 0)
+         specifications = specItem.specification_name + ':' + specItem.specification_value;
+         else
+         specifications += ',' + specItem.specification_name + ':' + specItem.specification_value;
+         }*/
+
+        var shelfLife = "";
+        if(dataItem.shelf_life != undefined && dataItem.shelf_life != null) {
+            shelfLife = dataItem.shelf_life;
+        }
+        var invbatchcode = "";
+        if(dataItem.invbatchcode != undefined && dataItem.invbatchcode != null){
+            invbatchcode = dataItem.invbatchcode;
+        }
 
         var row_data = {
             product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
             bar_code : dataItem.goods.product_sku.bar_code,
-            invbatchcode: dataItem.invbatchcode,
-            shelf_life: dataItem.shelf_life,
+            invbatchcode: invbatchcode,
+            shelf_life: shelfLife,
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
             quantity: dataItem.quantity,
@@ -374,19 +383,19 @@ function pagerFilter(data){
 //构建“合计”行
 function buildSubTotalRow(data) {
     var subTotal = {
-            product_sku_code: '<span class="subtotal">合计</span>',
-            quantity: '<span class="subtotal">' + compute(data, "quantity") + '</span>',
-            title : '',
-            sales_catelog: '',
-            bar_code : '',
-            specifications: '',
-            base_unit: '',
-            supply_price: '',
-            retail_price: '',
-            commission: '',
-            brand: '',
-            manufacturer: ''
-        };
+        product_sku_code: '<span class="subtotal">合计</span>',
+        quantity: '<span class="subtotal">' + compute(data, "quantity") + '</span>',
+        title : '',
+        sales_catelog: '',
+        bar_code : '',
+        specifications: '',
+        base_unit: '',
+        supply_price: '',
+        retail_price: '',
+        commission: '',
+        brand: '',
+        manufacturer: ''
+    };
     return subTotal;
 }
 

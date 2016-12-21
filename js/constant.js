@@ -1,5 +1,5 @@
-window.$account_pos = "3";
-window.$token_pos = "3|3|lj|aaa";
+window.$account_pos = "4";
+window.$token_pos = "4|4|lj|aaa";
 window.$token = "3|3|lj|aaa";
 window.$account = "3";
 window.$user = "lj";
