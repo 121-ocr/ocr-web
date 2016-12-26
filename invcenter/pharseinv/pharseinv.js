@@ -1676,6 +1676,17 @@ function goodsRefReturnAppend(){
 
 }
 
+
+
+
+function refExpdateDateSel(date){
+	var dd=date.format("yyyy-MM-dd");
+	 $('#ref_expdatestr').val(dd);	
+	
+	
+   
+}
+
 function addnewlines(dataItem,selectdData){
 	
 	var theDate = new Date();
@@ -1698,10 +1709,10 @@ function addnewlines(dataItem,selectdData){
         nsnum: parseFloat($('#ref_nsnum').val()),
         unqualifiednum:  parseFloat($('#ref_unqualifiednum').val()),
         locations:dataItem.locationcode,
-        shelflife:"",
-        shelflifeunit:"",
-        expdate:"",
-        su_batch_code:"",
+        shelflife:$('#ref_shelflife').val(),
+        shelflifeunit:$('#ref_shelflifeunit').val(),
+        expdate: $('#ref_expdatestr').val(),
+        su_batch_code:$('#ref_su_batch_code').val(),
         retail_price: 0.00,
         retail_amount:  0.00,
         discount:  0.00,
@@ -1717,10 +1728,10 @@ function addnewlines(dataItem,selectdData){
 			nsnum: parseFloat($('#ref_nsnum').val()),
 			unqualifiednum:  parseFloat($('#ref_unqualifiednum').val()),
             locations:dataItem.locationcode,
-            shelflife: 0,
-            shelflifeunit:"",
-            expdate:theDateStr,
-            su_batch_code:"",
+            shelflife:$('#ref_shelflife').val(),
+            shelflifeunit:$('#ref_shelflifeunit').val(),
+            expdate: $('#ref_expdatestr').val(),
+            su_batch_code:$('#ref_su_batch_code').val(),
             batch_code: "",
             retail_price: {},
             retail_amount: {},

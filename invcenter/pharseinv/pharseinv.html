@@ -426,12 +426,16 @@
     </div>
 </div>
 
-<div id="win" class="easyui-window" title="新增入库明细" data-options="modal:true,closed:true,iconCls:'icon-save'"
-     style="width:1000px;height:200px;padding:5px;">
+<div id="win" class="easyui-window" title="新增采购入库明细" data-options="modal:true,closed:true,iconCls:'icon-save'"
+     style="width:300px;height:800px;padding:5px;">
 	  <table id="addNewGoodsDg"  cellpadding="0" cellspacing="0" style="width:100%">
-                    <tr style="height: 50px">
-                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">采购入库单</strong></td>
+                    <tr style="height: 10px">
+                     
+						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px" >
+                             <strong style="font-size: 15px"><font color="DeepSkyBlue">采购信息</font></strong>
+                        </td>
                     </tr>
+										
                     <tr style="height: 35px">
                         <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
                              商品
@@ -442,6 +446,60 @@
 								<button style='width: 23px; height: 23px' onclick='showGoodsRefDialog();'>...</button>
                         </td>  
 					</tr>
+					
+					<tr style="height: 35px">							
+						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            保质期
+                        </td>
+							 
+						 <td style="width: 180px;text-align: left; vertical-align: middle">	
+							<input  id="ref_shelflife" style='width:170px' value="">	
+						</td> 						
+                    </tr>		
+
+				    <tr style="height: 35px">							
+						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            保质期单位
+                        </td>
+						 
+						 
+						 <td style="width: 180px;text-align: left; vertical-align: middle">	
+							<input  id="ref_shelflifeunit" style='width:170px' value="天">	
+						</td> 						
+                    </tr>		
+				    
+					<tr style="height: 35px">							
+						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                           失效日期
+                        </td>
+						 
+						 
+						 <td style="width: 180px;text-align: left; vertical-align: middle">	
+							<input type="hidden" id="ref_expdatestr" >
+							  <input class="easyui-datebox" id="ref_expdate" style="width:175px;"
+                                   data-options="
+                                   parser: function (date) { return new Date(Date.parse(date.replace(/-/g, '/'))); },
+                                   onSelect: refExpdateDateSel
+                                    ">
+						</td> 						
+                    </tr>
+					
+					<tr style="height: 35px">							
+						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                          供应商批次号
+                        </td>
+						 	 
+						 <td style="width: 180px;text-align: left; vertical-align: middle">	
+							<input  id="ref_su_batch_code" style='width:170px' value="">	
+						</td> 						
+                    </tr>			
+									
+					<tr style="height: 10px">
+                       
+						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            <strong style="font-size: 15px"><font color="DeepSkyBlue">入库信息</font></strong>
+                        </td>
+                    </tr>
 					<tr style="height: 35px">
 						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
                              应收数量
@@ -449,7 +507,8 @@
 						<td style="width: 180px;text-align: left; vertical-align: middle">
 								<input id="ref_nynum" style="width:170px" value="0.0" >
 					    </td>  
-					</tr>	 
+					</tr>	
+					
 				     <tr style="height: 35px">
 						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
                              实收数量
@@ -463,12 +522,13 @@
 						<td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
                             不合格数量
                         </td>
-						 
-						 
+						 						 
 						 <td style="width: 180px;text-align: left; vertical-align: middle">	
 							<input  id="ref_unqualifiednum" style='width:170px' value="0.0">	
 						</td> 						
-                    </tr>		
+                    </tr>	
+
+							
 	
 	 </table>
 	 	 <div data-options="region:'south',border:false" style="text-align:right;padding:5px 0 0;">
