@@ -3,6 +3,10 @@
 function confirm(){
     if(isChanged){
 
+        var theDate = new Date();
+        var theDateStr = theDate.format("yyyy-MM-dd");
+        shipmentObj.bo.accept_date = theDateStr;
+
         var data = {
             replenishment: currentReplenishment,
             shipment: shipmentObj
@@ -366,13 +370,6 @@ function onBeforeSelect(index,row){
     return true;
 }
 
-function onBeforeSelect(index,row){
-    if(isChanged){
-        $.messager.alert('提示','签收未确认，请先提交或取消!');
-        return false;
-    }
-    return true;
-}
 
 //商品分类字段格式化
 function formatCatelogsCol(catelogArray){
@@ -438,7 +435,8 @@ function buildRepsQueryCond(total, pageNum) {
             page_size: 5,
             total: total,
             total_page: -1
-        }
+        },
+        query_status: ["shipping","shipped"]
     };
     var reqData = JSON.stringify(condition);
     return reqData;

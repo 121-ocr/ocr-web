@@ -478,11 +478,21 @@ function generateStockoutTable(whStockOnList, showBatchNo) {
             '<td style="text-align: center">佣金</td>' +
         '</tr>';
 
-    for(var i in whStockOnList){
+    for(var i in whStockOnList) {
         var warehouseInfo = whStockOnList[i];
-        var supply_price = (warehouseInfo.supply_price==undefined)?0.00: warehouseInfo.supply_price.price.currency.money.toFixed(2);
-        var retail_price = (warehouseInfo.retail_price==undefined)?0.00:warehouseInfo.retail_price.price.currency.money.toFixed(2);
-        var commission = (warehouseInfo.commission==undefined)?0.00:warehouseInfo.commission.commission_value.currency.money.toFixed(2);
+        var supply_price = (warehouseInfo.supply_price == undefined) ? 0.00 : warehouseInfo.supply_price.price.currency.money.toFixed(2);
+        var retail_price = 0.00;
+        if (warehouseInfo.retail_price == undefined || warehouseInfo.retail_price == null) {
+        } else {
+            if(warehouseInfo.retail_price.price != undefined && warehouseInfo.retail_price.price != null) {
+                retail_price = warehouseInfo.retail_price.price.currency.money.toFixed(2);
+            }
+        }
+        var commission = 0.00;
+        if (warehouseInfo.commission == undefined || warehouseInfo.commission == null) {
+        } else {
+            commission = warehouseInfo.commission.commission_value.currency.money.toFixed(2);
+        }
 
         var trHtml = '<tr style="height: 16px; background-color: ivory">' +
                 '<td style="text-align: center">' + warehouseInfo.warehousename + '</td>';

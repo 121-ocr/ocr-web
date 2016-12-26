@@ -273,14 +273,14 @@
                                                                     type:'text'
                                                                 }">供应商批号</th>
 
-                        <th field="retail_price" width="80px" formatter="formatCellTooltip" editor="{
+                        <th field="supply_price" width="80px" formatter="formatCellTooltip" editor="{
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
                                                                        
                                                                     }
-                                                                }">单价</th>
-                        <th field="retail_amount" width="80px" formatter="formatCellTooltip" editor="{
+                                                                }">供货价</th>
+                        <th field="supply_amount" width="80px" formatter="formatCellTooltip" editor="{
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
@@ -388,7 +388,7 @@
      style="width:1000px;height:400px;padding:5px;">
     <div class="easyui-layout" data-options="fit:true">
         <div data-options="region:'west',split:true" style="width:120px">
-            <ul class="easyui-tree" id="catelogTree" style="width:100%" data-options="
+            <ul class="easyui-tree" id="locationLst" style="width:100%" data-options="
 
                                             onSelect: locatonsTreeSel"/>
             <li id="fixed">固定货位</li>
