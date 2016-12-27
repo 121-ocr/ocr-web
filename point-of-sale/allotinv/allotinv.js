@@ -235,7 +235,13 @@ function bindShipmentDetail(shipmentObj) {
 
 
 function acceptDetailFormatter(rowIndex, rowData){
-    return '<table style="border:0">' +
+
+    var theDate = new Date();
+    var theDateStr = theDate.format("yyyy-MM-dd");
+
+    setAcceptDate(rowIndex, theDateStr);
+
+    var ret = '<table style="border:0">' +
         '<tr>' +
         '<td style="width: 50px;border:0">实收数量</td>' +
         '<td style="width: 90px;border:0">' +
@@ -249,13 +255,21 @@ function acceptDetailFormatter(rowIndex, rowData){
         '<td style="width: 90px;border:0">' +
         '<input style="width: 80px" onchange="acceptActorChanged(this,' + rowIndex + ');"/>' +
         '</td>' +
+        '<td style="width: 50px;border:0">签收日期</td>' +
+        '<td style="width: 80px;border:0">' +
+        ' <input class="easyui-datebox" id="req_send_date" style="width:200px;" value="' + theDateStr + '" onchange="acceptDateChanged(this,' + rowIndex + ');"/>' +
+        '</td>' +
 
             /*                            '<td style="width: 50px;border:0">' +
              '<button style="width: 50px" onclick="">确定</button>' +
              '</td>' +*/
+
         '</tr>' +
         '</table>';
+
+    return ret;
 }
+
 
 var isChanged = false;
 
@@ -334,6 +348,45 @@ function acceptActorChanged(theInput, rowIndex){
     }
     isChanged = true;
 }
+
+//签收人
+function acceptDateChanged(theInput, rowIndex){
+    var value = theInput.value;
+    if(value == ""){
+        return;
+    }
+
+    setAcceptDate(rowIndex, value);
+
+/*    var detailDg = $('#detailDg');
+    var rows = detailDg.datagrid('getRows');
+    var row = rows[rowIndex];
+
+    if(row.obj.accept_info == undefined || row.obj.accept_info == null){
+        row.obj.accept_info = {
+            accept_date: value
+        }
+    }else{
+        row.obj.accept_info.accept_date = value;
+    }
+    isChanged = true;*/
+}
+
+function setAcceptDate(rowIndex, theDateStr){
+    var detailDg = $('#detailDg');
+    var rows = detailDg.datagrid('getRows');
+    var row = rows[rowIndex];
+
+    if(row.obj.accept_info == undefined || row.obj.accept_info == null){
+        row.obj.accept_info = {
+            accept_date: theDateStr
+        }
+    }else{
+        row.obj.accept_info.accept_date = theDateStr;
+    }
+    isChanged = true;
+}
+
 
 function detailListSetting(){
     $('#detailDg').datagrid({

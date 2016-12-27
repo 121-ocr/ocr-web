@@ -744,6 +744,11 @@ var initialized = false;
 function onRowSelected (rowIndex, rowData) {
     initialized = true;
 
+    if(rowData.obj == null){
+        initialized = false;
+        return;
+    }
+
     allotInvObjIndex = rowIndex;
     allotInvObj = rowData.obj;
 

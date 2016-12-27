@@ -1,4 +1,4 @@
-﻿﻿var allotInvObjIndex;
+﻿//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -960,7 +960,7 @@ var initialized = false;
 function onRowSelected (rowIndex, rowData) {
     initialized = true;
 
-    allotInvObjIndex = rowIndex;
+    //allotInvObjIndex = rowIndex;
     allotInvObj = rowData.obj;
 
     //克隆数据

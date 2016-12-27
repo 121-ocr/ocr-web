@@ -1,4 +1,4 @@
-﻿﻿var allotInvObjIndex;
+﻿//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -614,16 +614,16 @@ function onEndEdit(index, row) {
         var newValue = $(ed.target).val();
         row.supply_price = parseFloat(newValue); //设置当前行的数量值
         currentDetailRowObj.supply_price = {
-            "tax_type": "VTA",
-            "tax_rate": 0.17,
-            "price": {
-                "original_currency": {
-                    "money": 0.00,
-                    "currency_type": "USD"
+            tax_type: "VTA",
+            tax_rate: 0.17,
+            price: {
+                original_currency: {
+                    money: 0.00,
+                    currency_type: "USD"
                 },
-                "currency": {
-                    "money": parseFloat(newValue),
-                    "currency_type": "CYN"
+                currency: {
+                    money: parseFloat(newValue),
+                    currency_type: "CYN"
                 }
             }
         };
@@ -1050,7 +1050,7 @@ var initialized = false;
 function onRowSelected (rowIndex, rowData) {
     initialized = true;
 
-    allotInvObjIndex = rowIndex;
+    //allotInvObjIndex = rowIndex;
     allotInvObj = rowData.obj;
 
     //克隆数据
