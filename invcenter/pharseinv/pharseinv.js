@@ -275,6 +275,7 @@ function barcodeChanged(theInput){
                 row['manufacturer'] = data.goods.product_sku.product_spu.brand.manufacturer.name;
             }
 
+            row['purchase_price'] = data.purchase_price.price_including_tax.currency.price;
             row['supply_price'] = data.supply_price.price_including_tax.currency.price;
 
             detailDg.datagrid('refreshRow', index);
@@ -608,6 +609,31 @@ function onEndEdit(index, row) {
 
     var ed = $(this).datagrid('getEditor', {
         index: index,
+        field: 'purchase_price'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.purchase_price = parseFloat(newValue); //设置采购价
+        currentDetailRowObj.purchase_price = {
+            tax_type: "VTA",
+            tax_rate: 0.17,
+            price: {
+                original_currency: {
+                    money: 0.00,
+                    currency_type: "USD"
+                },
+                currency: {
+                    money: parseFloat(newValue),
+                    currency_type: "CYN"
+                }
+            }
+        };
+
+    }
+
+
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
         field: 'supply_price'
     });
     if (ed != null && ed != undefined) {
@@ -678,6 +704,7 @@ function append(){
             expdate:theDateStr,
             su_batch_code:"",
             batch_code: "",
+            purchase_price: {},
             supply_price: {},
             supply_amount: {},
             discount: "",
@@ -703,6 +730,7 @@ function append(){
             shelflifeunit:"",
             expdate:theDateStr,
             su_batch_code:"",
+            purchase_price: 0.00,
             supply_price: 0.00,
             supply_amount: 0.00,
             discount: 0.00,
@@ -1307,6 +1335,7 @@ function bindDetailData(data){
             shelflifeunit:dataItem.shelflifeunit,
             expdate:dataItem.expdate,
             su_batch_code:dataItem.su_batch_code,
+            purchase_price: (dataItem.purchase_price.price_including_tax==undefined)?0.00:dataItem.purchase_price.price_including_tax.currency.price,
             supply_price: (dataItem.supply_price.price_including_tax==undefined)?0.00:dataItem.supply_price.price_including_tax.currency.price,
             supply_amount: (dataItem.supply_amount.money_including_tax==undefined)?0.00:dataItem.supply_amount.money_including_tax.currency.money,
             discount: dataItem.discount,
@@ -1397,7 +1426,8 @@ function buildSubTotalRow(data) {
             specifications: '',
             base_unit: '',
             batch_code: '',
-            supply_price: '',
+            purchase_price: 0.00,
+            supply_price: 0.00,
             discount: '',
             brand: '',
             manufacturer: '',
@@ -1738,6 +1768,7 @@ function addnewlines(i, dataItem,selectdData){
             expdate: $('#ref_expdatestr').val(),
             su_batch_code:$('#ref_su_batch_code').val(),
             batch_code: "",
+            purchase_price: {},
             supply_price: {},
             supply_amount: {},
             discount: "",
@@ -1766,6 +1797,7 @@ function addnewlines(i, dataItem,selectdData){
         shelflifeunit:$('#ref_shelflifeunit').val(),
         expdate: $('#ref_expdatestr').val(),
         su_batch_code:$('#ref_su_batch_code').val(),
+        purchase_price: 0.00,
         supply_price: 0.00,
         supply_amount:  0.00,
         discount:  0.00,
