@@ -1633,10 +1633,10 @@ function onGoodsSelected (index, rowData) {
 }
 
 //构建分页条件
-function buildGoodRefQueryCond(sku,nsnum) {
+function buildGoodRefQueryCond(sku,nsnum,warehousecode) {
     var condition = {
 		
-        query: {'sku':sku,'type':"fixed",'nsnum':nsnum}
+        query: {'sku':sku,'type':"fixed",'nsnum':nsnum,"warehousecode":warehousecode}
     };
     var reqData = JSON.stringify(condition);
     return reqData;
@@ -1650,7 +1650,8 @@ function goodsRefReturnAppend(){
  var selectdData= $('#ref_goods').data();
  var sku =selectdData.product_sku_code;
  
- var con =buildGoodRefQueryCond(sku,nsnum);
+ var warehousecode = cloneAllotInvObj.warehouse.code;
+ var con =buildGoodRefQueryCond(sku,nsnum,warehousecode);
 
 	
  //根据sku ，数量 ，匹配一个或多个货位，
