@@ -1087,6 +1087,12 @@ function onRowSelected (rowIndex, rowData) {
     bindSelectedDataToCard(cloneAllotInvObj);
     bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
 
+    var viewModel = new Array();
+    $('#locationsDg').datagrid('loadData',{
+        total: 0,
+        rows: viewModel
+    });
+
     initialized = false;
 }
 
@@ -1614,6 +1620,7 @@ function locatonsTreeSelone(node) {
 }
 //构建分页条件
 function buildLocationsQueryCond(total, pageNum,sku,type) {
+    var warehousecode = cloneAllotInvObj.warehouse.code;
     var condition = {
         paging: {
             sort_field: "_id",
@@ -1623,7 +1630,7 @@ function buildLocationsQueryCond(total, pageNum,sku,type) {
             total: total,
             total_page: -1
         },
-        query: {'sku':sku,'type':type}
+        query: {'sku':sku,'type':type, 'warehousecode': warehousecode}
     };
     var reqData = JSON.stringify(condition);
     return reqData;
@@ -1653,20 +1660,22 @@ function onLocationsSelected (index, rowData) {
 function bindLocationDg(data) {
     var dgLst = $('#locationsDg');
     var viewModel = new Array();
-    for (var i in data) {
-        var dataItem = data[i];
-        var row_data = {
-            locationref_locationcode: dataItem.locationcode,
-            locationref_sku: dataItem.sku,
-			locationref_warehousecode: dataItem.warehousecode,
-            locationref_invbatchcode:dataItem.invbatchcode,
-            locationref_onhandnum: dataItem.onhandnum,
-            locationref_locationnum: dataItem.locationnum,
-			locationref_plusnum: dataItem.plusnum,
-            locationref_packageunit: dataItem.packageunit,
-            obj: dataItem
-        };
-        viewModel.push(row_data);
+    if(data != null) {
+        for (var i in data) {
+            var dataItem = data[i];
+            var row_data = {
+                locationref_locationcode: dataItem.locationcode,
+                locationref_sku: dataItem.sku,
+                locationref_warehousecode: dataItem.warehousecode,
+                locationref_invbatchcode: dataItem.invbatchcode,
+                locationref_onhandnum: dataItem.onhandnum,
+                locationref_locationnum: dataItem.locationnum,
+                locationref_plusnum: dataItem.plusnum,
+                locationref_packageunit: dataItem.packageunit,
+                obj: dataItem
+            };
+            viewModel.push(row_data);
+        }
     }
 
     dgLst.datagrid('loadData',{
