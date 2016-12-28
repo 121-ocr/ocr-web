@@ -190,7 +190,7 @@ function onWhSelected (rowIndex, rowData) {
             bindReplenishmentDetail(data.result);
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 
@@ -352,7 +352,7 @@ function loadDgList(){
 
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 
@@ -377,7 +377,7 @@ function loadChannelWarehouses(ddv, channelAccount){
             bindChannelWhDg(ddv, data);
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 
@@ -432,6 +432,9 @@ function queryFromWhOnHand(query, dgList, row, index){
             row['supply_onhand'] = data;
 
             dgList.datagrid('refreshRow', index);
+        },
+        error: function (x, e) {
+            alert_autoClose("错误", x.responseText);
         }
     });
 
@@ -997,7 +1000,7 @@ function loadRepRelations(){
 
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 
@@ -1048,7 +1051,7 @@ function buildAllowCatalogQueryCond(total, pageNum) {
             sort_field: "_id",
             sort_direction: -1,
             page_number: pageNum,
-            page_size: 2,
+            page_size: 10,
             total: total,
             total_page: -1
         },
@@ -1120,7 +1123,7 @@ function loadAllowCatalogs() {
                             bindAllowCatalogDg(data);
                         },
                         error: function (x, e) {
-                            alert(e.toString(), 0, "友好提醒");
+                            alert_autoClose("错误", x.responseText);
                         }
                     });
                 }
@@ -1128,7 +1131,7 @@ function loadAllowCatalogs() {
 
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 }
@@ -1201,7 +1204,7 @@ function notifyDelivery(){
             hasChanged = false;
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 

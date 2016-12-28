@@ -413,6 +413,8 @@ function bindAllowCatalogDg(data) {
             base_unit: dataItem.product_sku.product_spu.base_unit,
             //quantity: dataItem.quantity,
             onhandnum: item.onhandnum,
+            invbatchcode: item._id.invbatchcode,
+            shelf_life: item._id.shelf_life,
             brand: dataItem.product_sku.product_spu.brand.name,
             manufacturer: dataItem.product_sku.product_spu.brand.manufacturer.name,
             obj: item
@@ -528,6 +530,7 @@ function onGoodsSelected (index, rowData) {
     delete selectdData._id;
     currentDetailRowObj.goods = selectdData;
     currentDetailRowObj.batch_code = rowData.obj._id.invbatchcode;
+    currentDetailRowObj.shelf_life = rowData.obj._id.shelf_life;
 
     //-------刷新关联属性------
     var row = $('#detailDg').datagrid('getSelected');
@@ -541,6 +544,9 @@ function onGoodsSelected (index, rowData) {
         row['specifications'] = selectdData.product_sku.product_specifications;
 
     row['base_unit'] = selectdData.product_sku.product_spu.base_unit;
+
+    row['batch_code'] = currentDetailRowObj.batch_code;
+    row['shelf_life'] = currentDetailRowObj.shelf_life;
 
     if(selectdData.product_sku.product_spu.brand != null) {
         row['brand'] = selectdData.product_sku.product_spu.brand.name;
@@ -1126,6 +1132,7 @@ function bindDetailData(data){
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
             batch_code: dataItem.batch_code,
+            shelf_life: dataItem.shelf_life,
             quantity: dataItem.quantity,
             retail_price: (dataItem.retail_price.price==undefined)?0.00:dataItem.retail_price.price.currency.money,
             retail_amount: (dataItem.retail_amount.money_including_tax==undefined)?0.00:dataItem.retail_amount.money_including_tax.currency.money,
@@ -1208,6 +1215,7 @@ function buildSubTotalRow(data) {
         specifications: '',
         base_unit: '',
         batch_code: '',
+        shelf_life: '',
         retail_price: '',
         discount: '',
         brand: '',

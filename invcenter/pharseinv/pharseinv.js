@@ -275,8 +275,8 @@ function barcodeChanged(theInput){
                 row['manufacturer'] = data.goods.product_sku.product_spu.brand.manufacturer.name;
             }
 
-            row['purchase_price'] = data.purchase_price.price_including_tax.currency.price;
-            row['supply_price'] = data.supply_price.price_including_tax.currency.price;
+            row['purchase_price'] = data.purchase_price.price.currency.price;
+            row['supply_price'] = data.supply_price.price.currency.price;
 
             detailDg.datagrid('refreshRow', index);
 
@@ -381,7 +381,7 @@ function buildGoodsQueryCond(total, pageNum, cateLog) {
             sort_field: "_id",
             sort_direction: -1,
             page_number: pageNum,
-            page_size: 2,
+            page_size: 10,
             total: total,
             total_page: -1
         },
@@ -1335,8 +1335,8 @@ function bindDetailData(data){
             shelflifeunit:dataItem.shelflifeunit,
             expdate:dataItem.expdate,
             su_batch_code:dataItem.su_batch_code,
-            purchase_price: (dataItem.purchase_price.price_including_tax==undefined)?0.00:dataItem.purchase_price.price_including_tax.currency.price,
-            supply_price: (dataItem.supply_price.price_including_tax==undefined)?0.00:dataItem.supply_price.price_including_tax.currency.price,
+            purchase_price: (dataItem.purchase_price.price==undefined)?0.00:dataItem.purchase_price.price.currency.price,
+            supply_price: (dataItem.supply_price.price==undefined)?0.00:dataItem.supply_price.price.currency.price,
             supply_amount: (dataItem.supply_amount.money_including_tax==undefined)?0.00:dataItem.supply_amount.money_including_tax.currency.money,
             discount: dataItem.discount,
             discount_amount: (dataItem.discount_amount.money_including_tax==undefined)?0.00:dataItem.discount_amount.money_including_tax.currency.money,
@@ -1686,10 +1686,10 @@ function onGoodsSelected (index, rowData) {
 }
 
 //构建分页条件
-function buildGoodRefQueryCond(sku,nsnum) {
+function buildGoodRefQueryCond(sku,nsnum,warehousecode) {
     var condition = {
 		
-        query: {'sku':sku,'type':"fixed",'nsnum':nsnum}
+        query: {'sku':sku,'type':"fixed",'nsnum':nsnum,"warehousecode":warehousecode}
     };
     var reqData = JSON.stringify(condition);
     return reqData;
@@ -1703,7 +1703,8 @@ function goodsRefReturnAppend(){
  var selectdData= $('#ref_goods').data();
  var sku =selectdData.product_sku_code;
  
- var con =buildGoodRefQueryCond(sku,nsnum);
+ var warehousecode = cloneAllotInvObj.warehouse.code;
+ var con =buildGoodRefQueryCond(sku,nsnum,warehousecode);
 
 	
  //根据sku ，数量 ，匹配一个或多个货位，
