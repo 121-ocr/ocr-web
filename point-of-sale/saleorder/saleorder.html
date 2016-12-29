@@ -129,9 +129,10 @@
                         <th field="title" width="100px" formatter="formatCellTooltip"
                                                             data-options="editor:{type:'goodsRef'}">商品名</th>
                         <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
-                        <th field="bar_code" width="80px" formatter="formatCellTooltip" data-options="editor:{type:'barcodeEditor'}">条码</th>
+                        <th field="bar_code" width="80px" formatter="formatCellTooltip">条码</th>
                         <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
                         <th field="batch_code" width="80px" formatter="formatCellTooltip">批次号</th>
+                        <th field="shelf_life" width="80px" formatter="formatCellTooltip">保质期</th>
                         <th field="base_unit" width="80px" formatter="formatCellTooltip">单位</th>
                         <th field="quantity" width="80px" formatter="formatCellTooltip" data-options="editor:{type:'quantityEditor'}">数量</th>
                         <th field="retail_price" width="80px" formatter="formatCellTooltip">零售价</th>
@@ -196,33 +197,24 @@
 </div>
 
 <!--商品参照-->
-<div id="goodsRefDialog" class="easyui-window" title="商品选择" data-options="modal:true,closed:true,iconCls:'icon-save'"
-     style="width:600px;height:400px;padding:5px;">
+<div id="allowCatalogDialog" class="easyui-window" title="允销商品选择" data-options="modal:true,closed:true,iconCls:'icon-add'"
+     style="width:650px;height:450px;padding:5px;">
     <div class="easyui-layout" data-options="fit:true">
-        <div data-options="region:'west',split:true" style="width:120px">
-            <ul class="easyui-tree" id="catelogTree"  style="width:100%" data-options="
-                                            url:$goodsURL + 'ocr-goods-center/sales-catelog-mgr/findtree?context=3|3|lj|aaa',
-                                            method:'get',
-                                            onSelect: catelogTreeSel"
-                                            />
-        </div>
         <div data-options="region:'center',split:true" style="padding:10px;">
-            <table id="goodsDg" class="easyui-datagrid" style="width:100%;height:100%"
+            <table id="allowCatalogDg" class="easyui-datagrid" style="width:100%;height:100%"
                    title="请选择商品" iconCls="icon-save">
                 <thead>
                 <tr>
                     <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
                     <th field="title" width="80px" formatter="formatCellTooltip">商品名</th>
                     <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
-                    <th field="bar_code" width="80px" formatter="formatCellTooltip">条码</th>
                     <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
+                    <th field="onhandnum" width="80px" formatter="formatCellTooltip">存量</th>
+                    <th field="invbatchcode" width="80px" formatter="formatCellTooltip">批次</th>
+                    <th field="shelf_life" width="80px" formatter="formatCellTooltip">保质期</th>
                     <th field="brand" width="80px" formatter="formatCellTooltip">品牌</th>
                     <th field="manufacturer" width="80px" formatter="formatCellTooltip">制造商</th>
                     <th field="base_unit" width="80px" formatter="formatCellTooltip">单位</th>
-                    <th field="quantity" width="80px" formatter="formatCellTooltip">现存量</th>
-                    <th field="supply_price" width="80px" formatter="formatCellTooltip">供货价</th>
-                    <th field="retail_price" width="80px" formatter="formatCellTooltip">零售价</th>
-                    <th field="commission" width="80px" formatter="formatCellTooltip">佣金</th>
                 </tr>
                 </thead>
             </table>
@@ -230,7 +222,7 @@
         </div>
         <div data-options="region:'south',border:false" style="text-align:right;padding:5px 0 0;">
             <!--<a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="goodsRefReturn();" style="width:80px">Ok</a>-->
-            <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0)" onclick="closeGoodsRef();" style="width:80px">Cancel</a>
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0)" onclick="closeAllowCatalogDlg();" style="width:80px">关闭</a>
         </div>
     </div>
 </div>

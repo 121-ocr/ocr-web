@@ -273,14 +273,22 @@
                                                                     type:'text'
                                                                 }">供应商批号</th>
 
-                        <th field="retail_price" width="80px" formatter="formatCellTooltip" editor="{
+                        <th field="purchase_price" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        precision:0,
+
+                                                                    }
+                                                                }">采购价</th>
+
+                        <th field="supply_price" width="80px" formatter="formatCellTooltip" editor="{
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
                                                                        
                                                                     }
-                                                                }">单价</th>
-                        <th field="retail_amount" width="80px" formatter="formatCellTooltip" editor="{
+                                                                }">供货价</th>
+                        <th field="supply_amount" width="80px" formatter="formatCellTooltip" editor="{
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
@@ -388,7 +396,7 @@
      style="width:1000px;height:400px;padding:5px;">
     <div class="easyui-layout" data-options="fit:true">
         <div data-options="region:'west',split:true" style="width:120px">
-            <ul class="easyui-tree" id="catelogTree" style="width:100%" data-options="
+            <ul class="easyui-tree" id="locationLst" style="width:100%" data-options="
 
                                             onSelect: locatonsTreeSel"/>
             <li id="fixed">固定货位</li>
@@ -427,7 +435,7 @@
 </div>
 
 <div id="win" class="easyui-window" title="新增采购入库明细" data-options="modal:true,closed:true,iconCls:'icon-save'"
-     style="width:300px;height:800px;padding:5px;">
+     style="width:300px;height:900px;padding:5px;">
 	  <table id="addNewGoodsDg"  cellpadding="0" cellspacing="0" style="width:100%">
                     <tr style="height: 10px">
                      

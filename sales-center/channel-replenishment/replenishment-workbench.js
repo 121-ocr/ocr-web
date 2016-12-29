@@ -190,7 +190,7 @@ function onWhSelected (rowIndex, rowData) {
             bindReplenishmentDetail(data.result);
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 
@@ -352,7 +352,7 @@ function loadDgList(){
 
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 
@@ -377,7 +377,7 @@ function loadChannelWarehouses(ddv, channelAccount){
             bindChannelWhDg(ddv, data);
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 
@@ -432,6 +432,9 @@ function queryFromWhOnHand(query, dgList, row, index){
             row['supply_onhand'] = data;
 
             dgList.datagrid('refreshRow', index);
+        },
+        error: function (x, e) {
+            alert_autoClose("错误", x.responseText);
         }
     });
 
@@ -478,11 +481,50 @@ function generateStockoutTable(whStockOnList, showBatchNo) {
             '<td style="text-align: center">佣金</td>' +
         '</tr>';
 
-    for(var i in whStockOnList){
+    for(var i in whStockOnList) {
         var warehouseInfo = whStockOnList[i];
-        var supply_price = (warehouseInfo.supply_price==undefined)?0.00: warehouseInfo.supply_price.price.currency.money.toFixed(2);
-        var retail_price = (warehouseInfo.retail_price==undefined)?0.00:warehouseInfo.retail_price.price.currency.money.toFixed(2);
-        var commission = (warehouseInfo.commission==undefined)?0.00:warehouseInfo.commission.commission_value.currency.money.toFixed(2);
+        var supply_price = (warehouseInfo.supply_price == undefined) ? 0.00 : warehouseInfo.supply_price.price.currency.money.toFixed(2);
+        var retail_price = 0.00;
+        if (warehouseInfo.retail_price == undefined || warehouseInfo.retail_price == null
+            || warehouseInfo.retail_price.price == undefined || warehouseInfo.retail_price.price == null) {
+            warehouseInfo.retail_price = {
+                tax_type: "VTA",
+                tax_rate: 0.17,
+                price: {
+                    original_currency: {
+                        money: 0.00,
+                        currency_type: "USD"
+                    },
+                    currency: {
+                        money: 0.00,
+                        currency_type: "CYN"
+                    }
+                }
+            }
+        } else {
+            if(warehouseInfo.retail_price.price != undefined && warehouseInfo.retail_price.price != null) {
+                retail_price = warehouseInfo.retail_price.price.currency.money.toFixed(2);
+            }
+        }
+        var commission = 0.00;
+        if (warehouseInfo.commission == undefined || warehouseInfo.commission == null
+            || warehouseInfo.commission.commission_value == undefined || warehouseInfo.commission.commission_value == null) {
+            warehouseInfo.commission = {
+                commission_value: {
+                    original_currency: {
+                        money: 0.0,
+                        currency_type: "USD"
+                    },
+                    currency: {
+                        money: 0.0,
+                        currency_type: "CYN"
+                    }
+                },
+                computation_rule: {}
+            }
+        } else {
+            commission = warehouseInfo.commission.commission_value.currency.money.toFixed(2);
+        }
 
         var trHtml = '<tr style="height: 16px; background-color: ivory">' +
                 '<td style="text-align: center">' + warehouseInfo.warehousename + '</td>';
@@ -491,7 +533,8 @@ function generateStockoutTable(whStockOnList, showBatchNo) {
             trHtml += '<td style="text-align: center">' + warehouseInfo.invbatchcode + '</td>' +
             '<td style="text-align: center">' + warehouseInfo.shelf_life + '</td>';
         }
-            trHtml += '<td style="text-align: center">' + warehouseInfo.onhandnum + '</td>';
+
+        trHtml += '<td style="text-align: center">' + warehouseInfo.onhandnum + '</td>';
 
         if (showBatchNo) {
             trHtml += '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehousecode + '" batch_code="' + warehouseInfo.invbatchcode
@@ -499,10 +542,25 @@ function generateStockoutTable(whStockOnList, showBatchNo) {
         }else{
             trHtml += '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehousecode + '" style="width:50px" onchange="onStockNumChanged(this);"></td>';
         }
-            trHtml += '<td style="text-align: center">' + supply_price + '</td>' +
-                '<td style="text-align: center">' + retail_price + '</td>' +
-                '<td style="text-align: center">' + commission + '</td>' +
-            '</tr>';
+
+        if (showBatchNo) {
+            trHtml += '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehousecode + '" batch_code="' + warehouseInfo.invbatchcode
+                    + '" style="width:50px" onchange="onSupplypriceChanged(this);" value="' + supply_price + '" ></td>' +
+                '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehousecode + '" batch_code="' + warehouseInfo.invbatchcode
+                    + '" style="width:50px" onchange="onRetailpriceChanged(this);" value="' + retail_price + '" ></td>' +
+                '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehousecode + '" batch_code="' + warehouseInfo.invbatchcode
+                    + '" style="width:50px" onchange="onCommissionChanged(this);" value="' + commission + '" ></td>'
+        }else{
+            trHtml += '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehousecode
+                + '" style="width:50px" onchange="onSupplypriceChanged(this);" value="' + supply_price + '" ></td>' +
+                '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehousecode
+                + '" style="width:50px" onchange="onRetailpriceChanged(this);" value="' + retail_price + '" ></td>' +
+                '<td style="text-align: center"><input wh_code="' + warehouseInfo.warehousecode
+                + '" style="width:50px" onchange="onCommissionChanged(this);" value="' + commission + '" ></td>'
+        }
+
+        trHtml += '</tr>';
+
         html += trHtml;
     }
 
@@ -589,8 +647,6 @@ function onFIFOCheck2(ck){
 
 }
 
-
-
 //补货数量填写响应事件
 function onStockNumChanged(theInput){
 
@@ -629,6 +685,138 @@ function onStockNumChanged(theInput){
                 && warehouseInfo.invbatchcode == batchCode) {
                 //warehouseInfo.warehouses.
                 warehouseInfo.rep_quantity = parseFloat(theValue);
+                break;
+            }
+        }
+    }
+}
+
+//供货价格填写响应事件
+function onSupplypriceChanged(theInput){
+
+    hasChanged = true;
+
+    var theValue = theInput.value;
+    if(theValue == null || theValue == undefined || theValue == "") return;
+
+    var whCode = theInput.getAttribute("wh_code");
+    var batchCode = "";
+
+    var dgList = $('#detailDg');
+    var row = dgList.datagrid('getSelected');
+    var warehouseStockInfo = row["supply_onhand"];
+
+    var deliveryList;
+    var isNoBatchNo = false;
+    if(warehouseStockInfo.whNoBatchList != undefined && warehouseStockInfo.whNoBatchList != null){
+        deliveryList = warehouseStockInfo.whNoBatchList;
+        isNoBatchNo = true;
+    }else{
+        batchCode = theInput.getAttribute("batch_code");
+        deliveryList = warehouseStockInfo.sub_nums;
+    }
+
+    for(var i in deliveryList){
+        var warehouseInfo = deliveryList[i];
+        if(isNoBatchNo){
+            if (warehouseInfo.warehousecode == whCode) {
+                //warehouseInfo.warehouses.
+                warehouseInfo.supply_price.price.currency.money = parseFloat(theValue);
+                break;
+            }
+        }else {
+            if (warehouseInfo.warehousecode == whCode
+                && warehouseInfo.invbatchcode == batchCode) {
+                //warehouseInfo.warehouses.
+                warehouseInfo.supply_price.price.currency.money = parseFloat(theValue);
+                break;
+            }
+        }
+    }
+}
+
+//零售价格填写响应事件
+function onRetailpriceChanged(theInput){
+
+    hasChanged = true;
+
+    var theValue = theInput.value;
+    if(theValue == null || theValue == undefined || theValue == "") return;
+
+    var whCode = theInput.getAttribute("wh_code");
+    var batchCode = "";
+
+    var dgList = $('#detailDg');
+    var row = dgList.datagrid('getSelected');
+    var warehouseStockInfo = row["supply_onhand"];
+
+    var deliveryList;
+    var isNoBatchNo = false;
+    if(warehouseStockInfo.whNoBatchList != undefined && warehouseStockInfo.whNoBatchList != null){
+        deliveryList = warehouseStockInfo.whNoBatchList;
+        isNoBatchNo = true;
+    }else{
+        batchCode = theInput.getAttribute("batch_code");
+        deliveryList = warehouseStockInfo.sub_nums;
+    }
+
+    for(var i in deliveryList){
+        var warehouseInfo = deliveryList[i];
+        if(isNoBatchNo){
+            if (warehouseInfo.warehousecode == whCode) {
+                //warehouseInfo.warehouses.
+                warehouseInfo.retail_price.price.currency.money = parseFloat(theValue);
+                break;
+            }
+        }else {
+            if (warehouseInfo.warehousecode == whCode
+                && warehouseInfo.invbatchcode == batchCode) {
+                //warehouseInfo.warehouses.
+                warehouseInfo.retail_price.price.currency.money = parseFloat(theValue);
+                break;
+            }
+        }
+    }
+}
+
+//佣金填写响应事件
+function onCommissionChanged(theInput){
+
+    hasChanged = true;
+
+    var theValue = theInput.value;
+    if(theValue == null || theValue == undefined || theValue == "") return;
+
+    var whCode = theInput.getAttribute("wh_code");
+    var batchCode = "";
+
+    var dgList = $('#detailDg');
+    var row = dgList.datagrid('getSelected');
+    var warehouseStockInfo = row["supply_onhand"];
+
+    var deliveryList;
+    var isNoBatchNo = false;
+    if(warehouseStockInfo.whNoBatchList != undefined && warehouseStockInfo.whNoBatchList != null){
+        deliveryList = warehouseStockInfo.whNoBatchList;
+        isNoBatchNo = true;
+    }else{
+        batchCode = theInput.getAttribute("batch_code");
+        deliveryList = warehouseStockInfo.sub_nums;
+    }
+
+    for(var i in deliveryList){
+        var warehouseInfo = deliveryList[i];
+        if(isNoBatchNo){
+            if (warehouseInfo.warehousecode == whCode) {
+                //warehouseInfo.warehouses.
+                warehouseInfo.commission.commission_value.currency.money = parseFloat(theValue);
+                break;
+            }
+        }else {
+            if (warehouseInfo.warehousecode == whCode
+                && warehouseInfo.invbatchcode == batchCode) {
+                //warehouseInfo.warehouses.
+                warehouseInfo.commission.commission_value.currency.money = parseFloat(theValue);
                 break;
             }
         }
@@ -812,7 +1000,7 @@ function loadRepRelations(){
 
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 
@@ -863,7 +1051,7 @@ function buildAllowCatalogQueryCond(total, pageNum) {
             sort_field: "_id",
             sort_direction: -1,
             page_number: pageNum,
-            page_size: 2,
+            page_size: 10,
             total: total,
             total_page: -1
         },
@@ -935,7 +1123,7 @@ function loadAllowCatalogs() {
                             bindAllowCatalogDg(data);
                         },
                         error: function (x, e) {
-                            alert(e.toString(), 0, "友好提醒");
+                            alert_autoClose("错误", x.responseText);
                         }
                     });
                 }
@@ -943,7 +1131,7 @@ function loadAllowCatalogs() {
 
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 }
@@ -1016,7 +1204,7 @@ function notifyDelivery(){
             hasChanged = false;
         },
         error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
+            alert_autoClose("错误", x.responseText);
         }
     });
 

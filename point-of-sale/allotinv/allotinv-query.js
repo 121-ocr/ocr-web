@@ -1,53 +1,4 @@
 ﻿
-//保存
-function confirm(){
-    if(isChanged){
-
-        var data = {
-            replenishment: currentReplenishment,
-            shipment: shipmentObj
-        };
-
-        $.ajax({
-            method: 'POST',
-            url : $posURL + "ocr-pointofsale/allotinv/confirm?context=" + $token_pos,
-            data: JSON.stringify(data),
-            async: true,
-            dataType: 'json',
-            beforeSend: function (x) {
-                x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-            },
-            success: function (data) {
-
-                shipmentDg.datagrid('deleteRow', shipmentIndex);
-                shipmentIndex = undefined;
-
-                isChanged = false;
-                alert_autoClose('提示','拣货出库完成!');
-
-                //当前指针指向正确的位置
-                var rowCount = shipmentDg.datagrid('getRows').length + 1;
-                if(rowCount > 0){
-                    if(shipmentIndex == 0){
-                        dgList.datagrid('selectRow',shipmentIndex);
-                    }else{
-                        if(shipmentIndex == rowCount -1){
-                            dgList.datagrid('selectRow',shipmentIndex-1);
-                        }else{
-                            dgList.datagrid('selectRow',shipmentIndex+1);
-                        }
-                    }
-                }
-            },
-            error: function (x, e) {
-                alert(e.toString(), 0, "友好提醒");
-            }
-        });
-
-    }else{
-        alert_autoClose('提示','没有要提交的数据!');
-    }
-}
 
 var shipmentDg;
 var currentReplenishment;
@@ -55,7 +6,7 @@ var currentReplenishment;
 function dgListSetting(){
     $('#dgList').datagrid({
         loadMsg: "正在加载，请稍等...",
-        title : '待收货补货单',
+        title : '已签收发货单',
         iconCls : 'icon-a_detail',
         fit : true,
         fitColumns : false,
@@ -67,8 +18,8 @@ function dgListSetting(){
         pageList: [5, 10, 20, 50, 100], //页面数据条数选择清单
         singleSelect : true,
         border : false,
-        onBeforeSelect: onBeforeSelect,
-        //onSelect: onRowSelected,  //行选择事件
+        //onBeforeSelect: onBeforeSelect,
+        onSelect: showShipmentDetail,  //行选择事件
         onLoadSuccess: function (data) {
             if (data.total > 0) {
                 var dg = $(this);
@@ -76,39 +27,10 @@ function dgListSetting(){
                 //$('#gridleft').datagrid('selectRow', 0);
             }
         },
-        view: detailview,
-        detailFormatter:function(index,row){
-            return '<div style="padding:2px"><table class="ddv"></table></div>';
-        },
-        onExpandRow: function(index,row){
-            var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
-            ddv.datagrid({
-                fitColumns:true,
-                singleSelect:true,
-                rownumbers:true,
-                loadMsg:'',
-                height:'auto',
-                onBeforeSelect: onShipmentBeforeSelect,
-                onSelect: showShipmentDetail,  //仓库行选择事件
-                columns:[[
-                    {field:'bo_id',title:'发货编码',width:'60px'},
-                    {field:'restocking_warehouse',title:'发货仓库',width:'60px'},
-                    {field:'target_warehouse',title:'目标仓库',width:'60px'},
-                    {field:'ship_date',title:'发货日期',width:'60px',align:'left'},
-                    {field:'is_completed',title:'是否完成',width:'60xp',align:'left'}
-                ]],
-                onResize:function(){
-                    $('#dgList').datagrid('fixDetailRowHeight',index);
-                },
-                onLoadSuccess:function(){
-                    setTimeout(function(){
-                        $('#dgList').datagrid('fixDetailRowHeight',index);
-                    },0);
-                }
-            });
-            currentReplenishment = row.obj;
-            loadShipments(ddv, row.obj, index);
-            shipmentDg = ddv;
+        groupField:'group_id',
+        view: groupview,
+        groupFormatter:function(value, rows){
+            return value + ' - (' + rows.length + ')';
         }
     });
 }
@@ -233,22 +155,14 @@ function bindShipmentDetail(shipmentObj) {
 function acceptDetailFormatter(rowIndex, rowData){
     return '<table style="border:0">' +
         '<tr>' +
-        '<td style="width: 50px;border:0">实收数量</td>' +
-        '<td style="width: 90px;border:0">' +
-        '<input style="width: 80px" onchange="acceptQuantityChanged(this,' + rowIndex + ');"/>' +
-        '</td>' +
-        '<td style="width: 50px;border:0">退返数量</td>' +
-        '<td style="width: 90px;border:0">' +
-        '<input style="width: 80px" onchange="rejectQuantityChanged(this,' + rowIndex + ');"/>' +
-        '</td>' +
-        '<td style="width: 50px;border:0">签收人</td>' +
-        '<td style="width: 90px;border:0">' +
-        '<input style="width: 80px" onchange="acceptActorChanged(this,' + rowIndex + ');"/>' +
-        '</td>' +
-
-            /*                            '<td style="width: 50px;border:0">' +
-             '<button style="width: 50px" onclick="">确定</button>' +
-             '</td>' +*/
+        '<td style="width: 60px;border:0">实收数量</td>' +
+        '<td style="width: 90px;border:0">' +  rowData.obj.accept_info.accept_quantity +  '</td>' +
+        '<td style="width: 60px;border:0">退返数量</td>' +
+        '<td style="width: 90px;border:0">' +   rowData.obj.accept_info.reject_quantity +  '</td>' +
+        '<td style="width: 60px;border:0">签收人</td>' +
+        '<td style="width: 90px;border:0">' +  rowData.obj.accept_info.accept_actor +  '</td>' +
+        '<td style="width: 60px;border:0">签收日期</td>' +
+        '<td style="width: 90px;border:0">' +  rowData.obj.accept_info.accept_date +  '</td>' +
         '</tr>' +
         '</table>';
 }
@@ -358,22 +272,6 @@ function detailListSetting(){
 }
 
 
-function onBeforeSelect(index,row){
-    if(isChanged){
-        $.messager.alert('提示','签收未确认，请先提交或取消!');
-        return false;
-    }
-    return true;
-}
-
-function onBeforeSelect(index,row){
-    if(isChanged){
-        $.messager.alert('提示','签收未确认，请先提交或取消!');
-        return false;
-    }
-    return true;
-}
-
 //商品分类字段格式化
 function formatCatelogsCol(catelogArray){
     //计算规格字符串
@@ -408,16 +306,17 @@ function bindDgListData(data){
     var dgLst = $('#dgList');
     var viewModel = new Array();
     for ( var i in data.datas) {
-        var replenishmentBo = data.datas[i];
-        var replenishment = replenishmentBo.bo;
+        var dataItemBo = data.datas[i];
+        var dataItem = dataItemBo.bo;
         var row_data = {
-            code : replenishment.bo_id,
-            req_date : replenishment.req_date,
-            req_send_date: replenishment.req_send_date,
-            req_code : replenishment.req_code,
-            channel_name: replenishment.channel.name,
-            is_completed: replenishment.is_completed,
-            obj: replenishmentBo
+            bo_id : dataItem.bo_id,
+            from_account : dataItemBo.from_account,
+            restocking_warehouse : dataItem.restocking_warehouse.name,
+            target_warehouse : dataItem.target_warehouse.name,
+            ship_date : dataItem.ship_date,
+            accept_date : dataItem.accept_date,
+            group_id: dataItem.replenishments_id + " - " + dataItemBo.from_account,
+            obj: dataItemBo
         };
         viewModel.push(row_data);
     }
@@ -452,7 +351,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/replenishment-mgr/query?context=" + $token_pos,
+        url : $posURL + "ocr-pointofsale/shipment-mgr/find_completed?context=" + $token_pos,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -487,7 +386,7 @@ function loadDgList(){
                     //定义查询条件
                     $.ajax({
                         method: 'POST',
-                        url : $posURL + "ocr-pointofsale/allotinv/getall?context=" + $token_pos,
+                        url : $posURL + "ocr-pointofsale/shipment-mgr/find_completed?context=" + $token_pos,
                         data: condStr,
                         async: true,
                         dataType: 'json',
