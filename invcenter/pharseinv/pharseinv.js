@@ -15,6 +15,7 @@ var editIndex = undefined;
 
 //保存
 function save(){
+	var cloneAllotInvObj22=cloneAllotInvObj;
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
@@ -556,6 +557,16 @@ function onEndEdit(index, row) {
         var newValue = $(ed.target).val();
         row.locations = newValue; //设置当前行的数量值
         currentDetailRowObj.locations = newValue; //设置当前行对象的值
+    }
+	
+	  var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'goods'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.goods = newValue; //设置当前行的数量值
+        currentDetailRowObj.goods = newValue; //设置当前行对象的值
     }
 
     var ed = $(this).datagrid('getEditor', {
@@ -1754,10 +1765,10 @@ function addnewlines(i, dataItem,selectdData){
 	var theDate = new Date();
     var theDateStr = theDate.format("yyyy-MM-dd");
 		
-/*    var newDetailObjs = {
-        goods: selectdData
-    };*/
-
+		
+    var  selectdDatagoods = cloneJsonObject(selectdData);
+		
+  
     var nynum = dataItem.nsnum;
     var unqualifiednum = 0.0;
     if(i== 0){
@@ -1767,7 +1778,7 @@ function addnewlines(i, dataItem,selectdData){
 
     var newDetailObj = {
             detail_code: "",
-            goods: selectdData,
+            goods: selectdDatagoods,
             nynum: nynum,
 			//nsnum: parseFloat($('#ref_nsnum').val()),
             nsnum: dataItem.nsnum,
