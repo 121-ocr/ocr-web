@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DataGrid Selection - jQuery EasyUI Demo</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="invarea.js"></script>
+    <style type="text/css">
+        .subtotal { font-weight: bold; }/*合计单元格样式*/
+    </style>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="newRep();">新增</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick="save();">保存</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="reject();">撤销</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help"></a>
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:310px">
+        <table id="dgList" class="easyui-datagrid" style="width:600px;height:100%"
+               title="Load Data" iconCls="icon-save">
+            <thead>
+            <tr>
+                <th field="code" width="80px" formatter="formatCellTooltip">货区编码</th>
+                <th field="name" width="80px" formatter="formatCellTooltip">货区名称</th>
+                <th field="type" width="80px" formatter="formatCellTooltip">货区类型</th>
+                <th field="warehouse" width="80px" formatter="formatCellTooltip">仓库</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+    <div data-options="region:'center'">
+        <div class="easyui-layout" data-options="fit:true" style="border:0px">
+            <div data-options="region:'north',split:true" style="height:600px;border:0px;">
+                <table id="header" cellpadding="0" cellspacing="0" style="width:100%">
+                    <tr style="height: 50px">
+                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">仓库货区管理</strong></td>
+                    </tr>
+                    <tr style="height: 35px">
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            货区编码
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="code" style="width:200px" data-options="label:'Name:',required:true,onChange:onCodeChanged">
+
+                        </td>
+
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            货区名称
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="name" style="width:200px" data-options="label:'Name:',required:true,onChange:onNameChanged">
+
+                        </td>
+
+                    </tr>
+                    <tr style="height: 35px">
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            货区类型
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input id="type" class="easyui-combobox" style="width:200px;" data-options="
+                                        valueField:'code',
+                                        textField:'name',
+                                        data: [{
+                                                code: '1',
+                                                name: '拣货区'
+                                            },{
+                                                code: '2',
+                                                name: '退货区'
+                                            },{
+                                                code: '3',
+                                                name: '存货区'
+                                            }],
+                                            onSelect:onTypeSelected,
+                                        required:true"
+                            >
+                        </td>
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            所属仓库
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                          
+                            <input id="warehouse" class="easyui-combobox" style="width:200px;" data-options="
+                                        loader: warehoseLoader, 
+                                        mode: 'remote',
+                                        valueField:'code',
+                                        textField: 'name',
+                                        panelHeight:'auto',
+                                        onSelect: onWarehoseSelected,
+                                        required:true">
+                        </td>
+
+
+
+                    </tr>
+
+                </table>
+            </div>
+
+            <div data-options="region:'south',split:true" style="height:80px;">
+                <table cellpadding="0" cellspacing="0" style="width:100%;margin-top: 10px">
+                    <tr style="height: 35px">
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            制单人
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" name="operator" style="width:200px" data-options="label:'Name:',required:false">
+
+                        </td>
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            制单日期
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" name="bill_date" style="width:200px" data-options="label:'name:',required:false">
+
+                        </td>
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        </td>
+
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+</body>
+
+<script type="text/javascript">
+    dgListSetting();
+    detailListSetting();
+    loadDgList();
+</script>
+</html>
