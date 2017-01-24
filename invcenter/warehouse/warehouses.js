@@ -441,8 +441,8 @@ function newRep(){
         var dgList =  $('#dgList');
         var newObjIndex = dgList.datagrid('getRows').length;
         var newObj = {
-            warehousecode: "",
-            warehousename: "",
+            code: "",
+            name: "",
             type: {},
             character:{},
             region_code:"",
@@ -452,8 +452,8 @@ function newRep(){
         };
 
         var rowData = {
-            warehousecode: "",
-            warehousename: "",
+            code: "",
+            name: "",
             type: {},
             character:{},
             region_code:"",
@@ -544,8 +544,8 @@ function bindDgListData(data){
         var dataItem = data.datas[i];
 
         var row_data = {
-            warehousename:dataItem.warehousename,
-            warehousecode:dataItem.warehousecode,
+            name:dataItem.name,
+            code:dataItem.code,
             type:dataItem.type.name,
             character:dataItem.character.name,
             region_code:dataItem.region_code,
@@ -665,7 +665,7 @@ function onRowSelected (rowIndex, rowData) {
     cloneAllotInvObj = cloneJsonObject(allotInvObj);
 
     bindSelectedDataToCard(cloneAllotInvObj);
-    //bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
+   // bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
 
     var viewModel = new Array();
     $('#locationsDg').datagrid('loadData',{
@@ -686,8 +686,8 @@ function onDetailRowSelected(rowIndex, detailRowData){
 function bindSelectedDataToCard(data){
 
 
-    $('#warehousecode').textbox('setValue',data.warehousecode);
-    $('#warehousename').textbox('setValue',data.warehousename);
+    $('#code').textbox('setValue',data.code);
+    $('#name').textbox('setValue',data.name);
     $('#type').textbox('setValue',data.type.name);
     $('#character').textbox('setValue',data.character.name);
     $('#region_code').textbox('setValue',data.region_code);
@@ -714,15 +714,15 @@ function updateParentListRow(field, value){
 
 function onWarehouseCodeChanged(newValue,oldValue) {
     if(initialized) return;
-    cloneAllotInvObj.warehousecode = newValue;
+    cloneAllotInvObj.code = newValue;
     isBodyChanged =true;
-    updateParentListRow('warehousecode', cloneAllotInvObj.warehousecode);
+    updateParentListRow('code', cloneAllotInvObj.code);
 }
 function onWarehouseNameChanged(newValue,oldValue) {
     if(initialized) return;
-    cloneAllotInvObj.warehousename = newValue;
+    cloneAllotInvObj.name = newValue;
     isBodyChanged =true;
-    updateParentListRow('warehousename', cloneAllotInvObj.warehousename);
+    updateParentListRow('name', cloneAllotInvObj.name);
 }
 
 function onRegionCodeChanged(newValue,oldValue){

@@ -45,8 +45,8 @@
                title="Load Data" iconCls="icon-save">
             <thead>
             <tr>
-                <th field="warehousecode" width="80px" formatter="formatCellTooltip">编码</th>
-                <th field="warehousename" width="80px" formatter="formatCellTooltip">名称</th>
+                <th field="code" width="80px" formatter="formatCellTooltip">编码</th>
+                <th field="name" width="80px" formatter="formatCellTooltip">名称</th>
                 <th field="type" width="80px" formatter="formatCellTooltip">设施类型</th>
                 <th field="character" width="80px" formatter="formatCellTooltip">性质类型</th>
                 <th field="region_code" width="80px" formatter="formatCellTooltip">区域编码</th>
@@ -60,7 +60,7 @@
     </div>
     <div data-options="region:'center'">
         <div class="easyui-layout" data-options="fit:true" style="border:0px">
-            <div data-options="region:'north',split:true" style="height:600px;border:0px;">
+            <div data-options="region:'north',split:true" style="height:200px;border:0px;">
                 <table id="header" cellpadding="0" cellspacing="0" style="width:100%">
                     <tr style="height: 50px">
                         <td colspan="6" style="text-align: center"><strong style="font-size: 18px">仓库管理</strong></td>
@@ -72,7 +72,7 @@
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-textbox" id="warehousecode" style="width:200px" data-options="label:'Name:',required:true,onChange:onWarehouseCodeChanged">
+                            <input class="easyui-textbox" id="code" style="width:200px" data-options="label:'Name:',required:true,onChange:onWarehouseCodeChanged">
 
                         </td>
                         
@@ -81,7 +81,7 @@
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-textbox" id="warehousename" style="width:200px" data-options="label:'Name:',required:true,onChange:onWarehouseNameChanged">
+                            <input class="easyui-textbox" id="name" style="width:200px" data-options="label:'Name:',required:true,onChange:onWarehouseNameChanged">
 
                         </td>
 
@@ -177,7 +177,12 @@
                                         required:true">
                         </td>
 
-                    </tr>         
+                    </tr>
+
+
+
+
+                    
                     
                 </table>
             </div>
