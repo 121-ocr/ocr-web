@@ -15,6 +15,7 @@ var editIndex = undefined;
 
 //保存
 function save(){
+    endEditing();
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
@@ -53,6 +54,60 @@ function save(){
     }
 }
 
+
+
+function removeRep(){
+
+    if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}
+
+    obj = new Object();
+    obj._id = cloneAllotInvObj._id;
+
+    $.messager.confirm('删除警告', '是否确认删除?', function(r){
+        if (r){
+
+            $.ajax({
+                method: 'POST',
+                url: $invcenterURL + "ocr-inventorycenter/invfacility-mgr/remove?context=" + $token,
+                data: JSON.stringify(obj),
+                async: true,
+                dataType: 'json',
+                beforeSend: function (x) {
+                    x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                },
+                success: function (data) {
+                    //$.messager.alert('提示','删除成功!');
+                    resetState();
+
+                    var dgList = $('#dgList');
+                    dgList.datagrid('deleteRow', allotInvObjIndex);
+                    currentRowIndex = undefined;
+
+                    //$.messager.alert('提示','删除成功!');
+                    alert_autoClose('提示','删除成功!');
+
+                    //当前指针指向正确的位置
+                    var rowCount = dgList.datagrid('getRows').length + 1;
+                    if(rowCount > 0){
+                        if(allotInvObjIndex == 0){
+                            dgList.datagrid('selectRow',cloneAllotInvObj);
+                        }else{
+                            if(allotInvObjIndex == rowCount -1){
+                                dgList.datagrid('selectRow',cloneAllotInvObj-1);
+                            }else{
+                                dgList.datagrid('selectRow',cloneAllotInvObj+1);
+                            }
+                        }
+                    }
+                },
+                error: function (x, e) {
+                    alert(e.toString(), 0, "友好提醒");
+                }
+            });
+        }
+    });
+}
+
 function resetState(){
     editIndex = undefined;
     isNewRep = false;
@@ -89,11 +144,11 @@ function dgListSetting(){
 
 
 function detailListSetting(){
-	$('#win').window({
-    width:600,
-    height:400,
-    modal:true
-});
+// 	$('#win').window({
+//     width:600,
+//     height:400,
+//     modal:true
+// });
 
      $('#detailDg').datagrid({
         title : '渠道补货单详情',
@@ -937,14 +992,14 @@ var initialized = false;
 function onRowSelected (rowIndex, rowData) {
     initialized = true;
 
-    //allotInvObjIndex = rowIndex;
+    allotInvObjIndex = rowIndex;
     allotInvObj = rowData.obj;
 
     //克隆数据
     cloneAllotInvObj = cloneJsonObject(allotInvObj);
 
     bindSelectedDataToCard(cloneAllotInvObj);
-    bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
+    bindSelectedDataToSubDetail(cloneAllotInvObj.detail,cloneAllotInvObj.isplane.code);
 
     var viewModel = new Array();
     $('#locationsDg').datagrid('loadData',{
@@ -998,21 +1053,26 @@ function onCodeChanged(newValue,oldValue){
 
 
 //绑定到子表
-function bindSelectedDataToSubDetail(detailData){
+function bindSelectedDataToSubDetail(detailData,isplanecode){
     var detailDg = $('#detailDg');
     detailDg.datagrid('loadData', { total: 0, rows: [] });
-    bindDetailData(detailData);
+    bindDetailData(detailData,isplanecode);
 }
 
 //绑定表体数据
-function bindDetailData(data){
+function bindDetailData(data,isplanecode){
     var dgLst = $('#detailDg');
     var viewModel = new Array();
+    if(isplanecode ==1){
+        dgLst.datagrid('hideColumn', 'levelnum');
+    }
+    if(isplanecode == 2){
+        dgLst.datagrid('showColumn', 'levelnum');
+    }
     for ( var i in data) {
         var dataItem = data[i];
-
         var row_data = {
-						
+
             loccode : dataItem.loccode,
             loclength : (dataItem.loclength==undefined)?0.00:dataItem.loclength,
             locwidth: (dataItem.locwidth==undefined)?0.00:dataItem.locwidth,
@@ -1024,6 +1084,8 @@ function bindDetailData(data){
             note:(dataItem.note==undefined)?"":dataItem.note,
             obj: dataItem
         };
+
+
         viewModel.push(row_data);
         dgLst.datagrid('appendRow', row_data);
     }
@@ -1601,6 +1663,29 @@ function onIsplaneSelected(record){
     isBodyChanged = true;
     //-------刷新关联属性------
     updateParentListRow('isplane', record.name);
+    if(record.code == 2){
+        $("#detailDg").datagrid('showColumn', 'loccode');
+        $("#detailDg").datagrid('showColumn', 'loclength');
+        $("#detailDg").datagrid('showColumn', 'locwidth');
+        $("#detailDg").datagrid('showColumn', 'locheight');
+        $("#detailDg").datagrid('showColumn', 'capacityunit');
+        $("#detailDg").datagrid('showColumn', 'rownum');
+        $("#detailDg").datagrid('showColumn', 'colnum');
+        $("#detailDg").datagrid('showColumn', 'levelnum');
+        $("#detailDg").datagrid('showColumn', 'note');
+    }
+    if(record.code == 1){
+        $("#detailDg").datagrid('showColumn', 'loccode');
+        $("#detailDg").datagrid('showColumn', 'loclength');
+        $("#detailDg").datagrid('showColumn', 'locwidth');
+        $("#detailDg").datagrid('showColumn', 'locheight');
+        $("#detailDg").datagrid('showColumn', 'capacityunit');
+        $("#detailDg").datagrid('showColumn', 'rownum');
+        $("#detailDg").datagrid('showColumn', 'colnum');
+        $("#detailDg").datagrid('hideColumn', 'levelnum');
+
+        $("#detailDg").datagrid('showColumn', 'note');
+    }
 }
 
 function onIsmatrixSelected(record){
@@ -1625,7 +1710,6 @@ function onCapacityunitSelected(record){
     updateParentListRow('capacityunit', record.name);
 }
 
-onCapacityunitSelected
 
 
 
