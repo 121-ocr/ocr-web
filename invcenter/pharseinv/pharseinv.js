@@ -835,6 +835,7 @@ function removeDetail(){
     if (currentRowIndex == undefined){return}
     $('#detailDg').datagrid('cancelEdit', currentRowIndex)
         .datagrid('deleteRow', currentRowIndex);
+    cloneAllotInvObj.detail.splice(currentRowIndex,1);
     currentRowIndex = undefined;
   
     isBodyChanged = true;
@@ -945,7 +946,7 @@ function bindDgListData(data){
 	
      for ( var i in data.datas) {
         var dataItem = data.datas[i].bo;
-		
+		var state = data.datas[i].current_state;
     //for ( var i in data) {
       // var dataItem = data[i];
 
@@ -963,6 +964,7 @@ function bindDgListData(data){
             purchase_dept:dataItem.purchase_dept,
             // sale_date: dataItem.sale_date,
             // salesman: dataItem.salesman,
+            current_state:state,
             obj: dataItem
         };
         viewModel.push(row_data);
@@ -1091,6 +1093,8 @@ function onRowSelected (rowIndex, rowData) {
 
     //allotInvObjIndex = rowIndex;
     allotInvObj = rowData.obj;
+    //wdq 2017年2月2日
+    allotInvObj.current_state = rowData.current_state;
 
     //克隆数据
     cloneAllotInvObj = cloneJsonObject(allotInvObj);
