@@ -836,7 +836,7 @@ function removeDetail(){
     $('#detailDg').datagrid('cancelEdit', currentRowIndex)
         .datagrid('deleteRow', currentRowIndex);
     currentRowIndex = undefined;
-
+  
     isBodyChanged = true;
 }
 /*function accept(){
@@ -850,8 +850,8 @@ function rejectDetail(){
     $('#detailDg').datagrid('rejectChanges');
     editIndex = undefined;
     //克隆
-    cloneAllotInvObj.detail = cloneJsonObject(allotInvObj.detail);
-    bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
+    cloneAllotInvObj.detail = cloneJsonObject(allotInvObj.allotLocations);
+    bindSelectedDataToSubDetail(cloneAllotInvObj.allotLocations);
 
     isBodyChanged = false;
 }
@@ -872,7 +872,7 @@ function reject(){
         //重新克隆
         cloneAllotInvObj = cloneJsonObject(allotInvObj);
         bindSelectedDataToCard(cloneAllotInvObj)
-        bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
+        bindSelectedDataToSubDetail(cloneAllotInvObj.allotLocations);
 
         isHeadChanged = false;
         isBodyChanged = false;
