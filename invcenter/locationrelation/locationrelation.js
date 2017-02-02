@@ -15,6 +15,7 @@ var editIndex = undefined;
 
 //保存
 function save(){
+    endEditing();
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
