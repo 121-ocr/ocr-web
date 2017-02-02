@@ -726,22 +726,26 @@ function newRep(){
         var newObjIndex = dgList.datagrid('getRows').length;
         var newObj = {
             code: "",
+            warehouse:{},
             invarea: {},
             containertype: {},
             abctype:{},
             isplane:{},
             ismatrix:{},
+            isbulk:{},
 
             "detail": []
         };
 
         var rowData = {
             code: "",
+            warehouse:{},
             invarea: {},
             containertype: {},
             abctype:{},
             isplane:{},
             ismatrix:{},
+            isbulk:{},
             obj: newObj
         };
 
@@ -880,12 +884,13 @@ function bindDgListData(data){
 
         var row_data = {
             code: dataItem.code,
+            warehouse:dataItem.warehouse.name,
             invarea:dataItem.invarea.name,
             containertype:dataItem.containertype.name,
             abctype:dataItem.abctype.name,
             isplane:dataItem.isplane.name,
             ismatrix:dataItem.ismatrix.name,
-
+            isbulk:dataItem.isbulk.name,
             obj: dataItem
         };
         viewModel.push(row_data);
@@ -1021,12 +1026,13 @@ function bindSelectedDataToCard(data){
 
 
     $('#code').textbox('setValue',data.code);
+    $('#warehouse').textbox('setValue',data.warehouse.name);
     $('#invarea').textbox('setValue',data.invarea.name);
     $('#containertype').textbox('setValue',data.containertype.name);
     $('#abctype').textbox('setValue',data.abctype.name);
     $('#isplane').textbox('setValue',data.isplane.name);
     $('#ismatrix').textbox('setValue',data.ismatrix.name);
-
+    $('#isbulk').textbox('setValue',data.isbulk.name);
 }
 
 
@@ -1244,36 +1250,36 @@ $.extend($.fn.datagrid.defaults.editors, {
     }
 });
 
-function locatonsTreeSel(node){
-	if(node.id=="fixed"){
-		
-		 $("#locationsDg").datagrid('showColumn', 'locationref_warehousecode');			
-		 $("#locationsDg").datagrid('showColumn', 'locationref_locationcode');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_sku');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_invbatchcode');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_onhandnum');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_locationnum');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_plusnum');
-         $("#locationsDg").datagrid('showColumn', 'locationref_packageunit');		 
-		
-	}if(node.id=="free"){
-			
-		 $("#locationsDg").datagrid('showColumn', 'locationref_warehousecode');			
-		 $("#locationsDg").datagrid('showColumn', 'locationref_locationcode');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_sku');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_invbatchcode');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_onhandnum');
-		 $("#locationsDg").datagrid('hideColumn', 'locationref_locationnum');
-		 $("#locationsDg").datagrid('hideColumn', 'locationref_plusnum');
-         $("#locationsDg").datagrid('showColumn', 'locationref_packageunit');	
-	
-	}
-	
-	
-	locatonsTreeSelone(node); 
-      
-  
-}
+// function locatonsTreeSel(node){
+// 	if(node.id=="fixed"){
+//
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_warehousecode');
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_locationcode');
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_sku');
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_invbatchcode');
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_onhandnum');
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_locationnum');
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_plusnum');
+//          $("#locationsDg").datagrid('showColumn', 'locationref_packageunit');
+//
+// 	}if(node.id=="free"){
+//
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_warehousecode');
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_locationcode');
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_sku');
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_invbatchcode');
+// 		 $("#locationsDg").datagrid('showColumn', 'locationref_onhandnum');
+// 		 $("#locationsDg").datagrid('hideColumn', 'locationref_locationnum');
+// 		 $("#locationsDg").datagrid('hideColumn', 'locationref_plusnum');
+//          $("#locationsDg").datagrid('showColumn', 'locationref_packageunit');
+//
+// 	}
+//
+//
+// 	locatonsTreeSelone(node);
+//
+//
+// }
 					
 
 //品类树选择，查询货位列表
@@ -1565,11 +1571,21 @@ function addnewlines(i, dataItem,selectdData){
 
 
 var invareaLoader = function (param, success, error) {
+
+
+    obj = new Object();
+    if(cloneAllotInvObj != null ){
+        warehouse = new Object();
+        warehouse._id = cloneAllotInvObj.warehouse._id;
+        obj.warehouse = warehouse;
+    }
+
+
     $.ajax({
         method: 'POST',
         url: $invcenterURL + "ocr-inventorycenter/invarea-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
         async: true,
-        data: JSON.stringify({}),
+        data: JSON.stringify(obj),
         dataType: 'json',
         beforeSend: function (x) {
             x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
@@ -1580,7 +1596,7 @@ var invareaLoader = function (param, success, error) {
         error: function (x, e) {
             var args = [];
             args.push(e);
-            error.apply(this, args);
+            // error.apply(this, args);
         }
     });
 }
@@ -1654,6 +1670,17 @@ function onABCTypeSelected(record){
     updateParentListRow('abctype', record.name);
 }
 
+function onBulkSelected(record){
+    if(initialized) return;
+    cloneAllotInvObj.isbulk = {
+        code: record.code,
+        name: record.name
+    };
+    isBodyChanged = true;
+    //-------刷新关联属性------
+    updateParentListRow('isbulk', record.name);
+}
+
 function onIsplaneSelected(record){
     if(initialized) return;
     cloneAllotInvObj.isplane = {
@@ -1709,7 +1736,66 @@ function onCapacityunitSelected(record){
     //-------刷新关联属性------
     updateParentListRow('capacityunit', record.name);
 }
+var warehoseLoader = function (param, success, error) {
+    $.ajax({
+        method: 'POST',
+        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        async: true,
+        data: JSON.stringify({}),
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+            success(data.result);
+        },
+        error: function (x, e) {
+            var args = [];
+            args.push(e);
+            error.apply(this, args);
+        }
+    });
+}
+//仓库选择
+function onWarehoseSelected(record){
+    if(initialized) return;
+    cloneAllotInvObj.warehouse = record;
 
+    isBodyChanged = true;
+    //-------刷新关联属性------
+    updateParentListRow('warehouse', record.name);
+
+    $('#invarea').combobox('reload');
+}
+
+function reload(){
+    obj = new Object();
+    if(cloneAllotInvObj != null ){
+        warehouse = new Object();
+        warehouse._id = cloneAllotInvObj.warehouse._id;
+        obj.warehouse = warehouse;
+    }
+
+
+    $.ajax({
+        method: 'POST',
+        url: $invcenterURL + "ocr-inventorycenter/invarea-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        async: true,
+        data: JSON.stringify(obj),
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+            success(data.result);
+        },
+        error: function (x, e) {
+            var args = [];
+            args.push(e);
+            // error.apply(this, args);
+        }
+    });
+}
 
 
 

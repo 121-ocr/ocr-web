@@ -47,11 +47,13 @@
             <thead>
             <tr>
                 <th field="code" width="80px" formatter="formatCellTooltip">编码</th>
-                <th field="invarea" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDatetime">所属库区</th>
+                <th field="warehouse" width="80px" formatter="formatCellTooltip">所属仓库</th>
+                <th field="invarea" width="80px" formatter="formatCellTooltip">所属库区</th>
                 <th field="containertype" width="80px" formatter="formatCellTooltip">容器类型</th>
                 <th field="abctype" width="80px" formatter="formatCellTooltip">ABC分类</th>
                 <th field="isplane" width="80px" formatter="formatCellTooltip">是否平面</th>
                 <th field="ismatrix" width="80px" formatter="formatCellTooltip">是否矩阵分区</th>
+                <th field="isbulk" width="80px" formatter="formatCellTooltip">是否散货</th>
 
             </tr>
             </thead>
@@ -77,12 +79,31 @@
                         </td>
                         
                         <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            所属仓库
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-combobox" id="warehouse" style="width:200px;"
+                                   data-options=" loader: warehoseLoader, 
+                                        mode: 'remote',
+                                        valueField:'code',
+                                        textField:'name',
+                                        panelHeight:'auto',
+                                        onSelect: onWarehoseSelected,
+                                        required:true
+                                    ">
+                        </td>
+
+                    </tr>
+                    <tr style="height: 35px">
+
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
                             所属库区
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
                             <input class="easyui-combobox" id="invarea" style="width:200px;"
-                                   data-options=" loader: invareaLoader, 
+                                   data-options=" loader:invareaLoader,
                                         mode: 'remote',
                                         valueField:'code',
                                         textField:'name',
@@ -92,8 +113,6 @@
                                     ">
                         </td>
 
-                    </tr>
-                    <tr style="height: 35px">
                         <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
                             容器类型
                         </td>
@@ -111,26 +130,6 @@
                         </td>
 											
 						
-                        <td  style="width: 80px;text-align: right; vertical-align: middle; padding: 5px;">
-                            ABC分类
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-                            <input class="easyui-combobox" id="abctype"  style="width:200px" data-options="
-                                        valueField:'code',
-                                        textField:'name',
-                                        data: [{
-                                                code: '1',
-                                                name: 'A'
-                                            },{
-                                                code: '2',
-                                                name: 'B'
-                                            },{
-                                                code: '3',
-                                                name: 'C'
-                                            }],
-                                            onSelect:onABCTypeSelected,
-                                        required:true">
-                        </td>
 
                     </tr>
                     
@@ -170,6 +169,54 @@
                                                 name: '否'
                                             }],
                                             onSelect:onIsmatrixSelected,
+                                        required:true">
+                        </td>
+
+                    </tr>
+
+
+                    <tr style="height: 35px">
+
+
+
+
+                        <td  style="width: 80px;text-align: right; vertical-align: middle; padding: 5px;">
+                            ABC分类
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-combobox" id="abctype"  style="width:200px" data-options="
+                                        valueField:'code',
+                                        textField:'name',
+                                        data: [{
+                                                code: '1',
+                                                name: 'A'
+                                            },{
+                                                code: '2',
+                                                name: 'B'
+                                            },{
+                                                code: '3',
+                                                name: 'C'
+                                            }],
+                                            onSelect:onABCTypeSelected,
+                                        required:true">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            是否散货
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input id="isbulk" class="easyui-combobox" style="width:200px;" data-options="
+                                       valueField:'code',
+                                        textField:'name',
+                                        data: [{
+                                                code: '1',
+                                                name: '是'
+                                            },{
+                                                code: '2',
+                                                name: '否'
+                                            }],
+                                            onSelect:onBulkSelected,
                                         required:true">
                         </td>
 
