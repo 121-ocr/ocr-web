@@ -730,6 +730,7 @@ function removeDetail(){
     $('#detailDg').datagrid('cancelEdit', currentRowIndex)
         .datagrid('deleteRow', currentRowIndex);
     currentRowIndex = undefined;
+    cloneAllotInvObj.allotLocations.pop(currentDetailRowObj);
 
     isBodyChanged = true;
 	
