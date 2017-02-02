@@ -15,11 +15,10 @@ var editIndex = undefined;
 
 //保存
 function save(){
-	var cloneAllotInvObj22=cloneAllotInvObj;
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/create?context=" + $token,
+            url: $invcenterURL + "ocr-inventorycenter/invfacility-mgr/create?context=" + $token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -89,6 +88,35 @@ function dgListSetting(){
 }
 
 
+//选择商品
+function onGoodsSelected (index, rowData) {
+    $('#goodsRefDialog').window('close');
+    var selectdData = rowData.obj;
+    $('#goodsEditor').val(selectdData.title);
+
+    //设置商品到当前表体行对象上
+    delete selectdData._id;
+    currentDetailRowObj.goods = selectdData;
+
+    //-------刷新关联属性------
+    var row = $('#detailDg').datagrid('getSelected');
+    var index = $('#detailDg').datagrid('getRowIndex', row);
+
+    row['product_sku_code'] = selectdData.product_sku_code;
+    row['title'] = selectdData.title;
+    row['sales_catelog'] = selectdData.sales_catelogs;
+    row['bar_code'] = selectdData.product_sku.bar_code;
+    if(selectdData.product_sku.product_specifications != null)
+        row['specifications'] = selectdData.product_sku.product_specifications;
+
+    row['base_unit'] = selectdData.product_sku.product_spu.base_unit;
+
+    if(selectdData.product_sku.product_spu.brand != null) {
+        row['brand'] = selectdData.product_sku.product_spu.brand.name;
+        row['manufacturer'] = selectdData.product_sku.product_spu.brand.manufacturer.name;
+    }
+}
+
 function detailListSetting(){
 	$('#win').window({
     width:600,
@@ -96,8 +124,8 @@ function detailListSetting(){
     modal:true
 });
 
- $('#detailDg').datagrid({
-        title : '采购入库单详情',
+     $('#detailDg').datagrid({
+        title : '渠道补货单详情',
         iconCls : 'icon-a_detail',
         fit : true,
         fitColumns : false,
@@ -119,7 +147,14 @@ function detailListSetting(){
                     text : '新增',
                     iconCls : 'icon-add',
                     handler : function() {
-                        appendgoods();
+                        append();
+                    }
+                },
+                {
+                    text: '修改',
+                    iconCls : 'icon-edit',
+                    handler : function() {
+
                     }
                 },
                 {
@@ -138,7 +173,6 @@ function detailListSetting(){
                 }
             ]
     });
-
     $('#goodsDg').datagrid({
         loadMsg: "正在加载，请稍等...",
         iconCls : 'icon-a_detail',
@@ -509,183 +543,94 @@ function onAfterEdit(index, row){
 }
 
 function onEndEdit(index, row) {
-    //对于合计行进行处理
-    // var ed = $(this).datagrid('getEditor', {
-    //     index: index,
-    //     field: 'quantity'
-    // });
-    // if (ed != null && ed != undefined) {
-    //     var newValue = $(ed.target).val();
-    //     row.quantity = newValue; //设置当前行的数量值
-    //     currentDetailRowObj.quantity = newValue; //设置当前行对象的值
-    // }
 
     var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'nynum'
+        field: 'loccode'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.nynum = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.nynum = parseFloat(newValue); //设置当前行对象的值
-    }
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'nsnum'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.nsnum = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.nsnum = parseFloat(newValue); //设置当前行对象的值
-    }
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'unqualifiednum'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.unqualifiednum = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.unqualifiednum = parseFloat(newValue); //设置当前行对象的值
-    }
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'locations'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.locations = newValue; //设置当前行的数量值
-        currentDetailRowObj.locations = newValue; //设置当前行对象的值
+        row.loccode = newValue; //设置当前行的数量值
+        currentDetailRowObj.loccode = newValue; //设置当前行对象的值
     }
 	
-	  var ed = $(this).datagrid('getEditor', {
+	
+    var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'goods'
+        field: 'loclength'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.goods = newValue; //设置当前行的数量值
-        currentDetailRowObj.goods = newValue; //设置当前行对象的值
+        row.loclength = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.loclength = parseFloat(newValue); //设置当前行对象的值
     }
 
     var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'shelflife'
+        field: 'locwidth'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.shelflife = newValue; //设置当前行的数量值
-        currentDetailRowObj.shelflife = newValue; //设置当前行对象的值
+        row.locwidth = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.locwidth = parseFloat(newValue); //设置当前行对象的值
     }
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'shelflifeunit'
-		
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.shelflifeunit = newValue; //设置当前行的数量值
-        currentDetailRowObj.shelflifeunit = newValue; //设置当前行对象的值
-    }
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'expdate'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.expdate = newValue; //设置当前行的数量值
-        currentDetailRowObj.expdate = newValue; //设置当前行对象的值
-    }
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'su_batch_code'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.su_batch_code = newValue; //设置当前行的数量值
-        currentDetailRowObj.su_batch_code = newValue; //设置当前行对象的值
-    }
+	
 	
 	 var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'batch_code'
+        field: 'capacityunit'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.batch_code = newValue; //设置当前行的数量值
-        currentDetailRowObj.batch_code = newValue; //设置当前行对象的值
+        row.capacityunit = newValue; //设置当前行的数量值
+        currentDetailRowObj.capacityunit = newValue; //设置当前行对象的值
     }
-
-    var ed = $(this).datagrid('getEditor', {
+	
+	
+	var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'purchase_price'
+        field: 'rownum'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.purchase_price = parseFloat(newValue); //设置采购价
-        currentDetailRowObj.purchase_price = {
-            tax_type: "VTA",
-            tax_rate: 0.17,
-            price: {
-                original_currency: {
-                    money: 0.00,
-                    currency_type: "USD"
-                },
-                currency: {
-                    money: parseFloat(newValue),
-                    currency_type: "CYN"
-                }
-            }
-        };
-
+        row.rownum = newValue; //设置当前行的数量值
+        currentDetailRowObj.rownum = newValue; //设置当前行对象的值
     }
-
-
-    var ed = $(this).datagrid('getEditor', {
+	
+	
+	  var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'supply_price'
+        field: 'colnum'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.supply_price = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.supply_price = {
-            tax_type: "VTA",
-            tax_rate: 0.17,
-            price: {
-                original_currency: {
-                    money: 0.00,
-                    currency_type: "USD"
-                },
-                currency: {
-                    money: parseFloat(newValue),
-                    currency_type: "CYN"
-                }
-            }
-        };
-
+        row.colnum = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.colnum = parseFloat(newValue); //设置当前行对象的值
     }
 
-    var ed = $(this).datagrid('getEditor', {
+	
+	
+	var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'supply_amount'
+        field: 'levelnum'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.supply_amount = newValue; //设置当前行的数量值
-        currentDetailRowObj.supply_amount = newValue; //设置当前行对象的值
+        row.levelnum = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.levelnum = parseFloat(newValue); //设置当前行对象的值
     }
-    var ed = $(this).datagrid('getEditor', {
+
+	  var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'discount_amount'
+        field: 'note'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.discount_amount = newValue; //设置当前行的数量值
-        currentDetailRowObj.discount_amount = newValue; //设置当前行对象的值
+        row.note = newValue; //设置当前行的数量值
+        currentDetailRowObj.note = newValue; //设置当前行对象的值
     }
-    refreshSubTotalRows(); //刷新小计列
+	
+
 }
 
 function appendgoods(){
@@ -699,55 +644,28 @@ function append(){
 
     if (endEditing()){
 
-        var theDate = new Date();
-        var theDateStr = theDate.format("yyyy-MM-dd");
-
         var newDetailObj = {
-            detail_code: "",
-            goods: {},
-            // quantity: 0,
-            nynum: 0,
-            nsnum: 0,
-            unqualifiednum: 0,
-            locations: "",
-            shelflife: 0,
-            shelflifeunit:"",
-            expdate:theDateStr,
-            su_batch_code:"",
-            batch_code: "",
-            purchase_price: {},
-            supply_price: {},
-            supply_amount: {},
-            discount: "",
-            discount_amount: {},
+            loccode: "",
+            loclength:0,
+			locwidth:0,
+			locheight:0,
+            capacityunit:"",
+            rownum:0,
+			colnum:0,
+			levelnum:0,
             note: ""
         };
         cloneAllotInvObj.detail.push(newDetailObj);
 
         var rowData = {
-            product_sku_code : "",
-            title : "",
-            sales_catelog: {},
-            bar_code : "",
-            specifications: {},
-            base_unit: "",
-            batch_code: "",
-            // quantity: 0,
-            nynum: 0,
-            nsnum: 0,
-            unqualifiednum: 0,
-            locations: "",
-            shelflife: 0,
-            shelflifeunit:"",
-            expdate:theDateStr,
-            su_batch_code:"",
-            purchase_price: 0.00,
-            supply_price: 0.00,
-            supply_amount: 0.00,
-            discount: 0.00,
-            discount_amount: 0.00,
-            brand: "",
-            manufacturer: "",
+            loccode: "01",
+            loclength:0,
+			locwidth:0,
+			locheight:0,         
+            capacityunit:"个",
+            rownum:0,
+			colnum:0,
+			levelnum:0,
             note: "",
             obj: newDetailObj
         };
@@ -781,38 +699,23 @@ function newRep(){
         var dgList =  $('#dgList');
         var newObjIndex = dgList.datagrid('getRows').length;
         var newObj = {
-            bo_id: "",
-            inv_date: theDateStr,
-            warehouse_user: "",
-            warehouse:{},
-            inv_org:{},
-            purchase_org:{},
-            supplier_user:"",
-            transportation:"",
-			transportationfee:"",
-            purchase_user:"",
-            deliver_nation:"",
-            deliver_area:"",
-            purchase_dept:"",
-
+            code: "",
+            invarea: {},
+            containertype: {},
+            abctype:{},
+            isplane:{},
+            ismatrix:{},
 
             "detail": []
         };
 
         var rowData = {
-            bo_id: "",
-            inv_date: theDateStr,
-            warehouse_user: "",
-            warehouse:{},
-            inv_org:{},
-            purchase_org:{},
-            supplier_user:"",
-            transportation:"",
-			transportationfee:"",
-            purchase_user:"",
-            deliver_nation:"",
-            deliver_area:"",
-            purchase_dept:"",
+            code: "",
+            invarea: {},
+            containertype: {},
+            abctype:{},
+            isplane:{},
+            ismatrix:{},
             obj: newObj
         };
 
@@ -944,25 +847,19 @@ function bindDgListData(data){
 
 	
      for ( var i in data.datas) {
-        var dataItem = data.datas[i].bo;
+        var dataItem = data.datas[i];
 		
     //for ( var i in data) {
       // var dataItem = data[i];
 
         var row_data = {
-            bo_id: dataItem.bo_id,
-            inv_date:dataItem.inv_date,
-            warehouse:dataItem.warehouse,
-            inv_org:dataItem.inv_org,
-            warehouse_user:dataItem.warehouse_user,
-            purchase_user:dataItem.purchase_user,
-            transportation:dataItem.transportation,
-            supplier_user:dataItem.supplier_user,
-            deliver_nation:dataItem.deliver_nation,
-            deliver_area:dataItem.deliver_area,
-            purchase_dept:dataItem.purchase_dept,
-            // sale_date: dataItem.sale_date,
-            // salesman: dataItem.salesman,
+            code: dataItem.code,
+            invarea:dataItem.invarea.name,
+            containertype:dataItem.containertype.name,
+            abctype:dataItem.abctype.name,
+            isplane:dataItem.isplane.name,
+            ismatrix:dataItem.ismatrix.name,
+
             obj: dataItem
         };
         viewModel.push(row_data);
@@ -971,26 +868,6 @@ function bindDgListData(data){
                 total: data.total,
                 rows: viewModel
             });
-}
-var warehoseLoader = function (param, success, error) {
-    $.ajax({
-        method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
-        async: true,
-        data: JSON.stringify({}),
-        dataType: 'json',
-        beforeSend: function (x) {
-            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        },
-        success: function (data) {
-            success(data.result);
-        },
-        error: function (x, e) {
-            var args = [];
-            args.push(e);
-            error.apply(this, args);
-        }
-    });
 }
 
 
@@ -1021,7 +898,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/query?context=" + $token,
+        url : $invcenterURL + "ocr-inventorycenter/invfacility-mgr/querylist?context=" + $token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -1057,7 +934,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/query?context=" + $token,
+                            url: $invcenterURL + "ocr-inventorycenter/invfacility-mgr/querylist?context=" + $token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -1117,32 +994,15 @@ function onDetailRowSelected(rowIndex, detailRowData){
 function bindSelectedDataToCard(data){
 
 
-    $('#bo_id').textbox('setValue',data.bo_id);
-    $('#inv_date').textbox('setValue',data.inv_date);
-    $('#warehouse_user').textbox('setValue',data.warehouse_user);
-    $('#warehouse').textbox('setValue',data.warehouse.name);
-    $('#inv_org').textbox('setValue',data.inv_org.name);
-    $('#purchase_user').textbox('setValue',data.purchase_user);
-    $('#transportation').textbox('setValue',data.transportation);
-    $('#transportationfee').textbox('setValue',data.transportationfee);
-	$('#supplier_user').textbox('setValue',data.supplier_user);
-    $('#deliver_nation').textbox('setValue',data.deliver_nation);
-    $('#deliver_area').textbox('setValue',data.deliver_area);
-    $('#purchase_org').textbox('setValue',data.purchase_org.name);
-    $('#purchase_dept').textbox('setValue',data.purchase_dept);
-    if(data.warehouse != null) {
-        $('#warehouse').combobox('setValue', data.warehouse.code);
-    }
-    else{
-        $('#warehouse').combobox('setValue', "");
-    }
+    $('#code').textbox('setValue',data.code);
+    $('#invarea').textbox('setValue',data.invarea.name);
+    $('#containertype').textbox('setValue',data.containertype.name);
+    $('#abctype').textbox('setValue',data.abctype.name);
+    $('#isplane').textbox('setValue',data.isplane.name);
+    $('#ismatrix').textbox('setValue',data.ismatrix.name);
+
 }
 
-function onMemberChanged() {
-    if(initialized) return;
-    cloneAllotInvObj.member_code = newValue;
-    isBodyChanged = true;
-}
 
 //卡片内容变更后刷新父列表
 function updateParentListRow(field, value){
@@ -1157,163 +1017,19 @@ function updateParentListRow(field, value){
 
 function onCodeChanged(newValue,oldValue){
     if(initialized) return;
-    cloneAllotInvObj.bo_id = newValue;
+    cloneAllotInvObj.code = newValue;
     isBodyChanged = true;
 
     //-------刷新关联属性------
-    updateParentListRow('bo_id', newValue);
+    updateParentListRow('code', newValue);
 }
 
-function onSaleManChanged(newValue,oldValue){
-    if(initialized) return;
-    cloneAllotInvObj.salesman = newValue;
-    isBodyChanged = true;
-
-    //-------刷新关联属性------
-    updateParentListRow('salesman', newValue);
-}
-
-
-function incomeDateSel(date){
-    if(initialized) return;
-    cloneAllotInvObj.inv_date = date.format("yyyy-MM-dd");
-    isBodyChanged = true;
-
-    //-------刷新关联属性------
-    updateParentListRow('inv_date', cloneAllotInvObj.inv_date);
-}
-
-function dtDateSel(date){
-    if(initialized) return;
-    cloneAllotInvObj.dtDateSel = date.format("yyyy-MM-dd");
-    // isBodyChanged = true;
-
-    //-------刷新关联属性------
-    updateParentListRow('dtDateSel', cloneAllotInvObj.dtDateSel);
-}
-
-function onNoteChanged(newValue,oldValue){
-    if(initialized) return;
-    cloneAllotInvObj.note = newValue;
-    isBodyChanged = true;
-}
-
-function onDeliverNationChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.deliver_nation = newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('deliver_nation', newValue);
-}
-function onDeliverAreaChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.deliver_area= newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('deliver_area', newValue);
-}
-
-function onTransportationChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.transportation= newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('transportation', newValue);
-}
-
-function onTransportationfeeChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.transportationfee= newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('transportationfee', newValue);
-}
-function onSupUserChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.supplier_user= newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('supplier_user', newValue);
-}
-
-function onWarehouseUserChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.warehouse_user= newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('warehouse_user', newValue);
-}
-
-function onPurchaseUserChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.purchase_user= newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('purchase_user', newValue);
-}
-
-function onPurchaseDeptChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.purchase_dept= newValue;
-    isBodyChanged = true;
-}
-
-
-
-//仓库选择
-function onWarehoseSelected(record){
-    if(initialized) return;
-    cloneAllotInvObj.warehouse = {
-        code: record.code,
-        name: record.name
-    };
-    isBodyChanged = true;
-    //-------刷新关联属性------
-    updateParentListRow('warehouse', record.name);
-}
-
-//渠道选择
-function inv_orgSel(record){
-    if(initialized) return;
-    cloneAllotInvObj.inv_org = record.attributes;
-
-    $('#channel_type').textbox('setValue',record.attributes.channel_type.name);
-
-    if(record.attributes.customer != null)
-        $('#customer').textbox('setValue',record.attributes.customer.name);
-    else
-        $('#customer').textbox('setValue',"");
-
-    isBodyChanged = true;
-
-    //-------刷新关联属性------
-    updateParentListRow('inv_org', record.attributes.name);
-
-}
-
-function purchaseOrglSel(record){
-    if(initialized) return;
-    cloneAllotInvObj.purchase_org = record.attributes;
-
-    $('#channel_type').textbox('setValue',record.attributes.channel_type.name);
-
-    if(record.attributes.customer != null)
-        $('#customer').textbox('setValue',record.attributes.customer.name);
-    else
-        $('#customer').textbox('setValue',"");
-
-    isBodyChanged = true;
-
-    //-------刷新关联属性------
-    updateParentListRow('channel_name', record.attributes.name);
-
-}
 
 
 //绑定到子表
 function bindSelectedDataToSubDetail(detailData){
     var detailDg = $('#detailDg');
-    //detailDg.datagrid('loadData', { total: 0, rows: [] });
+    detailDg.datagrid('loadData', { total: 0, rows: [] });
     bindDetailData(detailData);
 }
 
@@ -1324,46 +1040,21 @@ function bindDetailData(data){
     for ( var i in data) {
         var dataItem = data[i];
 
- /*       //计算规格字符串
-        var specifications = '';
-        var specArray = dataItem.goods.product_sku.product_specifications;
-        for(var specIdx in specArray){
-            var specItem = specArray[specIdx];
-            if(specIdx == 0)
-                specifications = specItem.specification_name + ':' + specItem.specification_value;
-            else
-                specifications += ',' + specItem.specification_name + ':' + specItem.specification_value;
-        }*/
-
         var row_data = {
-            product_sku_code : dataItem.goods.product_sku_code,
-            title : dataItem.goods.title,
-            sales_catelog: dataItem.goods.sales_catelogs,
-            bar_code : dataItem.goods.product_sku.bar_code,
-            specifications: dataItem.goods.product_sku.product_specifications,
-            base_unit: dataItem.goods.product_sku.product_spu.base_unit,
-            batch_code: dataItem.batch_code,
-            // quantity: dataItem.quantity,
-            nynum: dataItem.nynum,
-            nsnum: dataItem.nsnum,
-            unqualifiednum: dataItem.unqualifiednum,
-            locations:dataItem.locations,
-            shelflife:dataItem.shelflife,
-            shelflifeunit:dataItem.shelflifeunit,
-            expdate:dataItem.expdate,
-            su_batch_code:dataItem.su_batch_code,
-            purchase_price: (dataItem.purchase_price.price==undefined)?0.00:dataItem.purchase_price.price.currency.price,
-            supply_price: (dataItem.supply_price.price==undefined)?0.00:dataItem.supply_price.price.currency.price,
-            supply_amount: (dataItem.supply_amount.money_including_tax==undefined)?0.00:dataItem.supply_amount.money_including_tax.currency.money,
-            discount: dataItem.discount,
-            discount_amount: (dataItem.discount_amount.money_including_tax==undefined)?0.00:dataItem.discount_amount.money_including_tax.currency.money,
-            brand: dataItem.goods.product_sku.product_spu.brand.name,
-            manufacturer: dataItem.goods.product_sku.product_spu.brand.manufacturer.name,
-            note:dataItem.note,
+						
+            loccode : dataItem.loccode,
+            loclength : (dataItem.loclength==undefined)?0.00:dataItem.loclength,
+            locwidth: (dataItem.locwidth==undefined)?0.00:dataItem.locwidth,
+            locheight : (dataItem.locheight==undefined)?0.00:dataItem.locheight,
+            capacityunit: (dataItem.capacityunit==undefined)?"":dataItem.capacityunit,
+            rownum: (dataItem.rownum==undefined)?0.00:dataItem.rownum,
+            colnum: (dataItem.colnum==undefined)?0.00:dataItem.colnum,
+            levelnum: (dataItem.levelnum==undefined)?0.00:dataItem.levelnum,
+            note:(dataItem.note==undefined)?"":dataItem.note,
             obj: dataItem
         };
         viewModel.push(row_data);
-        //dgLst.datagrid('appendRow', row_data);
+        dgLst.datagrid('appendRow', row_data);
     }
 
     dgLst.datagrid({loadFilter: pagerFilter}).datagrid('loadData',viewModel);
@@ -1390,7 +1081,7 @@ function pagerFilter(data){
             total: data.length,
             rows: data,
             footer: [
-                buildSubTotalRow(data)
+                // buildSubTotalRow(data)
             ]
         }
     }
@@ -1416,42 +1107,11 @@ function pagerFilter(data){
     var start = (opts.pageNumber-1)*parseInt(opts.pageSize);
     var end = start + parseInt(opts.pageSize);
     data.rows = (data.originalRows.slice(start, end));
-    data.footer =  [
-        buildSubTotalRow(data.rows)
-    ];
+
     return data;
 }
 
-//构建“合计”行
-function buildSubTotalRow(data) {
-    var subTotal = {
-            product_sku_code: '<span class="subtotal">合计</span>',
-            // quantity: '<span class="subtotal">' + compute(data, "quantity") + '</span>',
-            nynum: '<span class="subtotal">' + compute(data, "nynum") + '</span>',
-            nsnum: '<span class="subtotal">' + compute(data, "nsnum") + '</span>',
-            unqualifiednum: '<span class="subtotal">' + compute(data, "unqualifiednum") + '</span>',
-            locations: '',
-            shelflife:'',
-            shelflifeunit:'',
-            expdate:'',
-            su_batch_code:'',
-            supply_amount: '<span class="subtotal">' + compute(data, "supply_amount") + '</span>',
-            discount_amount: '<span class="subtotal">' + compute(data, "discount_amount") + '</span>',
-            title : '',
-            sales_catelog: '',
-            bar_code : '',
-            specifications: '',
-            base_unit: '',
-            batch_code: '',
-            purchase_price: 0.00,
-            supply_price: 0.00,
-            discount: '',
-            brand: '',
-            manufacturer: '',
-            note: ''
-        };
-    return subTotal;
-}
+
 
 function compute(date, colName) {
     var total = 0;
@@ -1700,9 +1360,15 @@ function bindLocationDg(data) {
 //选择商品
 function onGoodsSelected (index, rowData) {
     $('#goodsRefDialog').window('close');
-    var selectdData = rowData.obj;
-    $('#ref_good').val(selectdData.title);	
-    $('#ref_goods').data(selectdData);	
+	
+    var selectdData = rowData;
+
+    $('#skus').val(selectdData);
+	
+	$('#sku').val(selectdData.title);
+
+    //设置商品到当前表体行对象上
+    cloneAllotInvObj.skus = selectdData; 
 }
 
 //构建分页条件
@@ -1765,10 +1431,10 @@ function addnewlines(i, dataItem,selectdData){
 	var theDate = new Date();
     var theDateStr = theDate.format("yyyy-MM-dd");
 		
-		
-    var  selectdDatagoods = cloneJsonObject(selectdData);
-		
-  
+/*    var newDetailObjs = {
+        goods: selectdData
+    };*/
+
     var nynum = dataItem.nsnum;
     var unqualifiednum = 0.0;
     if(i== 0){
@@ -1778,7 +1444,7 @@ function addnewlines(i, dataItem,selectdData){
 
     var newDetailObj = {
             detail_code: "",
-            goods: selectdDatagoods,
+            goods: selectdData,
             nynum: nynum,
 			//nsnum: parseFloat($('#ref_nsnum').val()),
             nsnum: dataItem.nsnum,
@@ -1840,3 +1506,135 @@ function addnewlines(i, dataItem,selectdData){
         isBodyChanged = true;
 
 }
+
+
+var invareaLoader = function (param, success, error) {
+    $.ajax({
+        method: 'POST',
+        url: $invcenterURL + "ocr-inventorycenter/invarea-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        async: true,
+        data: JSON.stringify({}),
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+            success(data.result);
+        },
+        error: function (x, e) {
+            var args = [];
+            args.push(e);
+            error.apply(this, args);
+        }
+    });
+}
+
+
+var unitLoader = function (param, success, error) {
+    $.ajax({
+        method: 'POST',
+        url: $invcenterURL + "ocr-inventorycenter/invunit-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        async: true,
+        data: JSON.stringify({}),
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+            success(data.result);
+        },
+        error: function (x, e) {
+            var args = [];
+            args.push(e);
+            error.apply(this, args);
+        }
+    });
+}
+
+
+function onInvunitSelected(record){
+    if(initialized) return;
+    cloneAllotInvObj.capacityunit = {
+        code: record.code,
+        name: record.name
+    };
+    isBodyChanged = true;
+    //-------刷新关联属性------
+    updateParentListRow('capacityunit', record.name);
+}
+
+
+
+//仓库选择
+function onInvareaSelected(record){
+    if(initialized) return;
+    cloneAllotInvObj.invarea = record;
+
+    isBodyChanged = true;
+    //-------刷新关联属性------
+    updateParentListRow('invarea', record.name);
+}
+
+
+
+function onContainerSelected(record){
+    if(initialized) return;
+    cloneAllotInvObj.containertype = {
+        code: record.code,
+        name: record.name
+    };
+    isBodyChanged = true;
+    //-------刷新关联属性------
+    updateParentListRow('containertype', record.name);
+}
+function onABCTypeSelected(record){
+    if(initialized) return;
+    cloneAllotInvObj.abctype = {
+        code: record.code,
+        name: record.name
+    };
+    isBodyChanged = true;
+    //-------刷新关联属性------
+    updateParentListRow('abctype', record.name);
+}
+
+function onIsplaneSelected(record){
+    if(initialized) return;
+    cloneAllotInvObj.isplane = {
+        code: record.code,
+        name: record.name
+    };
+    isBodyChanged = true;
+    //-------刷新关联属性------
+    updateParentListRow('isplane', record.name);
+}
+
+function onIsmatrixSelected(record){
+    if(initialized) return;
+    cloneAllotInvObj.ismatrix = {
+        code: record.code,
+        name: record.name
+    };
+    isBodyChanged = true;
+    //-------刷新关联属性------
+    updateParentListRow('ismatrix', record.name);
+}
+
+function onCapacityunitSelected(record){
+    if(initialized) return;
+    cloneAllotInvObj.capacityunit = {
+        code: record.code,
+        name: record.name
+    };
+    isBodyChanged = true;
+    //-------刷新关联属性------
+    updateParentListRow('capacityunit', record.name);
+}
+
+onCapacityunitSelected
+
+
+
+
+
+
