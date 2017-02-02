@@ -40,13 +40,13 @@
         </div>
 
     </div>
-    <div data-options="region:'west',split:true" style="width:210px">
+    <div data-options="region:'west',split:true" style="width:350px">
         <table id="dgList" class="easyui-datagrid" style="width:100px;height:100%"
                title="Load Data" iconCls="icon-save">
             <thead>
             <tr>
-                <th field="catelog" width="80px" formatter="formatCellTooltip">商品分类</th>				
-                <th field="sku" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDatetime">SKU</th>              
+                <th field="sku" width="150px" formatter="formatCellTooltip">SKU</th>				
+                <th field="goods_title" width="150px" formatter="formatCellTooltip" sortable="true" sorter="compareDatetime">商品名称</th>              
             </tr>
             </thead>
         </table>
@@ -64,8 +64,8 @@
                             商品
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
-						   <input id="sku"  style='width:170px'>
-						   <input type="hidden" id="skus" >
+						   <input id="goods_title"  style='width:170px'>
+						  
                            <button style='width: 23px; height: 23px' onclick='showGoodsRefDialog();'>...</button>
                         </td>
                     </tr>
@@ -77,10 +77,18 @@
                        title="货位信息" data-options="">
                     <thead>
                     <tr>
-					   <th field="warehouse" width="80px" formatter="formatCellTooltip">仓库</th>
-                        <th field="locations" width="80px" formatter="formatCellTooltip"
-                            data-options="editor:{type:'locationsRef'}">货位
+					    <th field="warehousecode" width="80px" formatter="formatCellTooltip">仓库</th>
+                        <th field="locationcode" width="80px" formatter="formatCellTooltip"
+                            data-options="editor:{type:'locationsRef'}">货位编码
                         </th>
+						<th field="locationnum" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        precision:0,
+                                                                        required:true
+                                                                    }
+                                                                }">满载数量</th>
+						<th field="packageunit" width="80px" formatter="formatCellTooltip" data-options="editor:{type:'text'}">包装单位</th>
                     </tr>
 					
 					
@@ -127,11 +135,14 @@
      style="width:1000px;height:400px;padding:5px;">
     <div class="easyui-layout" data-options="fit:true">
         <div data-options="region:'west',split:true" style="width:120px">
-           <ul class="easyui-tree" id="catelogTree"  style="width:100%" data-options="
-                                            url:$invcenterURL + 'ocr-inventorycenter/invfacility-mgr/findtree?context=3|3|lj|aaa',
+              
+              <li id="tt">货架货位树</li>
+     
+              <ul class="easyui-tree" id="locationTree"  style="width:100%" data-options="
+                                            url:$invcenterURL + 'ocr-inventorycenter/invfacility-mgr/findtree2?context=3|3|lj|aaa',
                                             method:'get',
-                                            onSelect: catelogTreeSel"
-                                            />
+                                            onSelect: locationTreeSel"
+                                            />                             
         </div>
 
         <div data-options="region:'center',split:true" style="padding:10px;">
@@ -140,14 +151,15 @@
                 <thead>
                 <tr>
                     <th field="locationref_warehousecode" width="80px" formatter="formatCellTooltip">仓库编码</th>
-                    <th field="locationref_locationcode" width="80px" formatter="formatCellTooltip">货位编码</th>
-					<th field="locationref_sku" width="170px" formatter="formatCellTooltip">物料SKU</th>
-                    <th field="locationref_invbatchcode" width="80px" formatter="formatCellTooltip">物料批次</th>
-                    <th field="locationref_onhandnum" width="80px" formatter="formatCellTooltip">现存数量</th>			
-                    <th field="locationref_locationnum" width="80px" formatter="formatCellTooltip">满载数量</th>
-					<th field="locationref_plusnum" width="80px" formatter="formatPrice">剩余数量</th>
-                    <th field="locationref_packageunit" width="80px" formatter="formatCellTooltip">包装单位</th>					
-					
+                    <th field="locationref_loccode" width="80px" formatter="formatCellTooltip">货位编码</th>
+					<th field="locationref_loclength" width="80px" formatter="formatCellTooltip">长</th>
+					<th field="locationref_locwidth" width="70px" formatter="formatCellTooltip">宽</th>
+					<th field="locationref_locheight" width="70px" formatter="formatCellTooltip">高</th>
+					<th field="locationref_capacityunit" width="70px" formatter="formatCellTooltip">单位</th>
+                    <th field="locationref_rownum" width="80px" formatter="formatCellTooltip">坐标：行</th>
+					<th field="locationref_colnum" width="70px" formatter="formatCellTooltip">坐标：列</th>
+					<th field="locationref_levelnum" width="70px" formatter="formatCellTooltip">坐标：层</th>
+                  	<th field="locationref_note" width="170px" formatter="formatCellTooltip">备注</th>				
                 </tr>
                 </thead>
             </table>	

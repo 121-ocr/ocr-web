@@ -18,7 +18,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/invfacility-mgr/create?context=" + $token,
+            url: $invcenterURL + "ocr-inventorycenter/locationrelation-mgr/create?context=" + $token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -34,10 +34,7 @@ function save(){
                 var dgList = $('#dgList');
                 var row = dgList.datagrid('getSelected');
                 var index = dgList.datagrid('getRowIndex', row);
-                row['bo_id'] = data.bo_id;
-                row['sale_date'] = data.sale_date;
-                row['salesman'] = data.salesman;
-
+                
                 row.obj = allotInvObj;
                 dgList.datagrid('refreshRow', index);
 
@@ -88,34 +85,6 @@ function dgListSetting(){
 }
 
 
-//选择商品
-function onGoodsSelected (index, rowData) {
-    $('#goodsRefDialog').window('close');
-    var selectdData = rowData.obj;
-    $('#goodsEditor').val(selectdData.title);
-
-    //设置商品到当前表体行对象上
-    delete selectdData._id;
-    currentDetailRowObj.goods = selectdData;
-
-    //-------刷新关联属性------
-    var row = $('#detailDg').datagrid('getSelected');
-    var index = $('#detailDg').datagrid('getRowIndex', row);
-
-    row['product_sku_code'] = selectdData.product_sku_code;
-    row['title'] = selectdData.title;
-    row['sales_catelog'] = selectdData.sales_catelogs;
-    row['bar_code'] = selectdData.product_sku.bar_code;
-    if(selectdData.product_sku.product_specifications != null)
-        row['specifications'] = selectdData.product_sku.product_specifications;
-
-    row['base_unit'] = selectdData.product_sku.product_spu.base_unit;
-
-    if(selectdData.product_sku.product_spu.brand != null) {
-        row['brand'] = selectdData.product_sku.product_spu.brand.name;
-        row['manufacturer'] = selectdData.product_sku.product_spu.brand.manufacturer.name;
-    }
-}
 
 function detailListSetting(){
 	$('#win').window({
@@ -492,6 +461,88 @@ function catelogTreeSel(node) {
 }
 
 
+//品类树选择，查询商品列表
+function locationTreeSel(node) {
+
+    var id = node.id;
+
+    //定义查询条件
+    var condition = buildLocatinQueryCond(0, 1, id);
+
+    $.ajax({
+        method: 'POST',
+        url : $invcenterURL + "ocr-inventorycenter/invfacility-mgr/querylist?context=" + $token,
+        data: condition,
+        async: true,
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+
+               bindLocationDg(data.datas);
+
+            $('#locationsDg').datagrid('getPager').pagination({
+                displayMsg: '第 {from} - {to} 条 共 {total} 条',
+                onBeforeRefresh: function () {
+                    var thisDg = $('#locationsDg');
+                    thisDg.pagination('loading...');
+                    alert('before refresh');
+                    thisDg.pagination('loaded');
+                },         
+
+				onSelectPage: function (pPageIndex, pPageSize) {
+                        //改变opts.pageNumber和opts.pageSize的参数值，用于下次查询传给数据层查询指定页码的数据
+                        var gridOpts = $('#locationsDg').datagrid('options');
+                        gridOpts.pageNumber = pPageIndex;
+                        gridOpts.pageSize = pPageSize;
+
+                        condition = buildLocatinQueryCond(0, pPageIndex, id);
+
+                        //定义查询条件
+                        $.ajax({
+                            method: 'POST',
+                            url : $invcenterURL + "ocr-inventorycenter/invfacility-mgr/querylist?context=" + $token,
+                            data: condition,
+                            async: true,
+                            dataType: 'json',
+                            beforeSend: function (x) {
+                                x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                            },
+                            success: function (data) {
+
+                                  bindLocationDg(data);
+                            },
+                            error: function (x, e) {
+                                alert(e.toString(), 0, "友好提醒");
+                            }
+                        });
+                }
+            });
+
+
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
+}
+//构建分页条件
+function buildLocatinQueryCond(total, pageNum, id) {
+    var condition = {
+        paging: {
+            sort_field: "_id",
+            sort_direction: -1,
+            page_number: pageNum,
+            page_size: 10,
+            total: total,
+            total_page: -1
+        },
+        query: {'detail.loccode':id}
+    };
+    var reqData = JSON.stringify(condition);
+    return reqData;
+}
 
 
 $.extend($.fn.datagrid.methods, {
@@ -546,90 +597,46 @@ function onEndEdit(index, row) {
 
     var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'loccode'
+        field: 'warehousecode'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.loccode = newValue; //设置当前行的数量值
-        currentDetailRowObj.loccode = newValue; //设置当前行对象的值
+        row.warehousecode = newValue; //设置当前行的数量值
+        currentDetailRowObj.warehousecode = newValue; //设置当前行对象的值
     }
 	
-	
-    var ed = $(this).datagrid('getEditor', {
+	  var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'loclength'
+        field: 'locationcode'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.loclength = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.loclength = parseFloat(newValue); //设置当前行对象的值
-    }
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'locwidth'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.locwidth = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.locwidth = parseFloat(newValue); //设置当前行对象的值
-    }
-	
-	
-	 var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'capacityunit'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.capacityunit = newValue; //设置当前行的数量值
-        currentDetailRowObj.capacityunit = newValue; //设置当前行对象的值
-    }
-	
-	
-	var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'rownum'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.rownum = newValue; //设置当前行的数量值
-        currentDetailRowObj.rownum = newValue; //设置当前行对象的值
+        row.locationcode = newValue; //设置当前行的数量值
+        currentDetailRowObj.locationcode = newValue; //设置当前行对象的值
     }
 	
 	
 	  var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'colnum'
+        field: 'locationnum'
     });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.colnum = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.colnum = parseFloat(newValue); //设置当前行对象的值
-    }
 
-	
-	
-	var ed = $(this).datagrid('getEditor', {
+	 if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.locationnum = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.locationnum = parseFloat(newValue); //设置当前行对象的值
+    }
+   
+		
+    var ed = $(this).datagrid('getEditor', {
         index: index,
-        field: 'levelnum'
+        field: 'packageunit'
     });
     if (ed != null && ed != undefined) {
         var newValue = $(ed.target).val();
-        row.levelnum = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.levelnum = parseFloat(newValue); //设置当前行对象的值
+        row.packageunit = newValue; //设置当前行的数量值
+        currentDetailRowObj.packageunit = newValue; //设置当前行对象的值
     }
-
-	  var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'note'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.note = newValue; //设置当前行的数量值
-        currentDetailRowObj.note = newValue; //设置当前行对象的值
-    }
-	
 
 }
 
@@ -645,28 +652,19 @@ function append(){
     if (endEditing()){
 
         var newDetailObj = {
-            loccode: "",
-            loclength:0,
-			locwidth:0,
-			locheight:0,
-            capacityunit:"",
-            rownum:0,
-			colnum:0,
-			levelnum:0,
-            note: ""
+            warehousecode: "",
+            locationcode:"",
+			locationnum:0,
+			packageunit:"个"
+            
         };
-        cloneAllotInvObj.detail.push(newDetailObj);
+        cloneAllotInvObj.allotLocations.push(newDetailObj);
 
         var rowData = {
-            loccode: "01",
-            loclength:0,
-			locwidth:0,
-			locheight:0,         
-            capacityunit:"个",
-            rownum:0,
-			colnum:0,
-			levelnum:0,
-            note: "",
+            warehousecode: "",
+            locationcode:"",
+			locationnum:0,
+			packageunit:"个",
             obj: newDetailObj
         };
 
@@ -699,23 +697,15 @@ function newRep(){
         var dgList =  $('#dgList');
         var newObjIndex = dgList.datagrid('getRows').length;
         var newObj = {
-            code: "",
-            invarea: {},
-            containertype: {},
-            abctype:{},
-            isplane:{},
-            ismatrix:{},
+            goods_title: "",
+         
 
-            "detail": []
+            "allotLocations": []
         };
 
         var rowData = {
-            code: "",
-            invarea: {},
-            containertype: {},
-            abctype:{},
-            isplane:{},
-            ismatrix:{},
+            goods_title: "",
+           
             obj: newObj
         };
 
@@ -741,6 +731,8 @@ function removeDetail(){
     currentRowIndex = undefined;
 
     isBodyChanged = true;
+	
+	
 }
 /*function accept(){
     if (endEditing()){
@@ -753,8 +745,8 @@ function rejectDetail(){
     $('#detailDg').datagrid('rejectChanges');
     editIndex = undefined;
     //克隆
-    cloneAllotInvObj.detail = cloneJsonObject(allotInvObj.detail);
-    bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
+    cloneAllotInvObj.allotLocations = cloneJsonObject(allotInvObj.detail);
+    bindSelectedDataToSubDetail(cloneAllotInvObj.allotLocations);
 
     isBodyChanged = false;
 }
@@ -775,7 +767,7 @@ function reject(){
         //重新克隆
         cloneAllotInvObj = cloneJsonObject(allotInvObj);
         bindSelectedDataToCard(cloneAllotInvObj)
-        bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
+        bindSelectedDataToSubDetail(cloneAllotInvObj.allotLocations);
 
         isHeadChanged = false;
         isBodyChanged = false;
@@ -788,57 +780,6 @@ function formatCellTooltip(value){
     return "<span title='" + value + "'>" + value + "</span>";
 }
 
-//通过条码查询商品
-/*function queryGoods(value){
-    if(value == ""){
-        return;
-    }
-    var condition = {
-        "goods.product_sku.bar_code": value
-    };
-    var reqData = JSON.stringify(condition);
-
-    //定义查询条件
-
-    $.ajax({
-        method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token,
-        async : true,
-        data: reqData,
-        dataType : 'json',
-        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
-        success : function(result) {
-            var data = result.result[0];
-            currentDetailRowObj.goods = data.goods;
-            currentDetailRowObj.batch_code = data.invbatchcode;
-            currentDetailRowObj.detail_price = data.detail_price;
-            currentDetailRowObj.discount = data.discount;
-
-            //-------刷新关联属性------
-            var row = $('#detailDg').datagrid('getSelected');
-            var index = $('#detailDg').datagrid('getRowIndex', row);
-
-            row['product_sku_code'] = data.goods.product_sku_code;
-            row['title'] = data.goods.title;
-            row['sales_catelog'] = data.goods.sales_catelogs.name;
-            row['bar_code'] = data.goods.product_sku.bar_code;
-            if(data.goods.product_sku.product_specifications != null)
-                row['specifications'] = data.goods.product_sku.product_specifications;
-
-            row['base_unit'] = data.goods.product_sku.product_spu.base_unit;
-
-            if(data.goods.product_sku.product_spu.brand != null) {
-                row['brand'] = data.goods.product_sku.product_spu.brand.name;
-                row['manufacturer'] = data.goods.product_sku.product_spu.brand.manufacturer.name;
-            }
-            row['retail_price'] = data.retail_price.price_including_tax.currency.price;
-
-        },
-        error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
-        }
-    });
-}*/
 
 //绑定列表行数据
 function bindDgListData(data){
@@ -853,12 +794,8 @@ function bindDgListData(data){
       // var dataItem = data[i];
 
         var row_data = {
-            code: dataItem.code,
-            invarea:dataItem.invarea.name,
-            containertype:dataItem.containertype.name,
-            abctype:dataItem.abctype.name,
-            isplane:dataItem.isplane.name,
-            ismatrix:dataItem.ismatrix.name,
+            sku: dataItem.sku,
+            goods_title:dataItem.goods_title,
 
             obj: dataItem
         };
@@ -898,7 +835,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/invfacility-mgr/querylist?context=" + $token,
+        url : $invcenterURL + "ocr-inventorycenter/locationrelation-mgr/querylist?context=" + $token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -934,7 +871,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $invcenterURL + "ocr-inventorycenter/invfacility-mgr/querylist?context=" + $token,
+                            url: $invcenterURL + "ocr-inventorycenter/locationrelation-mgr/querylist?context=" + $token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -973,7 +910,7 @@ function onRowSelected (rowIndex, rowData) {
     cloneAllotInvObj = cloneJsonObject(allotInvObj);
 
     bindSelectedDataToCard(cloneAllotInvObj);
-    bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
+    bindSelectedDataToSubDetail(cloneAllotInvObj.allotLocations);
 
     var viewModel = new Array();
     $('#locationsDg').datagrid('loadData',{
@@ -993,14 +930,9 @@ function onDetailRowSelected(rowIndex, detailRowData){
 //绑定当前选择行的数据
 function bindSelectedDataToCard(data){
 
-
-    $('#code').textbox('setValue',data.code);
-    $('#invarea').textbox('setValue',data.invarea.name);
-    $('#containertype').textbox('setValue',data.containertype.name);
-    $('#abctype').textbox('setValue',data.abctype.name);
-    $('#isplane').textbox('setValue',data.isplane.name);
-    $('#ismatrix').textbox('setValue',data.ismatrix.name);
-
+     $('#goods_title').val(data.goods_title);
+     //$('#goods_title').textbox('setValue',data.goods_title);
+ 
 }
 
 
@@ -1042,15 +974,11 @@ function bindDetailData(data){
 
         var row_data = {
 						
-            loccode : dataItem.loccode,
-            loclength : (dataItem.loclength==undefined)?0.00:dataItem.loclength,
-            locwidth: (dataItem.locwidth==undefined)?0.00:dataItem.locwidth,
-            locheight : (dataItem.locheight==undefined)?0.00:dataItem.locheight,
-            capacityunit: (dataItem.capacityunit==undefined)?"":dataItem.capacityunit,
-            rownum: (dataItem.rownum==undefined)?0.00:dataItem.rownum,
-            colnum: (dataItem.colnum==undefined)?0.00:dataItem.colnum,
-            levelnum: (dataItem.levelnum==undefined)?0.00:dataItem.levelnum,
-            note:(dataItem.note==undefined)?"":dataItem.note,
+            warehousecode : dataItem.warehousecode,
+            locationcode : (dataItem.locationcode==undefined)?"":dataItem.locationcode,
+            locationnum: (dataItem.locationnum==undefined)?0.00:dataItem.locationnum,
+            packageunit: (dataItem.packageunit==undefined)?"":dataItem.packageunit,
+          
             obj: dataItem
         };
         viewModel.push(row_data);
@@ -1110,7 +1038,6 @@ function pagerFilter(data){
 
     return data;
 }
-
 
 
 function compute(date, colName) {
@@ -1211,84 +1138,7 @@ $.extend($.fn.datagrid.defaults.editors, {
     }
 });
 
-function locatonsTreeSel(node){
-	if(node.id=="fixed"){
-		
-		 $("#locationsDg").datagrid('showColumn', 'locationref_warehousecode');			
-		 $("#locationsDg").datagrid('showColumn', 'locationref_locationcode');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_sku');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_invbatchcode');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_onhandnum');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_locationnum');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_plusnum');
-         $("#locationsDg").datagrid('showColumn', 'locationref_packageunit');		 
-		
-	}if(node.id=="free"){
-			
-		 $("#locationsDg").datagrid('showColumn', 'locationref_warehousecode');			
-		 $("#locationsDg").datagrid('showColumn', 'locationref_locationcode');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_sku');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_invbatchcode');
-		 $("#locationsDg").datagrid('showColumn', 'locationref_onhandnum');
-		 $("#locationsDg").datagrid('hideColumn', 'locationref_locationnum');
-		 $("#locationsDg").datagrid('hideColumn', 'locationref_plusnum');
-         $("#locationsDg").datagrid('showColumn', 'locationref_packageunit');	
-	
-	}
-	
-	
-	locatonsTreeSelone(node); 
-      
-  
-}
-					
 
-//品类树选择，查询货位列表
-function locatonsTreeSelone(node) {
- 	
-    var type = node.id;
-	
-    var row = $('#detailDg').datagrid('getSelected');
-	
-    var product_sku_code= row['product_sku_code'];
-	
-	if(product_sku_code==null||product_sku_code==""){
-		return;
-	}
-	
-	//var warehouse=$('#warehouse');
-    //定义查询条件
-    var condition = buildLocationsQueryCond(0, 1, product_sku_code,type);
-
-    $.ajax({
-        method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/query_avaliable?context=" + $token,
-        data: condition,
-        async: true,
-        dataType: 'json',
-        beforeSend: function (x) {
-            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        },
-        success: function (data) {
-
-            bindLocationDg(data);
-
-            $('#locationsDg').datagrid('getPager').pagination({
-                displayMsg: '第 {from} - {to} 条 共 {total} 条',
-                onBeforeRefresh: function () {
-                    var thisDg = $('#goodsDg');
-                    thisDg.pagination('loading...');
-                    alert('before refresh');
-                    thisDg.pagination('loaded');
-                }
-            });
-
-        },
-        error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
-        }
-    });
-}
 //构建分页条件
 function buildLocationsQueryCond(total, pageNum,sku,type) {
     var warehousecode = cloneAllotInvObj.warehouse.code;
@@ -1310,18 +1160,17 @@ function buildLocationsQueryCond(total, pageNum,sku,type) {
 //选择商品
 function onLocationsSelected (index, rowData) {
     $('#locationsRefDialog').window('close');
- //   var selectdData = rowData.obj;
-   // $('#locationsEditor').val(selectdData.title);
+
    
     //设置商品到当前表体行对象上
    // delete selectdData._id;
-    currentDetailRowObj.locations = rowData.locationref_locationcode;
+    currentDetailRowObj.locationcode = rowData.locationref_loccode;
 
     //-------刷新关联属性------
     var row = $('#detailDg').datagrid('getSelected');
     var index = $('#detailDg').datagrid('getRowIndex', row);
 
-    row['locations'] = rowData.locationref_locationcode;
+    row['locationcode'] = rowData.locationref_loccode;
     $('#detailDg').datagrid('refreshRow', index);
    
 }
@@ -1333,18 +1182,22 @@ function bindLocationDg(data) {
     var viewModel = new Array();
     if(data != null) {
         for (var i in data) {
-            var dataItem = data[i];
-            var row_data = {
-                locationref_locationcode: dataItem.locationcode,
-                locationref_sku: dataItem.sku,
-                locationref_warehousecode: dataItem.warehousecode,
-                locationref_invbatchcode: dataItem.invbatchcode,
-                locationref_onhandnum: dataItem.onhandnum,
-                locationref_locationnum: dataItem.locationnum,
-                locationref_plusnum: dataItem.plusnum,
-                locationref_packageunit: dataItem.packageunit,
+            var dataItem2 = data[i].detail;
+			  for (var j in dataItem2) {
+				var dataItem =  dataItem2[i];
+				var row_data = {	
+				locationref_warehousecode: "",	
+                locationref_loccode: dataItem.loccode,              
+                locationref_loclength: dataItem.loclength,
+                locationref_locwidth: dataItem.locwidth,
+                locationref_locheight: dataItem.locheight,
+                locationref_capacityunit: dataItem.capacityunit,
+                locationref_rownum: dataItem.rownum,
+				locationref_colnum: dataItem.colnum,
+                locationref_levelnum: dataItem.levelnum,
+				locationref_note: dataItem.note,
                 obj: dataItem
-            };
+			  }};
             viewModel.push(row_data);
         }
     }
@@ -1363,57 +1216,21 @@ function onGoodsSelected (index, rowData) {
 	
     var selectdData = rowData;
 
-    $('#skus').val(selectdData);
-	
-	$('#sku').val(selectdData.title);
+	$('#goods_title').val(selectdData.title);
 
     //设置商品到当前表体行对象上
-    cloneAllotInvObj.skus = selectdData; 
-}
-
-//构建分页条件
-function buildGoodRefQueryCond(sku,nsnum,warehousecode) {
-    var condition = {
-		
-        query: {'sku':sku,'type':"fixed",'nsnum':nsnum,"warehousecode":warehousecode}
-    };
-    var reqData = JSON.stringify(condition);
-    return reqData;
-}
-
-function goodsRefReturnAppend(){
+     cloneAllotInvObj.sku = selectdData.product_sku_code;
+	 cloneAllotInvObj.goods_title = selectdData.title;
+	 
+    isBodyChanged = true;
 	
- $('#win').window('close');
- 
- var nsnum= parseFloat($('#ref_nsnum').val());//实收数量
- var selectdData= $('#ref_goods').data();
- var sku =selectdData.product_sku_code;
- 
- var warehousecode = cloneAllotInvObj.warehouse.code;
- var con =buildGoodRefQueryCond(sku,nsnum,warehousecode);
 
-	
- //根据sku ，数量 ，匹配一个或多个货位，
-  $.ajax({
-            method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/automatch_location?context=" + $token,
-            data: con,
-            async: true,
-            dataType: 'json',
-            success: function (data) {
-
-				for (var i in data) {
-					addnewlines(i, data[i], selectdData);
-                }
-				
-			},
-            error: function (x, e) {
-                alert(e.toString(), 0, "友好提醒");
-            }
-        });
-			
-
+    //-------刷新关联属性------
+    updateParentListRow('sku', selectdData.product_sku_code);
+	updateParentListRow('goods_title', selectdData.title);
 }
+
+
 
 
 
@@ -1426,212 +1243,8 @@ function refExpdateDateSel(date){
    
 }
 
-function addnewlines(i, dataItem,selectdData){
-	
-	var theDate = new Date();
-    var theDateStr = theDate.format("yyyy-MM-dd");
-		
-/*    var newDetailObjs = {
-        goods: selectdData
-    };*/
-
-    var nynum = dataItem.nsnum;
-    var unqualifiednum = 0.0;
-    if(i== 0){
-        nynum = parseFloat($('#ref_nynum').val());
-        unqualifiednum = parseFloat($('#ref_unqualifiednum').val());
-    }
-
-    var newDetailObj = {
-            detail_code: "",
-            goods: selectdData,
-            nynum: nynum,
-			//nsnum: parseFloat($('#ref_nsnum').val()),
-            nsnum: dataItem.nsnum,
-			unqualifiednum:  unqualifiednum,
-            locations:dataItem.locationcode,
-            shelflife:$('#ref_shelflife').val(),
-            shelflifeunit:$('#ref_shelflifeunit').val(),
-            expdate: $('#ref_expdatestr').val(),
-            su_batch_code:$('#ref_su_batch_code').val(),
-            batch_code: "",
-            purchase_price: {},
-            supply_price: {},
-            supply_amount: {},
-            discount: "",
-            discount_amount: {},
-            note: ""
-        };
-
-    cloneAllotInvObj.detail.push(newDetailObj);
-
-    var rowData = {
-        product_sku_code : selectdData.product_sku_code,
-        title : selectdData.title,
-        sales_catelog: selectdData.sales_catelogs,
-        bar_code : selectdData.product_sku.bar_code,
-        specifications: selectdData.product_sku.product_specifications,
-        base_unit: selectdData.product_sku.product_spu.base_unit,
-        brand: selectdData.product_sku.product_spu.brand.name,
-        manufacturer: selectdData.product_sku.product_spu.brand.manufacturer.name,
-        batch_code: "",
-        nynum: nynum,
-        //nsnum: parseFloat($('#ref_nsnum').val()),
-        nsnum: dataItem.nsnum,
-        unqualifiednum:  unqualifiednum,
-        locations:dataItem.locationcode,
-        shelflife:$('#ref_shelflife').val(),
-        shelflifeunit:$('#ref_shelflifeunit').val(),
-        expdate: $('#ref_expdatestr').val(),
-        su_batch_code:$('#ref_su_batch_code').val(),
-        purchase_price: 0.00,
-        supply_price: 0.00,
-        supply_amount:  0.00,
-        discount:  0.00,
-        discount_amount: 0.00,
-        note:"",
-        obj: newDetailObj
-    };
-	
-        $('#detailDg').datagrid('appendRow',rowData);
-
-        //必须加入到originalRows中，否则翻页会有问题
-        var data = $("#detailDg").datagrid('getData');
-        data.originalRows.push(rowData);
-
-       /* editIndex = $('#detailDg').datagrid('getRows').length-1;
-        $('#detailDg').datagrid('selectRow', editIndex)
-            .datagrid('beginEdit', editIndex);*/
-
-        isBodyChanged = true;
-
-}
 
 
-var invareaLoader = function (param, success, error) {
-    $.ajax({
-        method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invarea-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
-        async: true,
-        data: JSON.stringify({}),
-        dataType: 'json',
-        beforeSend: function (x) {
-            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        },
-        success: function (data) {
-            success(data.result);
-        },
-        error: function (x, e) {
-            var args = [];
-            args.push(e);
-            error.apply(this, args);
-        }
-    });
-}
-
-
-var unitLoader = function (param, success, error) {
-    $.ajax({
-        method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invunit-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
-        async: true,
-        data: JSON.stringify({}),
-        dataType: 'json',
-        beforeSend: function (x) {
-            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        },
-        success: function (data) {
-            success(data.result);
-        },
-        error: function (x, e) {
-            var args = [];
-            args.push(e);
-            error.apply(this, args);
-        }
-    });
-}
-
-
-function onInvunitSelected(record){
-    if(initialized) return;
-    cloneAllotInvObj.capacityunit = {
-        code: record.code,
-        name: record.name
-    };
-    isBodyChanged = true;
-    //-------刷新关联属性------
-    updateParentListRow('capacityunit', record.name);
-}
-
-
-
-//仓库选择
-function onInvareaSelected(record){
-    if(initialized) return;
-    cloneAllotInvObj.invarea = record;
-
-    isBodyChanged = true;
-    //-------刷新关联属性------
-    updateParentListRow('invarea', record.name);
-}
-
-
-
-function onContainerSelected(record){
-    if(initialized) return;
-    cloneAllotInvObj.containertype = {
-        code: record.code,
-        name: record.name
-    };
-    isBodyChanged = true;
-    //-------刷新关联属性------
-    updateParentListRow('containertype', record.name);
-}
-function onABCTypeSelected(record){
-    if(initialized) return;
-    cloneAllotInvObj.abctype = {
-        code: record.code,
-        name: record.name
-    };
-    isBodyChanged = true;
-    //-------刷新关联属性------
-    updateParentListRow('abctype', record.name);
-}
-
-function onIsplaneSelected(record){
-    if(initialized) return;
-    cloneAllotInvObj.isplane = {
-        code: record.code,
-        name: record.name
-    };
-    isBodyChanged = true;
-    //-------刷新关联属性------
-    updateParentListRow('isplane', record.name);
-}
-
-function onIsmatrixSelected(record){
-    if(initialized) return;
-    cloneAllotInvObj.ismatrix = {
-        code: record.code,
-        name: record.name
-    };
-    isBodyChanged = true;
-    //-------刷新关联属性------
-    updateParentListRow('ismatrix', record.name);
-}
-
-function onCapacityunitSelected(record){
-    if(initialized) return;
-    cloneAllotInvObj.capacityunit = {
-        code: record.code,
-        name: record.name
-    };
-    isBodyChanged = true;
-    //-------刷新关联属性------
-    updateParentListRow('capacityunit', record.name);
-}
-
-onCapacityunitSelected
 
 
 
