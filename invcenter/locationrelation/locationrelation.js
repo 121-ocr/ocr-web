@@ -528,8 +528,87 @@ function locationTreeSel(node) {
         }
     });
 }
+
+function onWarehoseSelected(record){
+  
+	
+    var row = $('#detailDg').datagrid('getSelected');
+    var index = $('#detailDg').datagrid('getRowIndex', row);
+   
+    row['warehousename'] = record;
+	
+	currentDetailRowObj.warehousename = record.name; //设置当前行对象的值
+	currentDetailRowObj.warehousecode = record.code; //设置当前行对象的值
+	
+    isBodyChanged = true;
+	
+   $('#locationTree').tree("reload","locationsRefDialog");
+}
+
+function reload(){
+	
+    var obj= buildLocatinByWAQueryCond(0,1);
+	
+    $.ajax({
+        method: 'GET',
+       url:$invcenterURL + 'ocr-inventorycenter/invfacility-mgr/findtree?context=3|3|lj|aaa',
+        async: true,
+        data: obj,
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+            success(data.result);
+        },
+        error: function (x, e) {
+            var args = [];
+            args.push(e);
+            // error.apply(this, args);
+        }
+    });
+}
+
+function buildLocatinQueryCond(total, pageNum,id){
+	 var condition = {
+        paging: {
+            sort_field: "_id",
+            sort_direction: -1,
+            page_number: pageNum,
+            page_size: 10,
+            total: total,
+            total_page: -1
+        },
+        query: {"detail.loccode":id}
+    }
+	 var reqData = JSON.stringify(condition);
+    return reqData;
+}
+
+
 //构建分页条件
-function buildLocatinQueryCond(total, pageNum, id) {
+function buildLocatinByWAQueryCond(total, pageNum) {
+	
+	//66
+	 if(currentDetailRowObj == null ){
+		 return;
+	 }
+		 
+	var warehousecode = currentDetailRowObj.warehousecode;
+	
+	if(warehousecode==null){
+		 var condition = {
+        paging: {
+            sort_field: "_id",
+            sort_direction: -1,
+            page_number: pageNum,
+            page_size: 10,
+            total: total,
+            total_page: -1
+        },
+        query: {"warehouse.code":warehousecode}
+    }
+	}else{
     var condition = {
         paging: {
             sort_field: "_id",
@@ -539,8 +618,8 @@ function buildLocatinQueryCond(total, pageNum, id) {
             total: total,
             total_page: -1
         },
-        query: {'detail.loccode':id}
-    };
+        query: {}
+    }};
     var reqData = JSON.stringify(condition);
     return reqData;
 }
@@ -596,17 +675,8 @@ function onAfterEdit(index, row){
 
 function onEndEdit(index, row) {
 
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'warehousecode'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.warehousecode = newValue; //设置当前行的数量值
-        currentDetailRowObj.warehousecode = newValue; //设置当前行对象的值
-    }
-	
-	  var ed = $(this).datagrid('getEditor', {
+   
+	var ed = $(this).datagrid('getEditor', {
         index: index,
         field: 'locationcode'
     });
@@ -653,7 +723,7 @@ function append(){
     if (endEditing()){
 
         var newDetailObj = {
-            warehousecode: "",
+            warehousename: "",
             locationcode:"",
 			locationnum:0,
 			packageunit:"个"
@@ -662,7 +732,7 @@ function append(){
         cloneAllotInvObj.allotLocations.push(newDetailObj);
 
         var rowData = {
-            warehousecode: "",
+            warehousename: "",
             locationcode:"",
 			locationnum:0,
 			packageunit:"个",
@@ -782,6 +852,28 @@ function reject(){
 function formatCellTooltip(value){
     return "<span title='" + value + "'>" + value + "</span>";
 }
+
+var warehoseLoader = function (param, success, error) {
+    $.ajax({
+        method: 'POST',
+        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        async: true,
+        data: JSON.stringify({}),
+        dataType: 'json',
+        beforeSend: function (x) {
+            x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        },
+        success: function (data) {
+            success(data.result);
+        },
+        error: function (x, e) {
+            var args = [];
+            args.push(e);
+            error.apply(this, args);
+        }
+    });
+}
+
 
 
 //绑定列表行数据
@@ -977,7 +1069,7 @@ function bindDetailData(data){
 
         var row_data = {
 						
-            warehousecode : dataItem.warehousecode,
+            warehousename : dataItem.warehousename,
             locationcode : (dataItem.locationcode==undefined)?"":dataItem.locationcode,
             locationnum: (dataItem.locationnum==undefined)?0.00:dataItem.locationnum,
             packageunit: (dataItem.packageunit==undefined)?"":dataItem.packageunit,
@@ -1189,7 +1281,7 @@ function bindLocationDg(data) {
 			  for (var j in dataItem2) {
 				var dataItem =  dataItem2[i];
 				var row_data = {	
-				locationref_warehousecode: "",	
+				locationref_warehousecode: data[i].warehouse.code,	
                 locationref_loccode: dataItem.loccode,              
                 locationref_loclength: dataItem.loclength,
                 locationref_locwidth: dataItem.locwidth,

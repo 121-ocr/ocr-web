@@ -77,7 +77,19 @@
                        title="货位信息" data-options="">
                     <thead>
                     <tr>
-					    <th field="warehousecode" width="80px" formatter="formatCellTooltip">仓库</th>
+					  
+					    <th field="warehousename" width="80px"  editor="{  
+                                        type : 'combobox',  
+                                        options : {  
+                                        loader: warehoseLoader, 
+										onSelect: onWarehoseSelected,
+                                        valueField: 'name',    
+                                        textField: 'code',    
+                                        panelHeight: 'auto',  
+                                         }  
+                                    }"  >仓库</th>
+						
+						
                         <th field="locationcode" width="80px" formatter="formatCellTooltip"
                             data-options="editor:{type:'locationsRef'}">货位编码
                         </th>
@@ -138,11 +150,11 @@
               
               <li id="tt">货架货位树</li>
      
-              <ul class="easyui-tree" id="locationTree"  style="width:100%" data-options="
-                                            url:$invcenterURL + 'ocr-inventorycenter/invfacility-mgr/findtree2?context=3|3|lj|aaa',
+                <ul class="easyui-tree" id="locationTree"  style="width:100%" data-options="
+                                            url:$invcenterURL + 'ocr-inventorycenter/invfacility-mgr/findtree?context=3|3|lj|aaa',
                                             method:'get',
                                             onSelect: locationTreeSel"
-                                            />                             
+                                            />                        
         </div>
 
         <div data-options="region:'center',split:true" style="padding:10px;">
