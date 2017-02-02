@@ -801,7 +801,7 @@ function removeDetail(){
         .datagrid('deleteRow', currentRowIndex);
     cloneAllotInvObj.allotLocations.splice(currentRowIndex,1);
     currentRowIndex = undefined;
-    
+
 
     isBodyChanged = true;
 	
