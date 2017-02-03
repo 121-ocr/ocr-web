@@ -19,7 +19,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/create?context=" + $token,
+            url: $invcenterURL + "ocr-inventorycenter/pharseorder-mgr/create?context=" + $token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -1024,7 +1024,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/query?context=" + $token,
+        url : $invcenterURL + "ocr-inventorycenter/pharseorder-mgr/query?context=" + $token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -1060,7 +1060,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/query?context=" + $token,
+                            url: $invcenterURL + "ocr-inventorycenter/pharseorder-mgr/query?context=" + $token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
