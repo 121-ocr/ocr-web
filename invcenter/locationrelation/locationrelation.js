@@ -542,7 +542,8 @@ function onWarehoseSelected(record){
 	
     isBodyChanged = true;
 	
-   $('#locationTree').tree("reload","locationsRefDialog");
+   // $('#locationTree').tree("reload","locationsRefDialog");
+    reload();
 }
 
 function reload(){
@@ -550,7 +551,7 @@ function reload(){
     var obj= buildLocatinByWAQueryCond(0,1);
 	
     $.ajax({
-        method: 'GET',
+        method: 'post',
        url:$invcenterURL + 'ocr-inventorycenter/invfacility-mgr/findtree?context=3|3|lj|aaa',
         async: true,
         data: obj,
@@ -559,7 +560,9 @@ function reload(){
             x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
         },
         success: function (data) {
-            success(data.result);
+            $('#locationTree').tree({data:data});
+            // success(data.result);
+
         },
         error: function (x, e) {
             var args = [];
@@ -596,7 +599,7 @@ function buildLocatinByWAQueryCond(total, pageNum) {
 		 
 	var warehousecode = currentDetailRowObj.warehousecode;
 	
-	if(warehousecode==null){
+	if(warehousecode!=null){
 		 var condition = {
         paging: {
             sort_field: "_id",
@@ -873,6 +876,8 @@ var warehoseLoader = function (param, success, error) {
         }
     });
 }
+
+
 
 
 
