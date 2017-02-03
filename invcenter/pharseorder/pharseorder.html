@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
     <script type="text/javascript" src="../../js/constant.js"></script>
     <script type="text/javascript" src="../../js/utility.js"></script>
-    <script type="text/javascript" src="pharseinv.js"></script>
+    <script type="text/javascript" src="pharseorder.js"></script>
     <style type="text/css">
         .subtotal { font-weight: bold; }/*合计单元格样式*/
     </style>
@@ -46,14 +46,13 @@
             <thead>
             <tr>
                 <th field="bo_id" width="80px" formatter="formatCellTooltip">单据号</th>
-                <th field="inv_date" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDatetime">入库日期</th>
-                <th field="warehouse" width="80px" formatter="formatCellTooltip">仓库</th>
+                <th field="inv_date" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDatetime">采购日期</th>
+                <!--<th field="warehouse" width="80px" formatter="formatCellTooltip">仓库</th>
                 <th field="inv_org" width="80px" formatter="formatCellTooltip">库存组织</th>
-                <th field="warehouse_user" width="80px" formatter="formatCellTooltip">仓库员</th>
+                <th field="warehouse_user" width="80px" formatter="formatCellTooltip">仓库员</th>-->
                 <th field="supplier_user" width="80px" formatter="formatCellTooltip">供应商</th>
                 <th field="transportation" width="80px" formatter="formatCellTooltip">运输方式</th>
                 <th field="purchase_user" width="80px" formatter="formatCellTooltip">采购员</th>
-
                 <th field="deliver_nation" width="80px" formatter="formatCellTooltip">发货国家</th>
                 <th field="deliver_area" width="80px" formatter="formatCellTooltip">发货地区</th>
             </tr>
@@ -66,7 +65,7 @@
             <div data-options="region:'north',split:true" style="height:200px;border:0px;">
                 <table id="header" cellpadding="0" cellspacing="0" style="width:100%">
                     <tr style="height: 50px">
-                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">采购入库单</strong></td>
+                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">采购订单</strong></td>
                     </tr>
                     <tr style="height: 35px">
 
@@ -80,7 +79,7 @@
                         </td>
                         
                         <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
-                            入库日期
+                            采购日期
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
@@ -98,42 +97,7 @@
                             <input class="easyui-textbox" id="supplier_user" style="width:200px;" data-options="label:'Name:',required:true,onChange:onSupUserChanged">
                         </td>
                     </tr>
-                    <tr style="height: 35px">
-                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
-                            仓库
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-
-                            <input id="warehouse" class="easyui-combobox" style="width:200px;" data-options="
-                                       loader: warehoseLoader, 
-                                        mode: 'remote',
-                                        valueField:'code',
-                                        textField:'name',
-                                        panelHeight:'auto',
-                                        onSelect: onWarehoseSelected,
-                                        required:true">
-                        </td>
-											
-						
-                        <td  style="width: 80px;text-align: right; vertical-align: middle; padding: 5px;display:none">
-                            库存组织
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle;display:none">
-                            <input class="easyui-combotree" id="inv_org"  style="width:200px" data-options="
-                                        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
-                                        method:'get',
-
-                                        panelHeight:'auto',
-                                        onSelect: inv_orgSel,
-                                        required:true">
-                        </td>
-                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
-                            仓管员
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-                            <input class="easyui-textbox" id="warehouse_user" style="width:200px;" data-options="label:'Name:',required:true,onChange:onWarehouseUserChanged">
-                        </td>
-						
+					<tr style="height: 35px">	
 						 <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
                             运费
                         </td>
@@ -141,11 +105,8 @@
 
                             <input id="transportationfee" class="easyui-textbox" style="width:200px;" data-options="label:'Name:',required:false,onChange:onTransportationfeeChanged">
                         </td>
-
-                    </tr>
                     
-                    
-                    <tr style="height: 35px">
+                  
                         <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
                             采购员
                         </td>
@@ -165,13 +126,18 @@
                                         onSelect: purchaseOrglSel,
                                         required:true">
                         </td>
+						
+						 
+						 
+						 
                         <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
                             采购部门
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input class="easyui-textbox" id="purchase_dept" style="width:200px;" data-options="label:'Name:',required:false,onChange:onPurchaseDeptChanged">
                         </td>
-						
+						 </tr>
+					<tr style="height: 35px"> 
 						 <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
                             运输方式
                         </td>
@@ -179,10 +145,7 @@
 
                             <input id="transportation" class="easyui-textbox" style="width:200px;" data-options="label:'Name:',required:false,onChange:onTransportationChanged">
                         </td>
-                    </tr>
-
-                    <tr style="height: 35px">
-
+                
                        
                         <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
                             发货国家
@@ -205,44 +168,42 @@
             </div>
             <div data-options="region:'center'" style="border:0px">
                 <table id="detailDg" class="easyui-datagrid" style="border:0px"
-                       title="采购入库单明细" data-options="">
+                       title="采购订单明细" data-options="">
                     <thead>
                     <tr>
                         <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
-                        <!--<th field="title" width="100px" formatter="formatCellTooltip"
-                            data-options="editor:{type:'goodsRef'}">商品名</th>-->
 					    <th field="title" width="100px" formatter="formatCellTooltip">商品名</th>
                         <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
                         <th field="bar_code" width="80px" formatter="formatCellTooltip" data-options="editor:{type:'barcodeEditor'}">条码</th>
                         <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
                         <th field="batch_code" width="80px" formatter="formatCellTooltip">批次号</th>
                         <th field="base_unit" width="80px" formatter="formatCellTooltip">单位</th>
-                        <th field="nynum" width="80px" formatter="formatCellTooltip" editor="{
+                        <th field="nynum" width="80px" formatter="formatCellTooltip"  editor="{
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
                                                                         required:true
                                                                     }
-                                                                }">应收数量</th>
-                        <th field="nsnum" width="80px" formatter="formatCellTooltip" editor="{
+                                                                } ">采购数量</th>
+                        <th field="nsnum" width="80px" formatter="formatCellTooltip" hidden="true" editor="{
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
                                                                         required:true
                                                                     }
-                                                                }">实收数量</th>
-                        <th field="unqualifiednum" width="80px" formatter="formatCellTooltip" editor="{
+                                                                } ">实收数量</th>
+                        <th field="unqualifiednum" width="80px" formatter="formatCellTooltip" hidden="true" editor="{
                                                                     type:'numberbox',
                                                                     options:{
                                                                         precision:0,
                                                                         required:true
                                                                     }
-                                                                }">不合格数量</th>
+                                                                } ">不合格数量</th>
 
                        
                        
-					   <th field="locations" width="80px" formatter="formatCellTooltip"
-                            data-options="editor:{type:'locationsRef'}">货位
+					   <th field="locations" width="80px" hidden="true" formatter="formatCellTooltip"
+                            data-options="editor:{type:'locationsRef'} ">货位
                         </th>
 						
 						
