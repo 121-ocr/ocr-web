@@ -1005,7 +1005,7 @@ var initialized = false;
 function onRowSelected (rowIndex, rowData) {
     initialized = true;
 
-    //allotInvObjIndex = rowIndex;
+    allotInvObjIndex = rowIndex;
     allotInvObj = rowData.obj;
 
     //克隆数据
@@ -1354,6 +1354,58 @@ function refExpdateDateSel(date){
 	
 	
    
+}
+
+function removeRep(){
+
+    if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}
+
+    obj = new Object();
+    obj._id = cloneAllotInvObj._id;
+
+    $.messager.confirm('删除警告', '是否确认删除?', function(r){
+        if (r){
+
+            $.ajax({
+                method: 'POST',
+                url: $invcenterURL + "ocr-inventorycenter/locationrelation-mgr/remove?context=" + $token,
+                data: JSON.stringify(obj),
+                async: true,
+                dataType: 'json',
+                beforeSend: function (x) {
+                    x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                },
+                success: function (data) {
+                    //$.messager.alert('提示','删除成功!');
+                    resetState();
+
+                    var dgList = $('#dgList');
+                    dgList.datagrid('deleteRow', allotInvObjIndex);
+                    currentRowIndex = undefined;
+
+                    //$.messager.alert('提示','删除成功!');
+                    alert_autoClose('提示','删除成功!');
+
+                    //当前指针指向正确的位置
+                    var rowCount = dgList.datagrid('getRows').length + 1;
+                    if(rowCount > 0){
+                        if(allotInvObjIndex == 0){
+                            dgList.datagrid('selectRow',cloneAllotInvObj);
+                        }else{
+                            if(allotInvObjIndex == rowCount -1){
+                                dgList.datagrid('selectRow',cloneAllotInvObj-1);
+                            }else{
+                                dgList.datagrid('selectRow',cloneAllotInvObj+1);
+                            }
+                        }
+                    }
+                },
+                error: function (x, e) {
+                    alert(e.toString(), 0, "友好提醒");
+                }
+            });
+        }
+    });
 }
 
 
