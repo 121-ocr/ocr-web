@@ -544,6 +544,8 @@ function onWarehoseSelected(record){
 	
    // $('#locationTree').tree("reload","locationsRefDialog");
     reload();
+	
+	clearbindLocationDg();
 }
 
 function reload(){
@@ -1304,6 +1306,17 @@ function bindLocationDg(data) {
 
     dgLst.datagrid('loadData',{
         total: data.total,
+        rows: viewModel
+    });
+
+}
+
+
+function clearbindLocationDg() {
+    var dgLst = $('#locationsDg');
+    var viewModel = new Array();
+    dgLst.datagrid('loadData',{
+        total: 0,
         rows: viewModel
     });
 
