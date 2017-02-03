@@ -949,12 +949,11 @@ function bindDgListData(data){
 		var state = data.datas[i].current_state;
     //for ( var i in data) {
       // var dataItem = data[i];
-         var x= dataItem.warehouse;
-		 //var x1=x.code;
+
         var row_data = {
             bo_id: dataItem.bo_id,
             inv_date:dataItem.inv_date,
-            //warehouse:dataItem.warehouse,
+            warehouse:dataItem.warehouse,
             inv_org:dataItem.inv_org,
             warehouse_user:dataItem.warehouse_user,
             purchase_user:dataItem.purchase_user,
@@ -1125,7 +1124,7 @@ function bindSelectedDataToCard(data){
     $('#bo_id').textbox('setValue',data.bo_id);
     $('#inv_date').textbox('setValue',data.inv_date);
     $('#warehouse_user').textbox('setValue',data.warehouse_user);
-    $('#warehouse').textbox('setValue',data.warehouse);
+    $('#warehouse').textbox('setValue',data.warehouse.name);
     $('#inv_org').textbox('setValue',data.inv_org.name);
     $('#purchase_user').textbox('setValue',data.purchase_user);
     $('#transportation').textbox('setValue',data.transportation);
@@ -1740,16 +1739,11 @@ function goodsRefReturnAppend(){
             async: true,
             dataType: 'json',
             success: function (data) {
-				
-				if(null==data[0].locationcode ||data[0].locationcode==""){
-					alert_autoClose("提示","此商品，自动匹配货位无数据，请手工添加!");
-					//$.messager.alert('信息提示','货位自动匹配无数据，请手工添加!');
-					console.log("货位自动匹配无数据，请手工添加");
-				}
 
 				for (var i in data) {
 					addnewlines(i, data[i], selectdData);
-                }			
+                }
+				
 			},
             error: function (x, e) {
                 alert(e.toString(), 0, "友好提醒");
@@ -1793,7 +1787,7 @@ function addnewlines(i, dataItem,selectdData){
 			//nsnum: parseFloat($('#ref_nsnum').val()),
             nsnum: dataItem.nsnum,
 			unqualifiednum:  unqualifiednum,
-            locations:(dataItem.locationcode==null)?"":dataItem.locationcode,
+            locations:dataItem.locationcode,
             shelflife:$('#ref_shelflife').val(),
             shelflifeunit:$('#ref_shelflifeunit').val(),
             expdate: $('#ref_expdatestr').val(),
@@ -1823,7 +1817,7 @@ function addnewlines(i, dataItem,selectdData){
         //nsnum: parseFloat($('#ref_nsnum').val()),
         nsnum: dataItem.nsnum,
         unqualifiednum:  unqualifiednum,
-        locations:(dataItem.locationcode==null)?"":dataItem.locationcode,
+        locations:dataItem.locationcode,
         shelflife:$('#ref_shelflife').val(),
         shelflifeunit:$('#ref_shelflifeunit').val(),
         expdate: $('#ref_expdatestr').val(),
