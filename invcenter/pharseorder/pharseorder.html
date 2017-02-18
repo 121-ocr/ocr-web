@@ -421,25 +421,25 @@
 				    <th field="invref_su_batch_code" width="80px" formatter="formatCellTooltip">供应商批号</th>
 					
 					
-					<th field="warehousename" width="80px"  editor="{  
-                                        type : 'combobox',  
-                                        options : {  
-                                        loader: warehoseLoader, 
+					<th field="warehousename" width="80px"  editor="{
+                                        type : 'combobox',
+                                        options : {
+                                        loader: warehoseLoader,
 										onSelect: onWarehoseSelectedRef,
-                                        valueField: 'name',    
-                                        textField: 'code',    
-                                        panelHeight: 'auto', 
-										required:true							
-                                         }  
+                                        valueField: 'name',
+                                        textField: 'code',
+                                        panelHeight: 'auto',
+										required:true
+                                         }
                                     }"  ><font color='red'>仓库编码</font></th>
-									
+
                    <th field="locationcode" width="80px" formatter="formatCellTooltip"
                             data-options="editor:{type:'locationsRef'}"><font color='red'>货位</font>
                     </th>
 						
 
                     <th field="invref_nynum" width="70px" formatter="formatCellTooltip " editor="{
-                                                                    type:'numberbox',
+                                                                    type:'text',
                                                                     options:{
 
                                                                         required:true
@@ -447,7 +447,7 @@
                                                                     }
                                                                 }"><font color='red'>应收数量</font></th>
 					<th field="invref_nsnum" width="70px" formatter="formatCellTooltip"  editor="{
-                                                                    type:'numberbox',
+                                                                    type:'text',
                                                                     options:{
 
                                                                         required:true

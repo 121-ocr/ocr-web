@@ -107,7 +107,7 @@ function dgPharseinv(){
         singleSelect : true,
         border : false,
         onClickCell: onClickCellinvDg,
-        onEndEdit: endEditinginvDg,
+        onEndEdit: onEndEdit,
         onSelect: onDetailRowSelected  //行选择事件
     });
 					
@@ -542,14 +542,14 @@ function endEditinginvDg(){
     }
 }
 function onClickCellinvDg(index, field){
-    if (endEditinginvDg()){
+     if (endEditinginvDg()){
 
         isBodyChanged = true;
 
         $('#invDg').datagrid('selectRow', index)
             .datagrid('editCell', {index:index,field:field});
         editIndex = index;
-    }
+     }
 
 }
 
@@ -568,6 +568,22 @@ function onEndEdit(index, row) {
     //     var newValue = $(ed.target).val();
     //     row.quantity = newValue; //设置当前行的数量值
     //     currentDetailRowObj.quantity = newValue; //设置当前行对象的值
+    // }
+
+    // var ed = $(this).datagrid('getEditor', {
+    //     index: index,
+    //     field: 'invref_nynum'
+    // });
+    // if (ed != null && ed != undefined) {
+    //     alert('a');
+    // }
+    //
+    // var ed = $(this).datagrid('getEditor', {
+    //     index: index,
+    //     field: 'invref_nsnum'
+    // });
+    // if (ed != null && ed != undefined) {
+    //     alert('a');
     // }
 
     var ed = $(this).datagrid('getEditor', {
@@ -710,7 +726,7 @@ function onEndEdit(index, row) {
         currentDetailRowObj.discount_amount = newValue; //设置当前行对象的值
     }
 	
-    refreshSubTotalRows(); //刷新小计列
+    // refreshSubTotalRows(); //刷新小计列
 }
 
 function appendgoods(){
@@ -787,9 +803,9 @@ function addPharseInvLines(data){
            invref_expdate:dataItem.expdate,
            invref_su_batch_code: dataItem.su_batch_code,
            invref_warehouse:{
-			   code:"1111",
-			   name:"sefrf"
-
+			   // code:"1111",
+			   // name:"sefrf"
+               //
 
 		   },
            invref_location: {},
@@ -843,10 +859,15 @@ function onWarehoseSelected(record){
     isBodyChanged = true;
 	
    // $('#locationTree').tree("reload","locationsRefDialog");
-    reload();
+   //  reload();
 	
 	clearbindLocationDg();
 }
+
+function  reload() {
+    
+}
+
 
 
 function onWarehoseSelectedRef(record){
