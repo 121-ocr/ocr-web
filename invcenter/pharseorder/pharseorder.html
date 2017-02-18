@@ -27,8 +27,10 @@
                     <td style="padding-left:2px">
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="newRep();">新增</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick="save();">保存</a>
+						<a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick="createinv();">生成入库单</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="reject();">撤销</a>
+						
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help"></a>
                     </td>
@@ -171,12 +173,13 @@
                        title="采购订单明细" data-options="">
                     <thead>
                     <tr>
+					    <th field="detailcode" width="80px" formatter="formatCellTooltip">表体号</th>
                         <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
 					    <th field="title" width="100px" formatter="formatCellTooltip">商品名</th>
                         <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
                         <th field="bar_code" width="80px" formatter="formatCellTooltip" data-options="editor:{type:'barcodeEditor'}">条码</th>
                         <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
-                        <th field="batch_code" width="80px" formatter="formatCellTooltip">批次号</th>
+
                         <th field="base_unit" width="80px" formatter="formatCellTooltip">单位</th>
                         <th field="nynum" width="80px" formatter="formatCellTooltip"  editor="{
                                                                     type:'numberbox',
@@ -395,7 +398,88 @@
     </div>
 </div>
 
-<div id="win" class="easyui-window" title="新增采购入库明细" data-options="modal:true,closed:true,iconCls:'icon-save'"
+<!--商品参照-->
+<div id="inv" class="easyui-window" title="创建采购入库"
+     data-options="modal:true,closed:true,iconCls:'icon-save'"
+     style="width:1150px;height:400px;padding:5px;">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'center',split:true" style="padding:10px;">
+            <table id="invDg" class="easyui-datagrid" style="width:100%;height:100%"
+                   title="请补充入库信息" >
+                <thead>
+                <tr>
+				    <th field="invref_detailcode" style="display:none;">表体号</th>	
+				    <th field="invref_boid"  width="70px" formatter="formatCellTooltip">采购订单号</th>				
+                    <th field="invref_pharse_date" width="70px" formatter="formatCellTooltip">采购日期</th>
+				    <th field="invref_sku" width="70px" formatter="formatCellTooltip">SKU</th>
+				    <th field="invref_goodtitile" width="70px" formatter="formatCellTooltip">商品名</th>				    
+					<th field="invref_bar_code" width="70px" formatter="formatCellTooltip">条码</th>
+				    <th field="invref_pharsenum" width="70px" formatter="formatCellTooltip">采购数量</th>
+					<th field="invref_shelflife" width="70px" formatter="formatCellTooltip">保质期</th>
+				    <th field="invref_shelflifeunit" width="70px" formatter="formatCellTooltip">保质期单位</th>
+				    <th field="invref_expdate" width="80px" formatter="formatCellTooltip">失效日期</th>
+				    <th field="invref_su_batch_code" width="80px" formatter="formatCellTooltip">供应商批号</th>
+					
+					
+					<th field="warehousename" width="80px"  editor="{  
+                                        type : 'combobox',  
+                                        options : {  
+                                        loader: warehoseLoader, 
+										onSelect: onWarehoseSelectedRef,
+                                        valueField: 'name',    
+                                        textField: 'code',    
+                                        panelHeight: 'auto', 
+										required:true							
+                                         }  
+                                    }"  ><font color='red'>仓库编码</font></th>
+									
+                   <th field="locationcode" width="80px" formatter="formatCellTooltip"
+                            data-options="editor:{type:'locationsRef'}"><font color='red'>货位</font>
+                    </th>
+						
+
+                    <th field="invref_nynum" width="70px" formatter="formatCellTooltip " editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+
+                                                                        required:true
+
+                                                                    }
+                                                                }"><font color='red'>应收数量</font></th>
+					<th field="invref_nsnum" width="70px" formatter="formatCellTooltip"  editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+
+                                                                        required:true
+
+                                                                    }
+                                                                }" ><font color='red'>实收数量</font></th>
+																
+                    <th field="invref_unqualifiednum" width="70px" formatter="formatCellTooltip"  editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+
+                                                                        required:true
+
+                                                                    }
+                                                                }"><font color='red'>不合格数量</font></th>             			
+                </tr>
+                </thead>
+            </table>	
+			
+        </div>
+		
+		
+		
+		
+        <div data-options="region:'south',border:false" style="text-align:right;padding:5px 0 0;">
+            <!--<a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="goodsRefReturn();" style="width:80px">Ok</a>-->
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)"
+               onclick="pharseinvRefReturnAppend();" style="width:80px">创建</a>
+        </div>
+    </div>
+</div>
+<div id="win" class="easyui-window" title="新增采购订单明细" data-options="modal:true,closed:true,iconCls:'icon-save'"
      style="width:300px;height:900px;padding:5px;">
 	  <table id="addNewGoodsDg"  cellpadding="0" cellspacing="0" style="width:100%">
                     <tr style="height: 10px">
@@ -493,7 +577,7 @@
                         </td>
 						 						 
 						 <td style="width: 180px;text-align: left; vertical-align: middle;display:none">	
-							<input  id="ref_unqualifiednum" style='width:170px' value="0.0">	
+							<input  id="ref_unqualifiednum" style='width:170px' value="0.0" >	
 						</td> 						
                     </tr>	
 
@@ -514,5 +598,6 @@
     dgListSetting();
     detailListSetting();
     loadDgList();
+	dgPharseinv();
 </script>
 </html>
