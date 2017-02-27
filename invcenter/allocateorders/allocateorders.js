@@ -1357,3 +1357,43 @@ function removeRep(){
         }
     });
 }
+
+function approve(){
+
+  if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}
+
+    obj = new Object();
+    obj._id = cloneAllotInvObj._id;
+
+    $.messager.confirm('提示', '是否确认审批?', function(r){
+        if (r){
+
+            $.ajax({
+                method: 'POST',
+                url: $invcenterURL + "ocr-inventorycenter/allocateorders-mgr/approve?context=" + $token,
+                data: JSON.stringify(obj),
+                async: true,
+                dataType: 'json',
+                beforeSend: function (x) {
+                    x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                },
+                success: function (data) {
+					
+                var dgList = $('#dgList');
+                var row = dgList.datagrid('getSelected');
+                var index = dgList.datagrid('getRowIndex', row);
+                row.obj = data;
+              
+                onRowSelected(index, row);
+
+                resetState();
+                alert_autoClose('提示','审批成功!');
+                },
+                error: function (x, e) {
+                    alert(e.toString(), 0, "友好提醒");
+                }
+            });
+        }
+    });
+}
+
