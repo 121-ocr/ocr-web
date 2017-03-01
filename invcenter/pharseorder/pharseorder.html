@@ -173,7 +173,13 @@
                        title="采购订单明细" data-options="">
                     <thead>
                     <tr>
-					    <th field="detailcode" width="80px" formatter="formatCellTooltip">表体号</th>
+					    <th field="detail_code" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        precision:0,
+                                                                        required:true
+                                                                    }
+                                                                } ">表体号</th>
                         <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
 					    <th field="title" width="100px" formatter="formatCellTooltip">商品名</th>
                         <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
@@ -408,7 +414,14 @@
                    title="请补充入库信息" >
                 <thead>
                 <tr>
-				    <th field="invref_detailcode" style="display:none;">表体号</th>	
+				    <th field="invref_detailcode" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+																		precision:0,                                                                        
+																		required:true
+
+                                                                    }
+                                                                }">表体号</th>	
 				    <th field="invref_boid"  width="70px" formatter="formatCellTooltip">采购订单号</th>				
                     <th field="invref_pharse_date" width="70px" formatter="formatCellTooltip">采购日期</th>
 				    <th field="invref_sku" width="70px" formatter="formatCellTooltip">SKU</th>
@@ -419,7 +432,7 @@
 				    <th field="invref_shelflifeunit" width="70px" formatter="formatCellTooltip">保质期单位</th>
 				    <th field="invref_expdate" width="80px" formatter="formatCellTooltip">失效日期</th>
 				    <th field="invref_su_batch_code" width="80px" formatter="formatCellTooltip">供应商批号</th>
-					
+					<th field="invref_warehouse" width="0px" >仓库对象</th>	
 					
 					<th field="warehousename" width="80px"  editor="{
                                         type : 'combobox',
@@ -433,23 +446,24 @@
                                          }
                                     }"  ><font color='red'>仓库编码</font></th>
 
-                   <th field="locationcode" width="80px" formatter="formatCellTooltip"
+				   <th field="invref_location" width="0px" >货位对象</th>	
+                   <th field="invref_locationcode" width="80px" formatter="formatCellTooltip"
                             data-options="editor:{type:'locationsRef'}"><font color='red'>货位</font>
                     </th>
 						
 
                     <th field="invref_nynum" width="70px" formatter="formatCellTooltip " editor="{
-                                                                    type:'text',
+                                                                    type:'numberbox',
                                                                     options:{
-
-                                                                        required:true
+																		precision:0,                                                                        
+																		required:true
 
                                                                     }
                                                                 }"><font color='red'>应收数量</font></th>
 					<th field="invref_nsnum" width="70px" formatter="formatCellTooltip"  editor="{
-                                                                    type:'text',
+                                                                    type:'numberbox',
                                                                     options:{
-
+																		precision:0,
                                                                         required:true
 
                                                                     }
@@ -458,11 +472,19 @@
                     <th field="invref_unqualifiednum" width="70px" formatter="formatCellTooltip"  editor="{
                                                                     type:'numberbox',
                                                                     options:{
-
+                                                                        precision:0,
                                                                         required:true
 
                                                                     }
-                                                                }"><font color='red'>不合格数量</font></th>             			
+                                                                }"><font color='red'>不合格数量</font></th>           
+                    <th field="invref_stockinnum" width="70px" formatter="formatCellTooltip"  editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        precision:0,
+                                                                        required:true
+
+                                                                    }
+                                                                }"><font color='red'>已入库数量</font></th>  																
                 </tr>
                 </thead>
             </table>	

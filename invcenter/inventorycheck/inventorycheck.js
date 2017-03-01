@@ -1378,16 +1378,16 @@ function approve(){
 
   if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}
 
-    obj = new Object();
-    obj._id = cloneAllotInvObj._id;
+   
 
-    $.messager.confirm('提示', '是否确认审批?', function(r){
+    $.messager.confirm('提示', '是否确认?', function(r){
         if (r){
-
+			var param =  JSON.stringify(cloneAllotInvObj);
+ 
             $.ajax({
                 method: 'POST',
                 url: $invcenterURL + "ocr-inventorycenter/inventorycheck-mgr/approve?context=" + $token,
-                data: JSON.stringify(obj),
+                data: param,
                 async: true,
                 dataType: 'json',
                 beforeSend: function (x) {
