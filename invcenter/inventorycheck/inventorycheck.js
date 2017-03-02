@@ -1393,7 +1393,7 @@ function approve(){
  
             $.ajax({
                 method: 'POST',
-                url: $invcenterURL + "ocr-inventorycenter/inventorycheck-mgr/approve?confirm=" + $token,
+                url: $invcenterURL + "ocr-inventorycenter/inventorycheck-mgr/confirm?context=" + $token,
                 data: param,
                 async: true,
                 dataType: 'json',
