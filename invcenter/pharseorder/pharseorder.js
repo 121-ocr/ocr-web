@@ -772,10 +772,16 @@ function querySelectAddDatas(){
         data: reqData,
         dataType : 'json',
         beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
-        success : function(result) {
-            var data = result;
- 
-			addPharseInvLines(data);
+        success : function(re) {
+			var result = re.result;
+			
+			if(result==null){
+				clearPhraseInvLines();
+			}else{
+				addPharseInvLines(result);
+			}
+			
+			
         },
         error: function (x, e) {
             alert(e.toString(), 0, "友好提醒");
@@ -785,11 +791,16 @@ function querySelectAddDatas(){
 	
 	
 }
-
+function clearPhraseInvLines(data){
+	var dgLst = $('#invDg');
+	 var viewModel = new Array();
+	  dgLst.datagrid('loadData',{
+        total: 0,
+        rows: viewModel
+    });
+} 
 
 function addPharseInvLines(data){ 
-	
-
 	
 	var dgLst = $('#invDg');
     var viewModel = new Array();	
