@@ -1240,9 +1240,18 @@ function onGoodsSelected (index, rowData) {
     endEditing();
 
     $('#goodsRefDialog').window('close');
+	
+  
+
 
     currentDetailRowObj.goods = rowData;
-
+	
+    currentDetailRowObj.goods.account=rowData.obj.account;
+	
+		
+	delete currentDetailRowObj.goods.obj;
+	
+	
     // currentDetailRowObj.title = rowData.title;
 
     //-------刷新关联属性------
@@ -1378,8 +1387,6 @@ function approve(){
 
   if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}
 
-   
-
     $.messager.confirm('提示', '是否确认?', function(r){
         if (r){
 			var param =  JSON.stringify(cloneAllotInvObj);
@@ -1403,7 +1410,7 @@ function approve(){
                 onRowSelected(index, row);
 
                 resetState();
-                alert_autoClose('提示','审批成功!');
+                alert_autoClose('提示','确认成功!');
                 },
                 error: function (x, e) {
                     alert(e.toString(), 0, "友好提醒");
