@@ -168,10 +168,30 @@
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input class="easyui-textbox" id="note" style="width:200px" data-options="label:'Name:',onChange:onNoteChanged">
                         </td>
+						
+						<td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            状态
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-combobox" id="status" style="width:200px" data-options="
+                                        valueField:'code',
+                                        textField:'name',
+                                        data: [{
+                                                code: '1',
+                                                name: '自由态',
+												selected:true
+                                            },{
+                                                code: '2',
+                                                name: '确认态'
+                                            }],
+                                            
+                                        required:true">
+                        </td>
 
 
                     </tr>
-
+					
+					
 
 
                 </table>
