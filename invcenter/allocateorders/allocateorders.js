@@ -704,7 +704,7 @@ function bindDgListData(data){
             inwarehouses:dataItem.inwarehouses.name,
             note:dataItem.note,
             detail:dataItem.detail,
-            obj: dataItem
+            obj: data.datas[i]
         };
         viewModel.push(row_data);
     }
@@ -831,9 +831,16 @@ function onRowSelected (rowIndex, rowData) {
     initialized = true;
 
     allotInvObjIndex = rowIndex;
-    allotInvObj = rowData.obj;
-    //wdq 2017年2月2日
-    allotInvObj.current_state = rowData.current_state;
+   // allotInvObj = rowData.obj;
+    
+   if (rowData.current_state == undefined){
+	   allotInvObj = rowData.obj.bo;
+	   allotInvObj.current_state =rowData.obj.current_state;
+	} else{	   
+	   allotInvObj = rowData.obj;
+	   allotInvObj.current_state =rowData.current_state;
+	   
+	}
 
     //克隆数据
     cloneAllotInvObj = cloneJsonObject(allotInvObj);
@@ -859,7 +866,7 @@ function onDetailRowSelected(rowIndex, detailRowData){
 //绑定当前选择行的数据
 function bindSelectedDataToCard(data){
 
-
+	//var state = data.datas[i].current_state;
     $('#billno').textbox('setValue',data.billno);
     $('#busidate').textbox('setValue',data.busidate);
     $('#outorg').textbox('setValue',data.outorg.name);
@@ -867,7 +874,16 @@ function bindSelectedDataToCard(data){
     $('#inorg').textbox('setValue',data.inorg.name);
     $('#inwarehouses').textbox('setValue',data.inwarehouses.name);
     $('#note').textbox('setValue',data.note);
+     
+    if(data.current_state=="confirm"){
+		$('#status').textbox('setValue',"确认态");
 
+	}	 else{
+		$('#status').textbox('setValue',"自由态");
+
+	}
+	
+	
 }
 
 function onMemberChanged() {
@@ -1367,7 +1383,7 @@ function approve(){
    var states = $("#status").combobox('getValue');
    
    if(states=="确认态"){
-	  alert_autoClose('提示','已确认!');
+	  alert_autoClose('提示','此单据已确认!');
 	  return;
    }
    $.messager.confirm('提示', '是否确认?', function(r){
@@ -1384,7 +1400,7 @@ function approve(){
                     x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
                 },
                 success: function (data) {
-				
+				alert(data);
 			    $('#status').combobox('setValue','确认态');	
 				
                 var dgList = $('#dgList');
