@@ -97,7 +97,6 @@
                             <input id="outorg" class="easyui-combotree" style="width:200px;" data-options="
                                        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
                                         method:'get',
-
                                         panelHeight:'auto',
                                         onSelect: onOutOrgSel,
                                         required:true">
@@ -134,7 +133,6 @@
                             <input id="inorg" class="easyui-combotree" style="width:200px;" data-options="
                                        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
                                         method:'get',
-
                                         panelHeight:'auto',
                                         onSelect: onInOrgSel,
                                         required:true">
@@ -174,14 +172,15 @@
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input class="easyui-combobox" id="status" style="width:200px" data-options="
-                                        valueField:'code',
+                                        valueField:'name',
                                         textField:'name',
+										disabled:true,
                                         data: [{
-                                                code: '1',
+                                               
                                                 name: '自由态',
 												selected:true
                                             },{
-                                                code: '2',
+                                              
                                                 name: '确认态'
                                             }],
                                             

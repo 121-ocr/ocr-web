@@ -711,7 +711,7 @@ function bindDgListData(data){
 
 	
      for ( var i in data.datas) {
-        var dataItem = data.datas[i];
+        var dataItem = data.datas[i].bo;
 		var state = data.datas[i].current_state;
 
         var row_data = {

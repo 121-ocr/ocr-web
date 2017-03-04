@@ -688,7 +688,7 @@ function bindDgListData(data){
 
 	
      for ( var i in data.datas) {
-        var dataItem = data.datas[i];
+        var dataItem = data.datas[i].bo;
 		var state = data.datas[i].current_state;
     //for ( var i in data) {
       // var dataItem = data[i];
@@ -1364,8 +1364,13 @@ function removeRep(){
 function approve(){
 
   if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}  
- 
-    $.messager.confirm('提示', '是否确认?', function(r){
+   var states = $("#status").combobox('getValue');
+   
+   if(states=="确认态"){
+	  alert_autoClose('提示','已确认!');
+	  return;
+   }
+   $.messager.confirm('提示', '是否确认?', function(r){
         if (r){
 			var param =  JSON.stringify(cloneAllotInvObj);
 			
@@ -1379,7 +1384,9 @@ function approve(){
                     x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
                 },
                 success: function (data) {
-					
+				
+			    $('#status').combobox('setValue','确认态');	
+				
                 var dgList = $('#dgList');
                 var row = dgList.datagrid('getSelected');
                 var index = dgList.datagrid('getRowIndex', row);
