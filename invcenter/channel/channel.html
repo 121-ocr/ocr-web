@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DataGrid Selection - jQuery EasyUI Demo</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="channel.js"></script>
+    <style type="text/css">
+        .subtotal { font-weight: bold; }/*合计单元格样式*/
+    </style>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="newRep();">新增</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick="save();">保存</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove" onclick="removeRep();">删除</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="reject();">撤销</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help"></a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="showTree()">渠道关系树</a>
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:310px">
+        <table id="dgList" class="easyui-datagrid" style="width:600px;height:100%"
+               title="Load Data" iconCls="icon-save">
+            <thead>
+            <tr>
+                <th field="code" width="80px" formatter="formatCellTooltip">编码</th>
+                <th field="name" width="80px" formatter="formatCellTooltip">名称</th>
+                <th field="channel_type" width="80px" formatter="formatCellTooltip">渠道类型</th>
+                <th field="level" width="80px" formatter="formatCellTooltip">等级</th>
+                <th field="region" width="80px" formatter="formatCellTooltip">所属区域</th>
+                <th field="ship_to" width="80px" formatter="formatCellTooltip">发货地址</th>
+                <th field="customer" width="80px" formatter="formatCellTooltip">客户</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+    <div data-options="region:'center'">
+        <div class="easyui-layout" data-options="fit:true" style="border:0px">
+            <div data-options="region:'north',split:true" style="height:400px;border:0px;">
+                <table id="header" cellpadding="0" cellspacing="0" style="width:100%">
+                    <tr style="height: 50px">
+                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">渠道组织管理</strong></td>
+                    </tr>
+                    <tr style="height: 35px">
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            编码
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="code" style="width:200px" data-options="label:'Name:',required:true,onChange:onCodeChanged">
+
+                        </td>
+                        
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            名称
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="name" style="width:200px" data-options="label:'Name:',required:true,onChange:onNameChanged">
+
+                        </td>
+
+                    </tr>
+                    <tr style="height: 35px">
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            渠道类型
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input id="channel_type" class="easyui-combobox" style="width:200px;" data-options="
+                                        valueField:'code',
+                                        textField:'name',
+                                        data: [{
+                                                code: 'ch001',
+                                                name: '加盟店'
+                                            },{
+                                                code: 'ch002',
+                                                name: '直营店'
+                                            },{
+                                                code: 'ch003',
+                                                name: '经销商'
+                                            }],
+                                            onSelect:onChanneltypeSelected,
+                                        required:true"
+                            >
+
+                        </td>
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            等级
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input id="level" class="easyui-combobox" style="width:200px;" data-options="
+                                        valueField:'code',
+                                        textField:'name',
+                                        data: [{
+                                                code: 'lv001',
+                                                name: '一级'
+                                            },{
+                                                code: 'lv002',
+                                                name: '二级'
+                                            },{
+                                                code: 'lv003',
+                                                name: '三级'
+                                            }],
+                                            onSelect:onLevelSelected,
+                                        required:true"
+                            >
+                        </td>
+
+
+                    </tr>
+
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            所属区域
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input id="region" class="easyui-combobox" style="width:200px;" data-options="
+                                        valueField:'code',
+                                        textField:'name',
+                                        data: [{
+                                                code: '100000',
+                                                name: '北京'
+                                            },{
+                                                code: '2000000',
+                                                name: '上海'
+                                            },{
+                                                code: '210000',
+                                                name: '南京'
+                                            }],
+                                            onSelect:onRegionSelected,
+                                        required:true"
+                            >
+
+                        </td>
+
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            发货地址编码
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="reg_code" style="width:200px" data-options="label:'Name:',required:true,onChange:onRegCodeChanged">
+
+                        </td>
+
+                    </tr>
+                    
+                    <tr style="height: 35px">
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            发货地址全称
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="full_name" style="width:200px;" data-options="label:'Name:',required:true,onChange:onFullNameChanged">
+                        </td>
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            详细地址
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="address_detail" style="width:200px;" data-options="label:'Name:',required:true,onChange:onAddressDetailChanged">
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            联系人
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="linkman" style="width:200px;" data-options="label:'Name:',required:true,onChange:onlinkmanChanged">
+                        </td>
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            电话
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="phone" style="width:200px;" data-options="label:'Name:',required:true,onChange:onphoneChanged">
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            Email
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="email" style="width:200px;" data-options="label:'Name:',required:true,onChange:onEmailChanged">
+                        </td>
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            客户编码
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="customercode" style="width:200px;" data-options="label:'Name:',required:true,onChange:onCustomerCodeChanged">
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            客户名称
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="customername" style="width:200px;" data-options="label:'Name:',required:true,onChange:onCustomerNameChanged">
+                        </td>
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            上级
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-combobox" id="parentid" style="width:200px;"
+                                   data-options=" loader: channelLoader, 
+                                        mode: 'remote',
+                                        valueField:'_id',
+                                        textField:'name',
+                                        panelHeight:'auto',
+                                        onSelect: onChannelSelected,
+                                        required:true
+                                    ">
+                        </td>
+
+                    </tr>
+
+
+                </table>
+            </div>
+
+            <div data-options="region:'south',split:true" style="height:80px;">
+                <table cellpadding="0" cellspacing="0" style="width:100%;margin-top: 10px">
+                    <tr style="height: 35px">
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            制单人
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" name="operator" style="width:200px" data-options="label:'Name:',required:false">
+
+                        </td>
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            制单日期
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" name="bill_date" style="width:200px" data-options="label:'name:',required:false">
+
+                        </td>
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        </td>
+
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="channelTreeDlg" class="easyui-window" title="渠道关系树"
+     data-options="modal:true,closed:true,iconCls:'icon-save'"
+     style="width:400px;height:400px;padding:5px;">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'west',split:true" style="width:400px">
+
+            <ul class="easyui-tree" id="locationTree"  style="width:100%"/>
+        </div>
+
+
+    </div>
+</div>
+
+
+
+</body>
+
+<script type="text/javascript">
+    dgListSetting();
+    detailListSetting();
+    loadDgList();
+</script>
+</html>
