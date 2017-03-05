@@ -711,7 +711,7 @@ function bindDgListData(data){
 
 	
      for ( var i in data.datas) {
-        var dataItem = data.datas[i];
+        var dataItem = data.datas[i].bo;
 		var state = data.datas[i].current_state;
 
         var row_data = {
@@ -1240,9 +1240,18 @@ function onGoodsSelected (index, rowData) {
     endEditing();
 
     $('#goodsRefDialog').window('close');
+	
+  
+
 
     currentDetailRowObj.goods = rowData;
-
+	
+    currentDetailRowObj.goods.account=rowData.obj.account;
+	
+		
+	delete currentDetailRowObj.goods.obj;
+	
+	
     // currentDetailRowObj.title = rowData.title;
 
     //-------刷新关联属性------
@@ -1365,6 +1374,43 @@ function removeRep(){
                             }
                         }
                     }
+                },
+                error: function (x, e) {
+                    alert(e.toString(), 0, "友好提醒");
+                }
+            });
+        }
+    });
+}
+
+function approve(){
+
+  if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}
+
+    $.messager.confirm('提示', '是否确认?', function(r){
+        if (r){
+			var param =  JSON.stringify(cloneAllotInvObj);
+ 
+            $.ajax({
+                method: 'POST',
+                url: $invcenterURL + "ocr-inventorycenter/inventorycheck-mgr/confirm?context=" + $token,
+                data: param,
+                async: true,
+                dataType: 'json',
+                beforeSend: function (x) {
+                    x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                },
+                success: function (data) {
+					
+                var dgList = $('#dgList');
+                var row = dgList.datagrid('getSelected');
+                var index = dgList.datagrid('getRowIndex', row);
+                row.obj = data;
+              
+                onRowSelected(index, row);
+
+                resetState();
+                alert_autoClose('提示','确认成功!');
                 },
                 error: function (x, e) {
                     alert(e.toString(), 0, "友好提醒");

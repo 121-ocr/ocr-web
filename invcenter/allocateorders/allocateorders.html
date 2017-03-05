@@ -29,6 +29,7 @@
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick="save();">保存</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove" onclick="removeRep();">删除</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
+						<a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="approve();">确认</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="reject();">撤销</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
                         <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help"></a>
@@ -96,7 +97,6 @@
                             <input id="outorg" class="easyui-combotree" style="width:200px;" data-options="
                                        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
                                         method:'get',
-
                                         panelHeight:'auto',
                                         onSelect: onOutOrgSel,
                                         required:true">
@@ -133,7 +133,6 @@
                             <input id="inorg" class="easyui-combotree" style="width:200px;" data-options="
                                        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
                                         method:'get',
-
                                         panelHeight:'auto',
                                         onSelect: onInOrgSel,
                                         required:true">
@@ -167,10 +166,31 @@
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input class="easyui-textbox" id="note" style="width:200px" data-options="label:'Name:',onChange:onNoteChanged">
                         </td>
+						
+						<td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            状态
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-combobox" id="status" style="width:200px" data-options="
+                                        valueField:'name',
+                                        textField:'name',
+										disabled:true,
+                                        data: [{
+                                               
+                                                name: '自由态',
+												selected:true
+                                            },{
+                                              
+                                                name: '确认态'
+                                            }],
+                                            
+                                        required:true">
+                        </td>
 
 
                     </tr>
-
+					
+					
 
 
                 </table>

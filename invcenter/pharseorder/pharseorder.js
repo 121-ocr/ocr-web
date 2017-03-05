@@ -559,32 +559,35 @@ function onAfterEdit(index, row){
 }
 
 function onEndEdit(index, row) {
-    //对于合计行进行处理
-    // var ed = $(this).datagrid('getEditor', {
-    //     index: index,
-    //     field: 'quantity'
-    // });
-    // if (ed != null && ed != undefined) {
-    //     var newValue = $(ed.target).val();
-    //     row.quantity = newValue; //设置当前行的数量值
-    //     currentDetailRowObj.quantity = newValue; //设置当前行对象的值
-    // }
-
-    // var ed = $(this).datagrid('getEditor', {
-    //     index: index,
-    //     field: 'invref_nynum'
-    // });
-    // if (ed != null && ed != undefined) {
-    //     alert('a');
-    // }
-    //
-    // var ed = $(this).datagrid('getEditor', {
-    //     index: index,
-    //     field: 'invref_nsnum'
-    // });
-    // if (ed != null && ed != undefined) {
-    //     alert('a');
-    // }
+  
+	 var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'invref_nynum'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.invref_nynum = parseFloat(newValue); //设置当前行的数量值
+ 
+    }
+	
+	 var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'invref_nsnum'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.invref_nsnum = parseFloat(newValue); //设置当前行的数量值
+ 
+    }
+	
+	 var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'invref_unqualifiednum'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.invref_unqualifiednum = parseFloat(newValue); //设置当前行的数量值
+    }
 
     var ed = $(this).datagrid('getEditor', {
         index: index,
@@ -739,6 +742,9 @@ function createinv(){
 	
 	$('#inv').window('open'); // open a window
 	
+	$("#invDg").datagrid('hideColumn', 'invref_detailcode');
+	$("#invDg").datagrid('hideColumn', 'invref_warehouse');
+	$("#invDg").datagrid('hideColumn', 'invref_location');	
 	querySelectAddDatas();
 	
 	
@@ -766,10 +772,16 @@ function querySelectAddDatas(){
         data: reqData,
         dataType : 'json',
         beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
-        success : function(result) {
-            var data = result;
- 
-			addPharseInvLines(data);
+        success : function(re) {
+			var result = re.result;
+			
+			if(result==null){
+				clearPhraseInvLines();
+			}else{
+				addPharseInvLines(result);
+			}
+			
+			
         },
         error: function (x, e) {
             alert(e.toString(), 0, "友好提醒");
@@ -779,11 +791,16 @@ function querySelectAddDatas(){
 	
 	
 }
-
+function clearPhraseInvLines(data){
+	var dgLst = $('#invDg');
+	 var viewModel = new Array();
+	  dgLst.datagrid('loadData',{
+        total: 0,
+        rows: viewModel
+    });
+} 
 
 function addPharseInvLines(data){ 
-	
-
 	
 	var dgLst = $('#invDg');
     var viewModel = new Array();	
@@ -802,16 +819,12 @@ function addPharseInvLines(data){
            invref_shelflifeunit: dataItem.shelflifeunit,
            invref_expdate:dataItem.expdate,
            invref_su_batch_code: dataItem.su_batch_code,
-           invref_warehouse:{
-			   // code:"1111",
-			   // name:"sefrf"
-               //
-
-		   },
+           invref_warehouse:{},
            invref_location: {},
-           invref_nynum:0.00,
-           invref_nsnum:0.00,
-           invref_unqualifiednum:0.00
+		   invref_locationcode:"",
+           invref_nynum:0,
+           invref_nsnum:0,
+           invref_unqualifiednum:0
         };
         viewModel.push(row_data);
     }
@@ -877,6 +890,8 @@ function onWarehoseSelectedRef(record){
     var index = $('#invDg').datagrid('getRowIndex', row);
    
     row['warehousename'] = record;
+    row['invref_warehouse'] = record;
+	
 	
 	//currentDetailRowObj.warehousename = record.name; //设置当前行对象的值
 	//currentDetailRowObj.warehousecode = record.code; //设置当前行对象的值
@@ -899,7 +914,7 @@ function append(){
         var theDateStr = theDate.format("yyyy-MM-dd");
 
         var newDetailObj = {
-            detail_code: "",
+            detail_code: -1,
             goods: {},
             // quantity: 0,
             nynum: 0,
@@ -1535,7 +1550,7 @@ function bindDetailData(data){
         }*/
 
         var row_data = {
-			detailcode :dataItem.detail_code,
+			detail_code :dataItem.detail_code,
             product_sku_code : dataItem.goods.product_sku_code,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
@@ -2002,7 +2017,7 @@ function addnewlines(selectdData){
     var  selectdDatagoods = cloneJsonObject(selectdData);
 	
     var newDetailObj = {
-            detail_code: "",
+            detail_code:-1,
             goods: selectdDatagoods,
             nynum: 0.0,
             shelflife:$('#ref_shelflife').val(),
@@ -2030,7 +2045,7 @@ function addnewlines(selectdData){
         brand: selectdData.product_sku.product_spu.brand.name,
         manufacturer: selectdData.product_sku.product_spu.brand.manufacturer.name,
      
-        nynum: 0.0,
+        nynum: 0,
         //nsnum: parseFloat($('#ref_nsnum').val()),    
         shelflife:$('#ref_shelflife').val(),
         shelflifeunit:$('#ref_shelflifeunit').val(),

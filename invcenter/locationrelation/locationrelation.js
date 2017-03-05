@@ -95,7 +95,7 @@ function detailListSetting(){
 });
 
      $('#detailDg').datagrid({
-        title : '渠道补货单详情',
+        title : '分配货位关系',
         iconCls : 'icon-a_detail',
         fit : true,
         fitColumns : false,

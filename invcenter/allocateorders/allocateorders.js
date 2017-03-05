@@ -688,7 +688,7 @@ function bindDgListData(data){
 
 	
      for ( var i in data.datas) {
-        var dataItem = data.datas[i];
+        var dataItem = data.datas[i].bo;
 		var state = data.datas[i].current_state;
     //for ( var i in data) {
       // var dataItem = data[i];
@@ -704,7 +704,7 @@ function bindDgListData(data){
             inwarehouses:dataItem.inwarehouses.name,
             note:dataItem.note,
             detail:dataItem.detail,
-            obj: dataItem
+            obj: data.datas[i]
         };
         viewModel.push(row_data);
     }
@@ -831,9 +831,16 @@ function onRowSelected (rowIndex, rowData) {
     initialized = true;
 
     allotInvObjIndex = rowIndex;
-    allotInvObj = rowData.obj;
-    //wdq 2017年2月2日
-    allotInvObj.current_state = rowData.current_state;
+   // allotInvObj = rowData.obj;
+    
+   if (rowData.current_state == undefined){
+	   allotInvObj = rowData.obj.bo;
+	   allotInvObj.current_state =rowData.obj.current_state;
+	} else{	   
+	   allotInvObj = rowData.obj;
+	   allotInvObj.current_state =rowData.current_state;
+	   
+	}
 
     //克隆数据
     cloneAllotInvObj = cloneJsonObject(allotInvObj);
@@ -859,7 +866,7 @@ function onDetailRowSelected(rowIndex, detailRowData){
 //绑定当前选择行的数据
 function bindSelectedDataToCard(data){
 
-
+	//var state = data.datas[i].current_state;
     $('#billno').textbox('setValue',data.billno);
     $('#busidate').textbox('setValue',data.busidate);
     $('#outorg').textbox('setValue',data.outorg.name);
@@ -867,7 +874,16 @@ function bindSelectedDataToCard(data){
     $('#inorg').textbox('setValue',data.inorg.name);
     $('#inwarehouses').textbox('setValue',data.inwarehouses.name);
     $('#note').textbox('setValue',data.note);
+     
+    if(data.current_state=="confirm"){
+		$('#status').textbox('setValue',"确认态");
 
+	}	 else{
+		$('#status').textbox('setValue',"自由态");
+
+	}
+	
+	
 }
 
 function onMemberChanged() {
@@ -1226,7 +1242,10 @@ function onGoodsSelected (index, rowData) {
     $('#goodsRefDialog').window('close');
 
     currentDetailRowObj.goods = rowData;
-
+	
+    currentDetailRowObj.goods.account=rowData.obj.account;
+		
+	delete currentDetailRowObj.goods.obj;
     // currentDetailRowObj.title = rowData.title;
 
     //-------刷新关联属性------
@@ -1357,3 +1376,48 @@ function removeRep(){
         }
     });
 }
+
+function approve(){
+
+  if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}  
+   var states = $("#status").combobox('getValue');
+   
+   if(states=="确认态"){
+	  alert_autoClose('提示','此单据已确认!');
+	  return;
+   }
+   $.messager.confirm('提示', '是否确认?', function(r){
+        if (r){
+			var param =  JSON.stringify(cloneAllotInvObj);
+			
+            $.ajax({
+                method: 'POST',
+                url: $invcenterURL + "ocr-inventorycenter/allocateorders-mgr/confirm?context=" + $token,
+                data: param,
+                async: true,
+                dataType: 'json',
+                beforeSend: function (x) {
+                    x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                },
+                success: function (data) {
+				alert(data);
+			    $('#status').combobox('setValue','确认态');	
+				
+                var dgList = $('#dgList');
+                var row = dgList.datagrid('getSelected');
+                var index = dgList.datagrid('getRowIndex', row);
+                row.obj = data;
+              
+                onRowSelected(index, row);
+
+                resetState();
+                alert_autoClose('提示','确认成功!');
+                },
+                error: function (x, e) {
+                    alert(e.toString(), 0, "友好提醒");
+                }
+            });
+        }
+    });
+}
+
