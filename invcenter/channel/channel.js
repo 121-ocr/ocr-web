@@ -971,7 +971,7 @@ function showTree() {
 
     $.ajax({
         method: 'get',
-        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
+        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=' + $token,
         async: true,
 
         dataType: 'json',
