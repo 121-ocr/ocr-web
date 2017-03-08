@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DataGrid Selection - jQuery EasyUI Demo</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="channelprices.js"></script>
+    <style type="text/css">
+        .subtotal { font-weight: bold; }/*合计单元格样式*/
+        .hr0{
+            border-top: 1px solid #bbb;
+            text-align: left;
+        }
+        .hr0:after {
+            content: '供货价';
+            position: relative;
+            top: -12px;
+            left: 40px;
+            padding: 0 3px;
+            background: #f0f0f0;
+            color: #bbb;
+            font-size: 16px;
+        }
+        .hr1{
+            border-top: 1px solid #bbb;
+            text-align: left;
+        }
+        .hr1:after {
+            content: '零售价';
+            position: relative;
+            top: -12px;
+            left: 40px;
+            padding: 0 3px;
+            background: #f0f0f0;
+            color: #bbb;
+            font-size: 16px;
+        }
+        .hr2{
+            border-top: 1px solid #bbb;
+            text-align: left;
+        }
+        .hr2:after {
+            content: '批发价';
+            position: relative;
+            top: -12px;
+            left: 40px;
+            padding: 0 3px;
+            background: #f0f0f0;
+            color: #bbb;
+            font-size: 16px;
+        }
+        .hr3{
+            border-top: 1px solid #bbb;
+            text-align: left;
+        }
+        .hr3:after {
+            content: '佣金';
+            position: relative;
+            top: -12px;
+            left: 40px;
+            padding: 0 3px;
+            background: #f0f0f0;
+            color: #bbb;
+            font-size: 16px;
+        }
+        .line_01{
+            padding: 0 20px 0;
+            margin: 20px 0;
+            line-height: 1px;
+            border-left: 200px solid #ddd;
+            border-right: 200px solid #ddd;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="newRep();">新增</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick="save();">保存</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove" onclick="removeRep();">删除</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="reject();">撤销</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help"></a>
+
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:310px">
+        <table id="dgList" class="easyui-datagrid" style="width:600px;height:100%"
+               title="Load Data" iconCls="icon-save">
+            <thead>
+            <tr>
+                <th field="channel" width="80px" formatter="formatCellTooltip">渠道</th>
+                <th field="goods" width="80px" formatter="formatCellTooltip">商品</th>
+                <th field="invbatchcode" width="80px" formatter="formatCellTooltip">批次号</th>
+                <th field="supply_price" width="80px" formatter="formatCellTooltip">供货价</th>
+                <th field="retail_price" width="80px" formatter="formatCellTooltip">零售价</th>
+                <th field="lot_price" width="80px" formatter="formatCellTooltip">批发价</th>
+                <th field="commission" width="80px" formatter="formatCellTooltip">佣金</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+    <div data-options="region:'center'">
+        <div class="easyui-layout" data-options="fit:true" style="border:0px">
+            <div data-options="region:'north',split:true" style="height:480px;border:0px;">
+                <table id="header" cellpadding="0" cellspacing="0" style="width:100%">
+                    <tr style="height: 50px">
+                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">渠道价格表</strong></td>
+                    </tr>
+                    <tr style="height: 35px">
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            渠道
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input id="channel" class="easyui-combotree" style="width:200px;" data-options="
+                                        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=' + $token,
+                                        method:'get',
+                                        panelHeight:'auto',
+                                        onSelect: onChannelSel,
+                                        required:true">
+
+                        </td>
+                        
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            商品
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input id="goods" style="width:170px" >
+
+
+
+                            <button style='width: 23px; height: 23px' onclick='showGoodsRefDialog();'>...</button>
+
+                        </td>
+
+                    </tr>
+                    <tr style="height: 35px">
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            批次号
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="invbatchcode" style="width:200px" data-options="label:'Name:',required:true,onChange:oninvbatchcodeChanged">
+
+                        </td>
+
+
+
+
+                    </tr>
+
+
+
+                    <tr style="height: 1px;">
+                        <td colspan="4"><div class="hr0"></div></td>
+
+                    </tr>
+
+                    <!--供货价-->
+                    <tr style="height: 35px;">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            税种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="sp_tax_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onSPTaxTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            税率
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="sp_tax_rate" style="width:200px" data-options="label:'Name:',required:true,onChange:onSPTaxRateChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币含税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="sp_tax_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onSPTaxCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币含税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="sp_tax_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onSPTaxMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币含税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="sp_tax_o_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onSPTaxOCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币含税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="sp_tax_o_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onSPTaxOMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币无税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="sp_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onSPCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币无税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="sp_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onSPMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币无税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="sp_o_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onSPOCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币无税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="sp_o_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onSPOMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 1px;">
+                        <td colspan="4"><div class="hr1"></div></td>
+
+                    </tr>
+
+                    <!--零售价-->
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            税种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="rp_tax_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onRPTaxTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            税率
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="rp_tax_rate" style="width:200px" data-options="label:'Name:',required:true,onChange:onRPTaxRateChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币含税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="rp_tax_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onRPTaxCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币含税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="rp_tax_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onRPTaxMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币含税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="rp_tax_o_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onRPTaxOCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币含税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="rp_tax_o_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onRPTaxOMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币无税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="rp_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onRPCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币无税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="rp_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onRPMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币无税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="rp_o_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onRPOCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币无税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="rp_o_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onRPOMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 1px;">
+                        <td colspan="4"><div class="hr2"></div></td>
+
+                    </tr>
+                    <!--批发价-->
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            税种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="lp_tax_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onLPTaxTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            税率
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="lp_tax_rate" style="width:200px" data-options="label:'Name:',required:true,onChange:onLPTaxRateChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币含税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="lp_tax_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onLPTaxCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币含税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="lp_tax_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onLPTaxMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币含税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="lp_tax_o_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onLPTaxOCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币含税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="lp_tax_o_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onLPTaxOMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币无税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="lp_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onLPCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币无税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="lp_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onLPMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币无税币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="lp_o_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onLPOCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币无税金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="lp_o_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onLPOMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr style="height: 1px;">
+                        <td colspan="4"><div class="hr3"></div></td>
+
+                    </tr>
+                    <!--佣金-->
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            计算规则编码
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="computation_rule_code" style="width:200px" data-options="label:'Name:',required:true,onChange:onComputationRuleCodeChanged">
+                        </td>
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            计算规则名称
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="computation_rule_name" style="width:200px" data-options="label:'Name:',required:true,onChange:onComputationRuleNameChanged">
+                        </td>
+
+                    </tr>
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            计算规则值
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="computation_rule_value" style="width:200px" data-options="label:'Name:',required:true,onChange:onComputationRuleValueChanged">
+                        </td>
+
+
+                    </tr>
+
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="commission_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onCommissionTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            本币金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="commission_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onCommissionMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币币种
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+                            <input class="easyui-textbox" id="commission_o_currency_type" style="width:200px" data-options="label:'Name:',required:true,onChange:onCommissionOCurrencyTypeChanged">
+                        </td>
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            原币金额
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="commission_o_money" style="width:200px" data-options="label:'Name:',required:true,onChange:onCommissionOMoneyChanged">
+
+                        </td>
+
+                    </tr>
+
+
+
+                </table>
+            </div>
+
+            <div data-options="region:'south',split:true" style="height:80px;">
+                <table cellpadding="0" cellspacing="0" style="width:100%;margin-top: 10px">
+                    <tr style="height: 35px">
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            制单人
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" name="operator" style="width:200px" data-options="label:'Name:',required:false">
+
+                        </td>
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            制单日期
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" name="bill_date" style="width:200px" data-options="label:'name:',required:false">
+
+                        </td>
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        </td>
+
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!--商品参照-->
+<div id="goodsRefDialog" class="easyui-window" title="商品选择" data-options="modal:true,closed:true,iconCls:'icon-add'"
+     style="width:600px;height:400px;padding:5px;">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'west',split:true" style="width:120px">
+            <ul class="easyui-tree" id="catelogTree"  style="width:100%" data-options="
+                                            url:$goodsURL + 'ocr-goods-center/sales-catelog-mgr/findtree?context=3|3|lj|aaa',
+                                            method:'get',
+                                            onSelect: catelogTreeSel"
+            />
+        </div>
+        <div data-options="region:'center',split:true" style="padding:10px;">
+            <table id="goodsDg" class="easyui-datagrid" style="width:100%;height:100%"
+                   title="请选择商品" iconCls="icon-save">
+                <thead>
+                <tr>
+                    <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
+                    <th field="title" width="80px" formatter="formatCellTooltip">商品名</th>
+                    <!--<th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>-->
+                    <th field="bar_code" width="80px" formatter="formatCellTooltip">条码</th>
+                    <!--<th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>-->
+                    <th field="brand" width="80px" formatter="formatCellTooltip">品牌</th>
+                    <th field="manufacturer" width="80px" formatter="formatCellTooltip">制造商</th>
+                    <th field="base_unit" width="80px" formatter="formatCellTooltip">单位</th>
+                    <th field="quantity" width="80px" formatter="formatCellTooltip">现存量</th>
+                    <th field="supply_price" width="80px" formatter="formatCellTooltip">供货价</th>
+                    <th field="retail_price" width="80px" formatter="formatCellTooltip">零售价</th>
+                    <th field="commission" width="80px" formatter="formatCellTooltip">佣金</th>
+                </tr>
+                </thead>
+            </table>
+
+        </div>
+        <div data-options="region:'south',border:false" style="text-align:right;padding:5px 0 0;">
+           <!-- <a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="goodsRefReturn();" style="width:80px">Ok</a>-->
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0)" onclick="closeGoodsRef();" style="width:80px">Cancel</a>
+        </div>
+    </div>
+</div>
+
+
+</body>
+
+<script type="text/javascript">
+    dgListSetting();
+    detailListSetting();
+    loadDgList();
+</script>
+</html>
