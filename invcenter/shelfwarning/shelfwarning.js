@@ -146,7 +146,7 @@ function bindDetailData(data){
             bar_code : dataItem.goods.product_sku.bar_code,
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
-            batch_code: dataItem.batch_code,
+            batch_code: dataItem.invbatchcode,
             shelf_life: dataItem.shelf_life,
             quantity: item.onhandnum,
             brand: dataItem.goods.product_sku.product_spu.brand.name,
