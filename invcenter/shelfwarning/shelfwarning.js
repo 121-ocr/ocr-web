@@ -141,6 +141,8 @@ function bindDetailData(data){
         var dataItem = item._id;
         var row_data = {
             product_sku_code : dataItem.goods.product_sku_code,
+            warehousecode: dataItem.warehouses.code,
+            warehousename: dataItem.warehouses.name,
             title : dataItem.goods.title,
             sales_catelog: dataItem.goods.sales_catelogs,
             bar_code : dataItem.goods.product_sku.bar_code,
