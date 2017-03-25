@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>租户应用订购</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/plugins/datagrid-detailview.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/plugins/datagrid-groupview.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="account-app-add.js"></script>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+                       <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-redo" onclick="deployApp();">订购应用</a>
+                       <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:100%">
+        <table id="dgList" class="easyui-datagrid" style="width:600px;height:100%"
+               title="Load Data" iconCls="icon-save">
+            <thead>
+            <tr>
+                <th data-options="field:'ck',checkbox:true"></th>
+                <th field="id" width="60px" formatter="formatCellTooltip">应用ID</th>
+                <th field="code" width="100px" formatter="formatCellTooltip">应用代码</th>
+                <th field="name" width="100px" formatter="formatCellTooltip">应用名</th>
+                <th field="app_version" width="90px" formatter="formatCellTooltip">版本</th>
+                <th field="is_platform" width="90px" formatter="formatCellTooltip">是否平台应用</th>
+                <th field="short_desc" width="200px" formatter="formatCellTooltip">描述</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+    <div data-options="region:'south',split:true" style="height:200px;">
+        <table id="roleList" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%;margin-top: 30px;margin-bottom: 20px">
+            <thead>
+            <tr>
+                 <th field="org_role_id" width="65px" formatter="formatCellTooltip">业务职能ID</th>
+                <th field="role_code" width="100px" formatter="formatCellTooltip">业务职能代码</th>
+                <th field="role_name" width="100px" formatter="formatCellTooltip">业务职能名</th>
+                <th field="desc" width="200px" formatter="formatCellTooltip">业务职能描述</th>
+                <th field="auth_roles" width="200px" formatter="formatAuthRolesForOrgRole">业务角色</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+
+
+</body>
+
+<script type="text/javascript">
+
+    $(function(){
+        dgListSetting();
+        bizRoleListSetting();
+        loadDgList();
+    });
+
+
+</script>
+
+</html>

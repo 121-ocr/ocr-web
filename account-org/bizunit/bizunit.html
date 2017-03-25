@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>业务单元管理</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/plugins/datagrid-detailview.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/plugins/datagrid-groupview.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="bizunit.js"></script>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="deployBizUnit();">新增业务单元</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-edit" onclick="editBizUnit();">编辑</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove" onclick="deleteBizUnit();">删除</a>
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:310px">
+        <table id="dgList" class="easyui-datagrid" style="width:670px;height:100%"
+               title="Load Data" >
+            <thead>
+            <tr>
+                <th field="unit_code" width="75px" formatter="formatCellTooltip">业务单元编码</th>
+                <th field="unit_name" width="100px" formatter="formatCellTooltip">业务单元名称</th>
+                <th field="unit_manager" width="100px" formatter="formatCellTooltip">业务主管</th>
+                <th field="role_name" width="80px" formatter="formatCellTooltip">业务职能</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+    <div data-options="region:'center'">
+        <div class="easyui-layout" data-options="fit:true">
+            <div class="easyui-panel" title="岗位" style="border: none; width: 100%; height: 100%;">
+<!--                <div style="background-color: #EAEDF1;border: 0.5px">
+                    <a href="#" class="easyui-linkbutton easyui-tooltip" title="添加" data-options="iconCls:'icon-edit',plain:true" onclick="appendPost();"></a>
+                </div>-->
+                <table id="postList" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%;margin-top: 30px;margin-bottom: 20px">
+                    <thead>
+                    <tr>
+                        <th field="post_code" width="150px" formatter="formatCellTooltip" editor="postCodeEditor">岗位编码</th>
+                        <th field="post_name" width="100px" formatter="formatCellTooltip" editor="postNameEditor">岗位名称</th>
+                        <th field="action" width="100px" formatter="postActionColumnFormat" >操作</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--新增岗位-->
+<div class="easyui-window" id="newPostDlg" title="新增岗位" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:400px;height:550px;padding: 20px 20px;">
+
+    <div class="easyui-panel" data-options="region:'center'" title="岗位" style="padding: 30px 30px; height: 185px;">
+        <div style="margin-bottom:10px">
+            <input id="txtPostCode" class="easyui-textbox" style="width:100%;height:30px;padding:12px" data-options="prompt:'岗位编码',iconCls:'icon-man',iconWidth:38">
+        </div>
+        <div style="margin-bottom:10px;margin-top: 20px">
+            <input id="txtPostName" class="easyui-textbox" style="width:100%;height:30px;padding:12px" data-options="prompt:'岗位名称',iconCls:'icon-man',iconWidth:38">
+        </div>
+    </div>
+    <div style="margin-bottom:20px;margin-top: 10px;height: 200px">
+        <table id="bizActivityDg" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%; height:100%; margin-top: 30px;margin-bottom: 20px">
+            <thead>
+            <tr>
+                <th data-options="field:'ck',checkbox:true"></th>
+                <th field="activity_code" width="65px" formatter="formatCellTooltip">业务活动代码</th>
+                <th field="activity_name" width="100px" formatter="formatCellTooltip">业务活动名</th>
+                <th field="activity_desc" width="100px" formatter="formatCellTooltip">业务活动描述</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div style="float:right ">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" style="padding:5px 0px;width:100px;" onclick="insertNewPost();">
+            <span style="font-size:14px;">确定</span>
+        </a>
+    </div>
+</div>
+
+<!--岗位修改-->
+<div class="easyui-window" id="postEditDlg" title="岗位修改" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:400px;height:300px;padding: 20px 20px;">
+    <div class="easyui-panel" data-options="region:'center'" title="岗位" style="padding: 30px 30px; height: 185px;">
+        <div style="margin-bottom:10px">
+            <input id="txtPostCode2" class="easyui-textbox" style="width:100%;height:30px;padding:12px" data-options="prompt:'岗位编码',iconCls:'icon-man',iconWidth:38">
+        </div>
+        <div style="margin-bottom:10px;margin-top: 20px">
+            <input id="txtPostName2" class="easyui-textbox" style="width:100%;height:30px;padding:12px" data-options="prompt:'岗位名称',iconCls:'icon-man',iconWidth:38">
+        </div>
+    </div>
+    <div style="float:right ">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" style="padding:5px 0px;width:100px;" onclick="updatePost();">
+            <span style="font-size:14px;">确定</span>
+        </a>
+    </div>
+</div>
+
+<!--业务活动选择-->
+<div class="easyui-window" id="bizActivityDlg" title="业务活动" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:400px;height:400px;padding: 20px 20px;">
+    <div style="margin-bottom:20px;margin-top: 20px;height: 250px">
+        <table id="bizActivityDg2" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%; height:100%; margin-top: 30px;margin-bottom: 20px">
+            <thead>
+            <tr>
+                <th data-options="field:'ck',checkbox:true"></th>
+                <th field="activity_code" width="65px" formatter="formatCellTooltip">业务活动代码</th>
+                <th field="activity_name" width="100px" formatter="formatCellTooltip">业务活动名</th>
+                <th field="activity_desc" width="100px" formatter="formatCellTooltip">业务活动描述</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div style="float:right ">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" style="padding:5px 0px;width:150px;" onclick="deployActivityForPost();">
+            <span style="font-size:14px;">确定</span>
+        </a>
+    </div>
+</div>
+
+
+<!--业务单元修改-->
+<div class="easyui-window" id="bizUnitEditDlg" title="业务单元修改" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:400px;height:300px;padding: 20px 20px;">
+    <div class="easyui-panel" data-options="region:'center'" title="岗位" style="padding: 30px 30px; height: 185px;">
+        <div style="margin-bottom:10px">
+            <input id="txtbizUnitCode" class="easyui-textbox" style="width:100%;height:30px;padding:12px" data-options="prompt:'业务单元编码',iconCls:'icon-man',iconWidth:38">
+        </div>
+        <div style="margin-bottom:10px;margin-top: 20px">
+            <input id="txtbizUnitName" class="easyui-textbox" style="width:100%;height:30px;padding:12px" data-options="prompt:'业务单元名称',iconCls:'icon-man',iconWidth:38">
+        </div>
+    </div>
+    <div style="float:right ">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" style="padding:5px 0px;width:100px;" onclick="updateBizUnit();">
+            <span style="font-size:14px;">确定</span>
+        </a>
+    </div>
+</div>
+
+
+</body>
+
+<script type="text/javascript">
+
+    $(function(){
+        dgListSetting();
+        loadDgList();
+    });
+
+
+</script>
+</html>
