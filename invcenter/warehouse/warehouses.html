@@ -10,7 +10,6 @@
     <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
     <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
     <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
-    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
     <script type="text/javascript" src="../../js/constant.js"></script>
     <script type="text/javascript" src="../../js/utility.js"></script>
     <script type="text/javascript" src="warehouses.js"></script>
@@ -170,7 +169,7 @@
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
                             <input id="purchase_org" class="easyui-combotree" style="width:200px;" data-options="
-                                       url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
+                                       url:$apiRoot + 'ocr-channel-manager/channel-org-mgr/findtree?token=' + window.$token,
                                         method:'get',
 
                                         panelHeight:'auto',

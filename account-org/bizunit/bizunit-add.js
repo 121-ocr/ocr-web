@@ -215,21 +215,23 @@ function dgListSetting(){
                     fitColumns:true,
                     singleSelect:true,
                     rownumbers:true,
+                    idField:'unit_code',
                     loadMsg:'',
                     height:'auto',
                     onClickCell: onClickCell,
                     columns:[[
                         {field:'unit_code',title:'业务单元编码',width:'100px',editor:'unitCodeEditor'},
-                        {field:'unit_name',title:'业务单元名称',width:'150px',editor:'unitNameEditor'}
-                        //{field:'unit_manager',title:'业务主管',width:'80px',editor:'unitManagerEditor'}
+                        {field:'unit_name',title:'业务单元名称',width:'150px',editor:'unitNameEditor'},
+                        {field:'is_global',title:'是否全局业务单元',width:'90px',editor:'isGlobalcheckbox'}
                     ]],
                     onResize:function(){
                         $('#bizUnitDg').datagrid('fixDetailRowHeight',index);
                     },
-                    onLoadSuccess:function(){
+                    onLoadSuccess:function(row,data){
                         setTimeout(function(){
                             $('#bizUnitDg').datagrid('fixDetailRowHeight',index);
                         },0);
+
                     },
                     toolbar :
                         [
@@ -383,7 +385,8 @@ function appendBizUnit(ddv, index){
         var bizUnit = {
             org_role_id: currentOrgRoleInfoRow.obj.org_role_id,
             unit_code: "",
-            unit_name: ""
+            unit_name: "",
+            is_global: true
             //unit_manager: ""
         };
 
@@ -399,6 +402,7 @@ function appendBizUnit(ddv, index){
         var rowData = {
             unit_code: "",
             unit_name: "",
+            is_global: true,
             //unit_manager: "",
             obj: bizUnit
         };
@@ -550,6 +554,37 @@ function unitNameChanged(theInput){
     }
 }
 
+
+$.extend($.fn.datagrid.defaults.editors,
+{
+    isGlobalcheckbox:
+    {
+        init: function (container, options) {
+            var input = $('<input type="checkbox" onclick="isGlobalClick(this);">').appendTo(container);
+            return input;
+        },
+        getValue: function (target) {
+            return $(target).prop('checked');
+        },
+        setValue: function (target, value) {
+            $(target).prop('checked', value);
+        }
+    }
+});
+
+function isGlobalClick(theInput){
+    var value = theInput.checked;
+
+    if(editIndex != undefined && editIndex != null) {
+        var rows = $(subGrid).datagrid('getRows');
+        var row = rows[editIndex];
+
+        row['is_global'] = value;
+        row.obj.is_global = value;
+
+       // $(subGrid).datagrid('refreshRow', editIndex);
+    }
+}
 
 $.extend($.fn.datagrid.defaults.editors, {
     unitCodeEditor : {

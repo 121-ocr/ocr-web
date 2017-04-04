@@ -597,6 +597,7 @@ function insertNewUser(){
     var userData = {
         acct_id: acctId,
         biz_unit_id: currentBizUnit.id,
+        d_is_global_bu: currentBizUnit.is_global==1?true:false,
         post_id: postId,
         user: {
             name: user_name,
@@ -802,6 +803,7 @@ function bindDgListData(data){
         var row_data = {
             unit_code: dataItem.unit_code,
             unit_name: dataItem.unit_name,
+            is_global: dataItem.is_global,
             unit_manager: dataItem.unit_manager,
             role_name: dataItem.role_name,
             obj: dataItem

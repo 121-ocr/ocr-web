@@ -540,6 +540,7 @@ function insertNewPost(){
         post_name: $('#txtPostName').val(),
         d_org_role_id: currentBizUnit.org_role_id,
         acct_biz_unit_id: currentBizUnit.id,
+        //d_is_global_bu: currentBizUnit.is_global,
         acct_id: acctId,
         post_activity: []
     };
@@ -721,6 +722,7 @@ function bindDgListData(data){
         var row_data = {
             unit_code: dataItem.unit_code,
             unit_name: dataItem.unit_name,
+            is_global: dataItem.is_global,
             unit_manager: dataItem.unit_manager,
             role_name: dataItem.role_name,
             obj: dataItem

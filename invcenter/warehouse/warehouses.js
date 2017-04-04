@@ -1,4 +1,6 @@
-﻿//﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -19,7 +21,7 @@ function save(){
 
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/create?context=" + $token,
+            url: $apiRoot + "ocr-inventorycenter/invorg-mgr/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -540,7 +542,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'POST',
-                url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/remove?context=" + $token,
+                url: $apiRoot + "ocr-inventorycenter/invorg-mgr/remove?token=" + window.$token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',
@@ -643,7 +645,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/invorg-mgr/query?context=" + $token,
+        url : $apiRoot + "ocr-inventorycenter/invorg-mgr/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -679,7 +681,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $invcenterURL + "ocr-inventorycenter/pharseinv-mgr/query?context=" + $token,
+                            url: $apiRoot + "ocr-inventorycenter/pharseinv-mgr/query?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
