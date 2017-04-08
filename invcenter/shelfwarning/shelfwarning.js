@@ -117,7 +117,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/shelfwarning/query?context=" + $token_pos,
+        url : $invcenterURL + "ocr-inventorycenter/shelfwarning/query?context=" + $token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -149,7 +149,6 @@ function bindDetailData(data){
             specifications: dataItem.goods.product_sku.product_specifications,
             base_unit: dataItem.goods.product_sku.product_spu.base_unit,
             batch_code: dataItem.invbatchcode,
-            shelf_life: dataItem.shelf_life,
             quantity: item.onhandnum,
             brand: dataItem.goods.product_sku.product_spu.brand.name,
             manufacturer: dataItem.goods.product_sku.product_spu.brand.manufacturer.name,
