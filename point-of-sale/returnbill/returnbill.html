@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DataGrid Selection - jQuery EasyUI Demo</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="returnbill.js"></script>
+    <style type="text/css">
+        .subtotal { font-weight: bold; }/*合计单元格样式*/
+    </style>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="newRep();">新增</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick="save();">保存</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove" onclick="removeRep();">删除</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="reject();">撤销</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help"></a>
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:310px">
+        <table id="dgList" class="easyui-datagrid" style="width:600px;height:100%"
+               title="Load Data" iconCls="icon-save">
+            <thead>
+            <tr>
+                <th field="return_code" width="80px" formatter="formatCellTooltip">退货单号</th>
+                <th field="return_date" width="80px" formatter="formatCellTooltip">退货日期</th>
+                <th field="replenishment_id" width="80px" formatter="formatCellTooltip">补货单id</th>
+                <th field="replenishment_code" width="80px" formatter="formatCellTooltip">补货单号</th>
+                <th field="out_warehouse" width="80px" formatter="formatCellTooltip">出库仓库</th>
+                <th field="channel" width="80px" formatter="formatCellTooltip">渠道</th>
+                <th field="is_completed" width="80px" formatter="formatCellTooltip">是否完成</th>
+                <th field="completed_date" width="80px" formatter="formatCellTooltip">完成日期</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+    <div data-options="region:'center'">
+        <div class="easyui-layout" data-options="fit:true" style="border:0px">
+            <div data-options="region:'north',split:true" style="height:200px;border:0px;">
+                <table id="header" cellpadding="0" cellspacing="0" style="width:100%">
+                    <tr style="height: 50px">
+                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">退货单</strong></td>
+                    </tr>
+                    <tr style="height: 35px">
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            退货单号
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="return_code" style="width:200px" data-options="label:'Name:',onChange:onreturn_codeChanged">
+
+                        </td>
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            退货日期
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-datebox" id="return_date" style="width:200px" data-options="label:'Name:',onChange:onreturn_dateChanged">
+
+                        </td>
+
+
+                    </tr>
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            补货单ID
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="replenishment_id" style="width:200px" data-options="label:'Name:',onChange:onreplenishment_idChanged">
+
+                        </td>
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            补货单号
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="replenishment_code" style="width:200px" data-options="label:'Name:',onChange:onreplenishment_codeChanged">
+
+                        </td>
+
+
+                    </tr>
+
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            出库仓库
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-combobox" id="out_warehouse" style="width:200px;"
+                                   data-options=" loader: warehoseLoader, 
+                                        mode: 'remote',
+                                        valueField:'code',
+                                        textField:'name',
+                                        panelHeight:'auto',
+                                        onSelect: onOutWarehoseSelected,
+                                        required:true
+                                    ">
+                        </td>
+
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            渠道
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input id="channel" class="easyui-combotree" style="width:200px;" data-options="
+                                       url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
+                                        method:'get',
+                                        panelHeight:'auto',
+                                        onSelect: onOutOrgSel,
+                                        required:true">
+                        </td>
+
+
+
+                    </tr>
+
+
+                    <tr style="height: 35px">
+
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            是否完成
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-combobox" id="is_completed" style="width:200px;"
+                                   data-options="valueField:'code',
+                                        textField:'name',
+                                        data: [
+                                        {code:'0',
+                                        name:'true'}
+                                        ,{
+                                                code: '1',
+                                                name: 'false'
+                                            }],
+                                            onSelect:onis_completedSelected,
+                                        required:true
+                                    ">
+                        </td>
+
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            完成日期
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-datebox" id="completed_date" style="width:200px" data-options="label:'Name:',onChange:oncompleted_dateChanged">
+                        </td>
+
+
+
+                    </tr>
+
+
+
+
+
+
+                </table>
+            </div>
+            <div data-options="region:'center'" style="border:0px">
+                <table id="detailDg" class="easyui-datagrid" style="border:0px"
+                       title="退货单明细" data-options="">
+                    <thead>
+                    <tr>
+                        <th rowspan="2" field="stocking_warehouse" width="80px" formatter="formatCellTooltip" editor="{
+                                        type : 'combobox',
+                                        options : {
+                                        loader: rowwarehoseLoader,
+										onSelect: onWarehoseSelected,
+                                        valueField: 'name',
+                                        textField: 'code',
+                                        panelHeight: 'auto',
+                                         }
+                                    }" >入库仓库</th>
+                        <th rowspan="2" field="location" width="80px" formatter="formatCellTooltip" data-options="editor:{type:'locationsRef'}">货位</th>
+                        <th rowspan="2" field="shelf_life" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'text',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">保质期</th>
+                        <th rowspan="2" field="batch_code" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">批次号</th>
+
+                        <th rowspan="2" field="quantity" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">退货数量</th>
+                        <th rowspan="2" field="title" width="100px" formatter="formatCellTooltip"
+                            data-options="editor:{type:'goodsRef'}">商品名</th>
+
+
+                        <th colspan="10" field="supply_price" width="100px"  align="center">供应价格</th>
+                        <th colspan="10" field="supply_amount" width="100px"  align="center">供应金额</th>
+                        <th rowspan="2" field="returnreason" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">退货原因</th>
+
+                    </tr>
+
+                    <tr>
+
+
+                        <!--供应价格-->
+                        <th field="sp_tax_type" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'text',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">税种</th>
+                        <th field="sp_tax_rate" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'text',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">税率</th>
+
+                        <th field="sp_in_currency_type" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">本币含税币种</th>
+                        <th field="sp_in_money" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">本币含税价格</th>
+                        <th field="sp_in_o_currency_type" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">原币含税币种</th>
+                        <th field="sp_in_o_money" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">原币含税价格</th>
+                        <th field="sp_currency_type" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">本币无税币种</th>
+                        <th field="sp_money" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">本币无税价格</th>
+                        <th field="sp_o_currency_type" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">原币无税币种</th>
+                        <th field="sp_o_money" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">原币无税价格</th>
+
+
+                        <!--供应金额-->
+                        <th field="sa_tax_type" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">税种</th>
+                        <th field="sa_tax_rate" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'text',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">税率</th>
+
+                        <th field="sa_in_currency_type" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">本币含税币种</th>
+                        <th field="sa_in_money" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">本币含税金额</th>
+                        <th field="sa_in_o_currency_type" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">原币含税币种</th>
+                        <th field="sa_in_o_money" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">原币含税金额</th>
+                        <th field="sa_currency_type" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">本币无税币种</th>
+                        <th field="sa_money" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">本币无税金额</th>
+                        <th field="sa_o_currency_type" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'textbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">原币无税币种</th>
+                        <th field="sa_o_money" width="80px" formatter="formatCellTooltip" editor="{
+                                                                    type:'numberbox',
+                                                                    options:{
+                                                                        required:true
+                                                                    }
+                                                                }">原币无税金额</th>
+
+
+
+
+
+
+                    </tr>
+                    </thead>
+                </table>
+
+            </div>
+            <div data-options="region:'south',split:true" style="height:80px;">
+                <table cellpadding="0" cellspacing="0" style="width:100%;margin-top: 10px">
+                    <tr style="height: 35px">
+                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            制单人
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" name="operator" style="width:200px" data-options="label:'Name:',required:false">
+
+                        </td>
+                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
+                            制单日期
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" name="bill_date" style="width:200px" data-options="label:'name:',required:false">
+
+                        </td>
+                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        </td>
+
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--商品参照-->
+<div id="goodsRefDialog" class="easyui-window" title="商品选择" data-options="modal:true,closed:true,iconCls:'icon-save'"
+     style="width:600px;height:400px;padding:5px;">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'west',split:true" style="width:120px">
+            <ul class="easyui-tree" id="catelogTree"  style="width:100%" data-options="
+                                            url:$goodsURL + 'ocr-goods-center/sales-catelog-mgr/findtree?context=3|3|lj|aaa',
+                                            method:'get',
+                                            onSelect: catelogTreeSel"
+                                            />
+        </div>
+        <div data-options="region:'center',split:true" style="padding:10px;">
+            <table id="goodsDg" class="easyui-datagrid" style="width:100%;height:100%"
+                   title="请选择商品" iconCls="icon-save">
+                <thead>
+                <tr>
+                    <th field="product_sku_code" width="80px" formatter="formatCellTooltip">SKU</th>
+                    <th field="title" width="80px" formatter="formatCellTooltip">商品名</th>
+                    <th field="sales_catelog" width="80px" formatter="formatCatelogsCol">品类</th>
+                    <th field="bar_code" width="80px" formatter="formatCellTooltip">条码</th>
+                    <th field="specifications" width="80px" formatter="formatSpecificationCol">规格</th>
+                    <th field="brand" width="80px" formatter="formatCellTooltip">品牌</th>
+                    <th field="manufacturer" width="80px" formatter="formatCellTooltip">制造商</th>
+                    <th field="base_unit" width="80px" formatter="formatCellTooltip">单位</th>
+                    <!--<th field="supply_price" width="80px" formatter="formatCellTooltip">供货价</th>-->
+                    <!--<th field="retail_price" width="80px" formatter="formatCellTooltip">零售价</th>-->
+                    <!--<th field="commission" width="80px" formatter="formatCellTooltip">佣金</th>-->
+                </tr>
+                </thead>
+            </table>
+
+        </div>
+        <div data-options="region:'south',border:false" style="text-align:right;padding:5px 0 0;">
+            <!--<a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="goodsRefReturn();" style="width:80px">Ok</a>-->
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0)" onclick="closeGoodsRef();" style="width:80px">Cancel</a>
+        </div>
+    </div>
+</div>
+
+<!-- 货位选择-->
+<div id="locationsRefDialog" class="easyui-window" title="货位选择"
+     data-options="modal:true,closed:true,iconCls:'icon-save'"
+     style="width:1000px;height:400px;padding:5px;">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'west',split:true" style="width:120px">
+
+            <li id="tt">货架货位树</li>
+
+            <ul class="easyui-tree" id="locationTree"  style="width:100%" data-options="
+
+                                            onSelect: locationTreeSel"
+            />
+        </div>
+
+        <div data-options="region:'center',split:true" style="padding:10px;">
+            <table id="locationsDg" class="easyui-datagrid" style="width:100%;height:100%"
+                   title="请选择货位" iconCls="icon-save">
+                <thead>
+                <tr>
+                    <th field="locationref_warehousecode" width="80px" formatter="formatCellTooltip">仓库编码</th>
+                    <th field="locationref_loccode" width="80px" formatter="formatCellTooltip">货位编码</th>
+                    <th field="locationref_loclength" width="80px" formatter="formatCellTooltip">长</th>
+                    <th field="locationref_locwidth" width="70px" formatter="formatCellTooltip">宽</th>
+                    <th field="locationref_locheight" width="70px" formatter="formatCellTooltip">高</th>
+                    <th field="locationref_capacityunit" width="70px" formatter="formatCellTooltip">单位</th>
+                    <th field="locationref_rownum" width="80px" formatter="formatCellTooltip">坐标：行</th>
+                    <th field="locationref_colnum" width="70px" formatter="formatCellTooltip">坐标：列</th>
+                    <th field="locationref_levelnum" width="70px" formatter="formatCellTooltip">坐标：层</th>
+                    <th field="locationref_note" width="170px" formatter="formatCellTooltip">备注</th>
+                </tr>
+                </thead>
+            </table>
+
+        </div>
+
+
+
+
+        <div data-options="region:'south',border:false" style="text-align:right;padding:5px 0 0;">
+            <!--<a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="goodsRefReturn();" style="width:80px">Ok</a>-->
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0)"
+               onclick="closeGoodsRef();" style="width:80px">Cancel</a>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script type="text/javascript">
+    dgListSetting();
+    detailListSetting();
+    loadDgList();
+</script>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>租户注册</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="account-registry.js"></script>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="newRep();">新增</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick="save();">保存</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="reject();">撤销</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help"></a>
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:310px">
+        <table id="dgList" class="easyui-datagrid" style="width:600px;height:100%"
+               title="Load Data" iconCls="icon-save">
+            <thead>
+            <tr>
+                <th field="id" width="80px" formatter="formatCellTooltip">租户ID</th>
+                <th field="acct_code" width="80px" formatter="formatCellTooltip">企业代码</th>
+                <th field="acct_name" width="80px" formatter="formatCellTooltip">公司名称</th>
+                <th field="status" width="80px" formatter="formatCellTooltip">当前状态</th>
+                <th field="entry_datetime" width="80px" formatter="formatCellTooltip" sortable="true" sorter="compareDatetime">注册日期</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+    <div data-options="region:'center'">
+        <div class="easyui-layout" style="height:220px;border:0px;width: 100%; padding-left: 50px">
+            <table id="header" cellpadding="0" cellspacing="0" style="width:740px">
+                <tr style="height: 50px">
+                    <td colspan="6" style="text-align: center"><strong style="font-size: 18px">企业租户信息</strong></td>
+                </tr>
+                <tr style="height: 35px">
+                    <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                        租户ID
+                    </td>
+                    <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        <input class="easyui-textbox" id="id" style="width:180px" data-options="label:'Name:'">
+
+                    </td>
+                    <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                        企业代码
+                    </td>
+                    <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        <input class="easyui-textbox" id="acct_code" style="width:180px" data-options="label:'Name:',required:false,onChange:onAcctCodeChanged">
+
+                    </td>
+                    <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                        公司名称
+                    </td>
+                    <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        <input class="easyui-textbox" id="acct_name" style="width:180px" data-options="label:'Name:',required:false,onChange:onAcctNameChanged">
+
+                    </td>
+
+                </tr>
+                <tr style="height: 35px">
+                    <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                        联系人
+                    </td>
+                    <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        <input class="easyui-textbox" id="contacts" style="width:180px" data-options="label:'Name:',required:false,onChange:onContactsChanged">
+
+                    </td>
+                    <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                        联系电话
+                    </td>
+                    <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        <input class="easyui-textbox" id="tel" style="width:180px" data-options="label:'Name:',required:false,onChange:onTelChanged">
+
+                    </td>
+                    <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                        EMAIL
+                    </td>
+                    <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        <input class="easyui-textbox" id="email" style="width:180px" data-options="label:'Name:',required:false,onChange:onMailChanged">
+
+                    </td>
+
+                </tr>
+                <tr style="height: 35px">
+                    <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px" >
+                        公司地址
+                    </td>
+                    <td style="width:437px;text-align: left; vertical-align: middle" colspan="3">
+
+                        <input class="easyui-textbox" id="address" style="width:437px" data-options="required:false,onChange:onAddressChanged">
+
+                    </td>
+                    <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                        网址
+                    </td>
+                    <td style="width: 180px;text-align: left; vertical-align: middle">
+                        <input class="easyui-textbox" id="website_url" style="width:180px;" data-options="label:'Name:',required:false,onChange:onWebsiteUrlChanged">
+                    </td>
+
+                </tr>
+                <tr style="height: 35px">
+                     <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                        注册日期
+                    </td>
+                    <td style="width: 180px;text-align: left; vertical-align: middle">
+                        <input class="easyui-textbox" id="entry_datetime" style="width:180px" data-options="label:'Name:',required:false">
+                    </td>
+                    <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                        当前状态
+                    </td>
+                    <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                        <input class="easyui-textbox" id="status" style="width:180px;" data-options="label:'Name:',required:false">
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="easyui-panel" style="border:0px; width: 100%; padding-left: 50px">
+            <div class="easyui-panel" title="企业管理员" style="width: 740px">
+                <div id="toolbar" style="background-color: #EAEDF1;border: 1px">
+                    <a href="#" class="easyui-linkbutton easyui-tooltip" title="修改" data-options="iconCls:'icon-edit',plain:true"></a>
+                    <a href="#" class="easyui-linkbutton easyui-tooltip" title="保存" data-options="iconCls:'icon-save',plain:true" onclick="saveOwner();"></a>
+                </div>
+                <table cellpadding="0" cellspacing="0" style="width:730px;margin-top: 30px;margin-bottom: 20px">
+                    <tr style="height: 35px">
+                        <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                            用户名
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="user_name" style="width:180px" data-options="label:'Name:',required:false,onChange:onUserNameChanged">
+
+                        </td>
+                        <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                            手机
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="cell_no" style="width:180px" data-options="label:'Name:',required:false,onChange:onCellNoChanged">
+
+                        </td>
+                    </tr>
+                    <tr style="height: 35px">
+                        <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                            密码
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="password" type="password" style="width:180px" data-options="label:'Name:',required:false,onChange:onPasswordChanged">
+
+                        </td>
+                        <td style="width: 65px;text-align: right; vertical-align: middle; padding: 5px">
+                            EMAIL
+                        </td>
+                        <td style="width: 180px;text-align: left; vertical-align: middle">
+
+                            <input class="easyui-textbox" id="user_email" style="width:180px" data-options="label:'Name:',required:false,onChange:onMgrEmailChanged">
+
+                        </td>
+
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+
+<script type="text/javascript">
+    dgListSetting();
+    loadDgList();
+</script>
+</html>

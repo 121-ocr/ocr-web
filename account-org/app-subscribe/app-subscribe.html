@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>租户应用订购</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/plugins/datagrid-detailview.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/plugins/datagrid-groupview.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="app-subscribe.js"></script>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+                       <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-redo" onclick="deployBizUnit();">下一步：部署业务单元</a>
+                       <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:100%">
+        <table id="dgList" class="easyui-datagrid" style="width:600px;height:100%"
+               title="Load Data" iconCls="icon-save">
+            <thead>
+            <tr>
+                <th data-options="field:'ck',checkbox:true"></th>
+                <th field="id" width="60px" formatter="formatCellTooltip">应用ID</th>
+                <th field="code" width="100px" formatter="formatCellTooltip">应用代码</th>
+                <th field="name" width="100px" formatter="formatCellTooltip">应用名</th>
+                <th field="app_version" width="90px" formatter="formatCellTooltip">版本</th>
+                <th field="short_desc" width="200px" formatter="formatCellTooltip">描述</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+    <div data-options="region:'south',split:true" style="height:200px;">
+        <table id="roleList" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%;margin-top: 30px;margin-bottom: 20px">
+            <thead>
+            <tr>
+                <th data-options="field:'ck',checkbox:true"></th>
+                <th field="org_role_id" width="65px" formatter="formatCellTooltip">业务职能ID</th>
+                <th field="role_code" width="100px" formatter="formatCellTooltip">业务职能代码</th>
+                <th field="role_name" width="100px" formatter="formatCellTooltip">业务职能名</th>
+                <th field="desc" width="200px" formatter="formatCellTooltip">业务职能描述</th>
+                <th field="auth_roles" width="200px" formatter="formatAuthRolesForOrgRole">业务角色</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+
+
+</body>
+
+<!--业务单元部署-->
+<div class="easyui-window" id="deployBizUnitDlg" title="部署业务单元" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:700px;height:500px;padding: 20px 20px;">
+    <div id="depAppLab" style="font-size: 12px;display:inline;padding-right: 20px">为应用：[&nbsp;] &nbsp; 部署业务单元</div>
+    <div style="margin-bottom:20px;margin-top: 20px;height: 300px">
+        <table id="bizUnitDg" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%; height:100%; margin-top: 30px;margin-bottom: 20px">
+            <thead>
+            <tr>
+                <th field="org_role_id" width="65px" formatter="formatCellTooltip">业务职能ID</th>
+                <th field="role_code" width="100px" formatter="formatCellTooltip">业务职能代码</th>
+                <th field="role_name" width="100px" formatter="formatCellTooltip">业务职能名</th>
+                <th field="auth_roles" width="200px" formatter="formatAuthRolesForOrgRole">业务角色</th>
+                <th field="desc" width="200px" formatter="formatCellTooltip">业务职能描述</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div style="float:right ">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" style="padding:5px 0px;width:150px;" onclick="deployPosition();">
+            <span style="font-size:14px;">部署岗位</span>
+        </a>
+    </div>
+</div>
+
+<!--岗位部署-->
+<div class="easyui-window" id="deployPostDlg" title="部署岗位" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:700px;height:500px;padding: 20px 20px;">
+    <div class="easyui-layout" data-options="fit:true" style="border: none">
+        <div data-options="region:'west',split:true" style="width:310px;border: none;">
+            <table id="bizUnitList" class="easyui-datagrid" title="业务单元" style="width:100%;height:100%"
+                   title="Load Data" iconCls="icon-save">
+                <thead>
+                <tr>
+                    <th field="unit_code" width="75px" formatter="formatCellTooltip">业务单元编码</th>
+                    <th field="unit_name" width="100px" formatter="formatCellTooltip">业务单元名称</th>
+                    <th field="unit_manager" width="100px" formatter="formatCellTooltip">业务主管</th>
+                    <th field="group_id" width="80px" formatter="formatCellTooltip">业务职能</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <div data-options="region:'center'" style="border: none" >
+            <div class="easyui-panel" title="岗位" style="border: none; width: 100%; height: 100%;">
+                <div style="background-color: #EAEDF1;border: 0.5px">
+                    <a href="#" class="easyui-linkbutton easyui-tooltip" title="添加" data-options="iconCls:'icon-edit',plain:true" onclick="appendPost();"></a>
+                 </div>
+                <table id="postList" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%;margin-top: 30px;margin-bottom: 20px">
+                    <thead>
+                    <tr>
+                        <th field="post_code" width="150px" formatter="formatCellTooltip" editor="postCodeEditor">岗位编码</th>
+                        <th field="post_name" width="100px" formatter="formatCellTooltip" editor="postNameEditor">岗位名称</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div data-options="region:'south'" style="height: 70px;">
+            <div style="float:right;">
+                <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" style="margin-top: 15px; margin-right: 20px; width:150px;" onclick="deployApp();">
+                    <span style="font-size:14px;">确定</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--业务活动选择-->
+<div class="easyui-window" id="bizActivityDlg" title="业务活动" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:400px;height:400px;padding: 20px 20px;">
+     <div style="margin-bottom:20px;margin-top: 20px;height: 250px">
+        <table id="bizActivityDg" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%; height:100%; margin-top: 30px;margin-bottom: 20px">
+            <thead>
+            <tr>
+                <th data-options="field:'ck',checkbox:true"></th>
+                <th field="activity_code" width="65px" formatter="formatCellTooltip">业务活动代码</th>
+                <th field="activity_name" width="100px" formatter="formatCellTooltip">业务活动名</th>
+                <th field="activity_desc" width="100px" formatter="formatCellTooltip">业务活动描述</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div style="float:right ">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" style="padding:5px 0px;width:150px;" onclick="deployActivityForPost();">
+            <span style="font-size:14px;">确定</span>
+        </a>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(function(){
+        dgListSetting();
+        bizRoleListSetting();
+        loadDgList();
+    });
+
+
+</script>
+
+</html>

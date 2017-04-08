@@ -1,3 +1,35 @@
+window.getQueryString = function (name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+        return decodeURIComponent(r[2]);    //(r[2]);
+    }else{
+        var index1 = window.location.href.indexOf('?');
+        if(index1>=0){
+            r = window.location.href.substring(index1+1).match(reg);
+        }else{
+            r = window.location.href.substring(0).match(reg);
+        }
+
+        if (r != null) {
+            return decodeURIComponent(r[2]);    //(r[2]);
+        }
+        //var ret = getQueryStringArgs(window.location.href,name);
+    }
+    return '';
+};
+
+//获取当前租户
+window.getCurrentAcctInfo = function(){
+/*    var defaultAcctInfo = localStorage.getItem("default_acct");
+    if (defaultAcctInfo != undefined && defaultAcctInfo != null) {
+        var defaultAcctObj = JSON.parse(defaultAcctInfo);
+        loginAccount(defaultAcctObj);
+    }*/
+    var currentAcctInfo = sessionStorage.getItem("current_acct");
+    return JSON.parse(currentAcctInfo);
+};
+
 //深度复制JSON
 function cloneJsonObject(originalObj){
     return JSON.parse(JSON.stringify(originalObj));

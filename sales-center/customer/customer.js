@@ -1,6 +1,4 @@
-﻿window.$token = localStorage.getItem("access_token");
-
-//﻿var allotInvObjIndex;
+﻿//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -21,7 +19,7 @@ function save(){
 
         $.ajax({
             method: 'POST',
-            url: $apiRoot + "ocr-inventorycenter/invorg-mgr/create?token=" + window.$token,
+            url: $invcenterURL + "ocr-inventorycenter/suppliers-mgr/create?context=" + $token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -182,172 +180,7 @@ function onAfterEdit(index, row){
 }
 
 function onEndEdit(index, row) {
-    //对于合计行进行处理
-    // var ed = $(this).datagrid('getEditor', {
-    //     index: index,
-    //     field: 'quantity'
-    // });
-    // if (ed != null && ed != undefined) {
-    //     var newValue = $(ed.target).val();
-    //     row.quantity = newValue; //设置当前行的数量值
-    //     currentDetailRowObj.quantity = newValue; //设置当前行对象的值
-    // }
 
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'nynum'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.nynum = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.nynum = parseFloat(newValue); //设置当前行对象的值
-    }
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'nsnum'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.nsnum = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.nsnum = parseFloat(newValue); //设置当前行对象的值
-    }
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'unqualifiednum'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.unqualifiednum = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.unqualifiednum = parseFloat(newValue); //设置当前行对象的值
-    }
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'locations'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.locations = newValue; //设置当前行的数量值
-        currentDetailRowObj.locations = newValue; //设置当前行对象的值
-    }
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'shelflife'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.shelflife = newValue; //设置当前行的数量值
-        currentDetailRowObj.shelflife = newValue; //设置当前行对象的值
-    }
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'shelflifeunit'
-		
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.shelflifeunit = newValue; //设置当前行的数量值
-        currentDetailRowObj.shelflifeunit = newValue; //设置当前行对象的值
-    }
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'expdate'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.expdate = newValue; //设置当前行的数量值
-        currentDetailRowObj.expdate = newValue; //设置当前行对象的值
-    }
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'su_batch_code'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.su_batch_code = newValue; //设置当前行的数量值
-        currentDetailRowObj.su_batch_code = newValue; //设置当前行对象的值
-    }
-	
-	 var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'batch_code'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.batch_code = newValue; //设置当前行的数量值
-        currentDetailRowObj.batch_code = newValue; //设置当前行对象的值
-    }
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'purchase_price'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.purchase_price = parseFloat(newValue); //设置采购价
-        currentDetailRowObj.purchase_price = {
-            tax_type: "VTA",
-            tax_rate: 0.17,
-            price: {
-                original_currency: {
-                    money: 0.00,
-                    currency_type: "USD"
-                },
-                currency: {
-                    money: parseFloat(newValue),
-                    currency_type: "CYN"
-                }
-            }
-        };
-
-    }
-
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'supply_price'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.supply_price = parseFloat(newValue); //设置当前行的数量值
-        currentDetailRowObj.supply_price = {
-            tax_type: "VTA",
-            tax_rate: 0.17,
-            price: {
-                original_currency: {
-                    money: 0.00,
-                    currency_type: "USD"
-                },
-                currency: {
-                    money: parseFloat(newValue),
-                    currency_type: "CYN"
-                }
-            }
-        };
-
-    }
-
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'supply_amount'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.supply_amount = newValue; //设置当前行的数量值
-        currentDetailRowObj.supply_amount = newValue; //设置当前行对象的值
-    }
-    var ed = $(this).datagrid('getEditor', {
-        index: index,
-        field: 'discount_amount'
-    });
-    if (ed != null && ed != undefined) {
-        var newValue = $(ed.target).val();
-        row.discount_amount = newValue; //设置当前行的数量值
-        currentDetailRowObj.discount_amount = newValue; //设置当前行对象的值
-    }
     refreshSubTotalRows(); //刷新小计列
 }
 
@@ -446,23 +279,51 @@ function newRep(){
         var newObj = {
             code: "",
             name: "",
-            type: {},
-            character:{},
-            region_code:"",
-            region_name:"",
-            region_detail:"",
-            purchase_org:{}
+            shortname:"",
+            mcode:"",
+            legalperson:"",
+            developdate:"",
+            contactinfo:{
+                address:"",
+                email:"",
+                linkman:"",
+                phone:"",
+                fax:""
+            },
+            accountinfo:{
+                taxnumber:"",
+                depositbank:"",
+                bankaccount:""
+            },
+            creditinfo:{
+                credittype:{},
+                grade:{}
+            }
         };
 
         var rowData = {
             code: "",
             name: "",
-            type: {},
-            character:{},
-            region_code:"",
-            region_name:"",
-            region_detail:"",
-            purchase_org:{},
+            shortname:"",
+            mcode:"",
+            legalperson:"",
+            developdate:"",
+            contactinfo:{
+                address:"",
+                email:"",
+                linkman:"",
+                phone:"",
+                fax:""
+            },
+            accountinf:{
+                taxnumber:"",
+                depositbank:"",
+                bankaccount:""
+            },
+            creditinfo:{
+                credittype:{},
+                grade:{}
+            },
             obj: newObj
         };
 
@@ -542,7 +403,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'POST',
-                url: $apiRoot + "ocr-inventorycenter/invorg-mgr/remove?token=" + window.$token,
+                url: $invcenterURL + "ocr-inventorycenter/suppliers-mgr/remove?context=" + $token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',
@@ -599,16 +460,23 @@ function bindDgListData(data){
         var dataItem = data.datas[i];
 
         var row_data = {
+
             name:dataItem.name,
             code:dataItem.code,
-            type:dataItem.type.name,
-            character:dataItem.character.name,
-            region_code:dataItem.region_code,
-            region_name:dataItem.region_name,
-            region_detail:dataItem.region_detail,
-            account:dataItem.account,
-            // sale_date: dataItem.sale_date,
-            // salesman: dataItem.salesman,
+            shortname:dataItem.shortname,
+            mcode:dataItem.mcode,
+            legalperson:dataItem.legalperson,
+            developdate:dataItem.developdate,
+            address:dataItem.contactinfo.address,
+            email:dataItem.contactinfo.email,
+            linkman:dataItem.contactinfo.linkman,
+            phone:dataItem.contactinfo.phone,
+            fax:dataItem.contactinfo.fax,
+            taxnumber:dataItem.accountinfo.taxnumber,
+            depositbank:dataItem.accountinfo.depositbank,
+            bankaccount:dataItem.accountinfo.bankaccount,
+            credittype:dataItem.creditinfo.credittype.name,
+            grade:dataItem.creditinfo.grade.name,
             obj: dataItem
         };
         viewModel.push(row_data);
@@ -645,7 +513,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $apiRoot + "ocr-inventorycenter/invorg-mgr/query?token=" + window.$token,
+        url : $invcenterURL + "ocr-inventorycenter/suppliers-mgr/query?context=" + $token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -681,7 +549,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $apiRoot + "ocr-inventorycenter/pharseinv-mgr/query?token=" + window.$token,
+                            url: $invcenterURL + "ocr-inventorycenter/suppliers-mgr/query?context=" + $token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -743,13 +611,20 @@ function bindSelectedDataToCard(data){
 
     $('#code').textbox('setValue',data.code);
     $('#name').textbox('setValue',data.name);
-    $('#type').textbox('setValue',data.type.name);
-    $('#character').textbox('setValue',data.character.name);
-    $('#region_code').textbox('setValue',data.region_code);
-    $('#region_name').textbox('setValue',data.region_name);
-    $('#region_detail').textbox('setValue',data.region_detail);
-
-    $('#purchase_org').textbox('setValue',data.purchase_org.name);
+    $('#shortname').textbox('setValue',data.shortname);
+    $('#mcode').textbox('setValue',data.mcode);
+    $('#legalperson').textbox('setValue',data.legalperson);
+    $('#developdate').textbox('setValue',data.developdate);
+    $('#address').textbox('setValue',data.contactinfo.address);
+    $('#email').textbox('setValue',data.contactinfo.email);
+    $('#linkman').textbox('setValue',data.contactinfo.linkman);
+    $('#phone').textbox('setValue',data.contactinfo.phone);
+    $('#fax').textbox('setValue',data.contactinfo.fax);
+    $('#taxnumber').textbox('setValue',data.accountinfo.taxnumber);
+    $('#depositbank').textbox('setValue',data.accountinfo.depositbank);
+    $('#bankaccount').textbox('setValue',data.accountinfo.bankaccount);
+    $('#credittype').textbox('setValue',data.creditinfo.credittype.name);
+    $('#grade').textbox('setValue',data.creditinfo.grade.name);
 
 }
 
@@ -767,66 +642,127 @@ function updateParentListRow(field, value){
 }
 
 
-function onWarehouseCodeChanged(newValue,oldValue) {
+function onCodeChanged(newValue,oldValue) {
     if(initialized) return;
     cloneAllotInvObj.code = newValue;
     isBodyChanged =true;
     updateParentListRow('code', cloneAllotInvObj.code);
 }
-function onWarehouseNameChanged(newValue,oldValue) {
+function onNameChanged(newValue,oldValue) {
     if(initialized) return;
     cloneAllotInvObj.name = newValue;
     isBodyChanged =true;
     updateParentListRow('name', cloneAllotInvObj.name);
 }
 
-function onRegionCodeChanged(newValue,oldValue){
+function onShortnameChanged(newValue,oldValue) {
     if(initialized) return;
-    cloneAllotInvObj.region_code = newValue;
-    isBodyChanged = true;
-    updateParentListRow('region_code', cloneAllotInvObj.region_code);
-}
-
-function onRegionNameChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.region_name = newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('region_name', cloneAllotInvObj.region_name);
-}
-function onRegionDetailChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.region_detail= newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('region_detail', newValue);
+    cloneAllotInvObj.shortname = newValue;
+    isBodyChanged =true;
+    updateParentListRow('shortname', cloneAllotInvObj.shortname);
 }
 
 
+function onMcodeChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.mcode = newValue;
+    isBodyChanged =true;
+    updateParentListRow('mcode', cloneAllotInvObj.mcode);
+}
 
+function onlegalpersonChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.legalperson = newValue;
+    isBodyChanged =true;
+    updateParentListRow('legalperson', cloneAllotInvObj.legalperson);
+}
+
+function ondevelopdateChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.developdate = newValue;
+    isBodyChanged =true;
+    updateParentListRow('developdate', cloneAllotInvObj.developdate);
+}
+
+
+function onAddressChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.contactinfo.address = newValue;
+    isBodyChanged =true;
+    updateParentListRow('address', cloneAllotInvObj.contactinfo.address);
+}
+
+function onEmailChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.contactinfo.email = newValue;
+    isBodyChanged =true;
+    updateParentListRow('email', cloneAllotInvObj.contactinfo.email);
+}
+
+function onlinkmanChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.contactinfo.linkman = newValue;
+    isBodyChanged =true;
+    updateParentListRow('linkman', cloneAllotInvObj.contactinfo.linkman);
+}
+
+function onphoneChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.contactinfo.phone = newValue;
+    isBodyChanged =true;
+    updateParentListRow('phone', cloneAllotInvObj.contactinfo.phone);
+}
+
+function onfaxChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.contactinfo.fax = newValue;
+    isBodyChanged =true;
+    updateParentListRow('fax', cloneAllotInvObj.contactinfo.fax);
+}
+
+function ontaxnumberChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.accountinfo.taxnumber = newValue;
+    isBodyChanged =true;
+    updateParentListRow('taxnumber', cloneAllotInvObj.accountinfo.taxnumber);
+}
+
+function ondepositbankChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.accountinfo.depositbank = newValue;
+    isBodyChanged =true;
+    updateParentListRow('depositbank', cloneAllotInvObj.accountinfo.depositbank);
+}
+
+function onbankaccountChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.accountinfo.bankaccount = newValue;
+    isBodyChanged =true;
+    updateParentListRow('bankaccount', cloneAllotInvObj.accountinfo.bankaccount);
+}
 
 //仓库类型选择
-function onTypeSelected(record){
+function onCredittypeSelected(record){
     if(initialized) return;
-    cloneAllotInvObj.type = {
+    cloneAllotInvObj.creditinfo.credittype = {
         code: record.code,
         name: record.name
     };
     isBodyChanged = true;
     //-------刷新关联属性------
-    updateParentListRow('type', record.name);
+    updateParentListRow('credittype', record.name);
 }
 
-function onCharacterSelected(record){
+function onGradeSelected(record){
     if(initialized) return;
-    cloneAllotInvObj.character = {
+    cloneAllotInvObj.creditinfo.grade = {
         code: record.code,
         name: record.name
     };
 
     isBodyChanged = true;
     //-------刷新关联属性------
-    updateParentListRow('character', record.name);
+    updateParentListRow('grade', record.name);
 }
 
 //渠道选择

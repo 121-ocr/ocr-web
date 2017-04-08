@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/plugins/datagrid-detailview.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/plugins/datagrid-groupview.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/knockout/knockout-3.1.0.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="user.js"></script>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+<!--                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="deployBizUnit();">新增业务单元</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-edit" onclick="editBizUnit();">编辑</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove" onclick="deleteBizUnit();">删除</a>-->
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:310px">
+        <table id="dgList" class="easyui-datagrid" style="width:670px;height:100%"
+               title="Load Data" >
+            <thead>
+            <tr>
+                <th field="unit_code" width="75px" formatter="formatCellTooltip">业务单元编码</th>
+                <th field="unit_name" width="100px" formatter="formatCellTooltip">业务单元名称</th>
+                <th field="is_global" width="100px" formatter="formatCellTooltip">全局业务单元</th>
+                <th field="unit_manager" width="100px" formatter="formatCellTooltip">业务主管</th>
+                <th field="role_name" width="80px" formatter="formatCellTooltip">业务职能</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+    <div data-options="region:'center'">
+        <div class="easyui-layout" data-options="fit:true">
+            <div class="easyui-panel" title="用户" style="border: none; width: 100%; height: 100%;">
+                <!--                <div style="background-color: #EAEDF1;border: 0.5px">
+                                    <a href="#" class="easyui-linkbutton easyui-tooltip" title="添加" data-options="iconCls:'icon-edit',plain:true" onclick="appendPost();"></a>
+                                </div>-->
+                <table id="userList" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%;margin-top: 30px;margin-bottom: 20px">
+                    <thead>
+                    <tr>
+                        <th field="name" width="150px" formatter="formatCellTooltip" >用户名</th>
+                        <th field="cell_no" width="100px" formatter="formatCellTooltip" >电话</th>
+                        <th field="email" width="100px" formatter="formatCellTooltip" >EMAIL</th>
+                        <th field="post_code" width="100px" formatter="formatCellTooltip" >岗位编码</th>
+                        <th field="post_name" width="100px" formatter="formatCellTooltip" >岗位名称</th>
+                        <th field="action" width="100px" formatter="postActionColumnFormat" >操作</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--新增用户-->
+<div class="easyui-window" id="newUserDlg" title="新增用户" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:100%;max-width:400px;padding:30px 40px;">
+
+    <table style="width: 250px;">
+        <tr style="height: 35px; width: 200px;">
+            <td>用户名:</td>
+            <td><input id="user_name" class="easyui-textbox" style="width:100%" data-options="required:true"></td>
+        </tr>
+        <tr style="height: 35px; width: 200px;">
+            <td>手机:</td>
+            <td><input id="cell_no" class="easyui-textbox" style="width:100%" data-options="required:false"></td>
+        </tr>
+        <tr style="height: 35px; width: 200px;">
+            <td>密码:</td>
+            <td><input id="password" class="easyui-textbox" type="password" style="width:100%" data-options="required:true"></td>
+        </tr>
+        <tr style="height: 35px; width: 200px;">
+            <td>Email:</td>
+            <td><input class="easyui-textbox" id="user_email" style="width:100%" data-options="required:false,validType:'email'"></td>
+        </tr>
+        <tr style="height: 35px; width: 200px;">
+            <td>岗位:</td>
+            <td><input class="easyui-combobox" id="cmb_post" style="width:100%;" >
+            </td>
+        </tr>
+
+        <tr style="height: 50px; width: 200px;">
+            <td></td>
+            <td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="insertNewUser()" style="width:80px">确定</a></td>
+        </tr>
+    </table>
+</div>
+
+<!--用户修改-->
+<div class="easyui-window" id="userEditDlg" title="用户修改" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:100%;max-width:400px;padding:30px 40px;">
+
+    <table style="width: 250px;">
+        <tr style="height: 35px; width: 200px;">
+            <td>用户名:</td>
+            <td><input id="user_name2" class="easyui-textbox" style="width:100%" data-options="required:true"></td>
+        </tr>
+        <tr style="height: 35px; width: 200px;">
+            <td>手机:</td>
+            <td><input id="cell_no2" class="easyui-textbox" style="width:100%" data-options="required:false"></td>
+        </tr>
+        <tr style="height: 35px; width: 200px;">
+            <td>密码:</td>
+            <td><input id="password2" class="easyui-textbox" type="password" style="width:100%" data-options="required:true"></td>
+        </tr>
+        <tr style="height: 35px; width: 200px;">
+            <td>Email:</td>
+            <td><input class="easyui-textbox" id="user_email2" style="width:100%" data-options="required:false,validType:'email'"></td>
+        </tr>
+
+        <tr style="height: 50px; width: 200px;">
+            <td></td>
+            <td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="updateUser()" style="width:80px">确定</a></td>
+        </tr>
+    </table>
+</div>
+
+
+<!--添加兼职-->
+<div class="easyui-window" id="addPartTimerDlg" title="添加兼职" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:100%;max-width:750px;padding:10px 10px;height: 500px;">
+
+    <div class="easyui-layout" data-options="fit:false" style="height:400px">
+        <div data-options="region:'west',split:true" style="width:30%;height:100%">
+            <table id="dgList2" class="easyui-datagrid" title="业务单元" data-options="fit:true">
+                <thead>
+                <tr>
+                    <th field="unit_code" width="75px" formatter="formatCellTooltip">业务单元编码</th>
+                    <th field="unit_name" width="100px" formatter="formatCellTooltip">业务单元名称</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <div data-options="region:'center'" style="width:60%;height:100%">
+             <table id="userList2" class="easyui-datagrid" title="用户" data-options="fit:true" style="width:100%;height:100%">
+                <thead>
+                <tr>
+                    <th data-options="field:'ck',checkbox:true"></th>
+                    <th field="name" width="80px" formatter="formatCellTooltip" >用户名</th>
+                    <th field="cell_no" width="80px" formatter="formatCellTooltip">电话</th>
+                    <th field="email" width="80px" formatter="formatCellTooltip">EMAIL</th>
+                    <th field="post_code" width="80px" formatter="formatCellTooltip">岗位编码</th>
+                    <th field="post_name" width="80px" formatter="formatCellTooltip">岗位名称</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <table style="width: 100%;height:35px">
+        <tr style="height: 35px;">
+            <td>岗位:</td>
+            <td><input class="easyui-combobox" id="cmb_post2" style="width:200px;" >
+            </td>
+            <td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="insertPartTimeUser()" style="width:80px">确定</a></td>
+        </tr>
+    </table>
+</div>
+
+
+
+</body>
+
+<script type="text/javascript">
+
+    $(function(){
+        dgListSetting();
+        loadDgList();
+    });
+
+
+</script>
+</html>

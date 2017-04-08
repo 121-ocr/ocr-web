@@ -1,4 +1,5 @@
-﻿
+﻿window.$token = localStorage.getItem("access_token");
+
 var currentChannelRow;
 var hasChanged = false;
 
@@ -180,7 +181,7 @@ function onWhSelected (rowIndex, rowData) {
 
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/query?context=" + $account + "|" + targetWarehouse.account + "|lj|aaa",
+        url : $apiRoot + "ocr-inventorycenter/stockonhand-mgr/query?token=" + window.$token,
         async : true,
         data: JSON.stringify(queryParam),
         dataType : 'json',
@@ -297,7 +298,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $channelURL + "ocr-channel-manager/channel-org-mgr/findall?context=3|3|lj|aaa",
+        url : $apiRoot + "ocr-channel-manager/channel-org-mgr/findall?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -332,7 +333,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $salesURL + "ocr-channel-manager/channel-org-mgr/findall?context=3|3|lj|aaa",
+                            url: $apiRoot + "ocr-channel-manager/channel-org-mgr/findall?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -368,7 +369,7 @@ function loadChannelWarehouses(ddv, channelAccount){
 
     $.ajax({
         method : 'POST',
-        url : $channelURL + "ocr-channel-manager/supplyrelation-mgr/bc_vmi_relations.get?context=" + $account + "|" + $account + "|lj|aaa",
+        url : $apiRoot + "ocr-channel-manager/supplyrelation-mgr/bc_vmi_relations.get?token=" + window.$token,
         async : true,
         data: JSON.stringify(condStr),
         dataType : 'json',
@@ -419,7 +420,7 @@ function computeRepNum(){
 function queryFromWhOnHand(query, dgList, row, index){
     $.ajax({
         method: 'POST',
-        url: $channelURL + "ocr-channel-manager/supplyrelation-mgr/warehousestocks.get?context=" + $account + "|" + $account + "|lj|aaa",
+        url: $apiRoot + "ocr-channel-manager/supplyrelation-mgr/warehousestocks.get?token=" + window.$token,
         async: true,
         data: JSON.stringify(query),
         dataType: 'json',
@@ -987,7 +988,7 @@ function loadRepRelations(){
 
     $.ajax({
         method: 'POST',
-        url: $channelURL + "ocr-channel-manager/supplyrelation-mgr/bc_replenishment_warehouses.get?context=3|3|lj|aaa",
+        url: $apiRoot + "ocr-channel-manager/supplyrelation-mgr/bc_replenishment_warehouses.get?token=" + window.$token,
         data: reqData,
         async: true,
         dataType: 'json',
@@ -1081,7 +1082,7 @@ function loadAllowCatalogs() {
 
     $.ajax({
         method: 'POST',
-        url: $channelURL + "ocr-channel-manager/allowcatalog-mgr/find_pagination?context=3|3|lj|aaa",
+        url: $apiRoot + "ocr-channel-manager/allowcatalog-mgr/find_pagination?token=" + window.$token,
         data: condition,
         async: true,
         dataType: 'json',
@@ -1111,7 +1112,7 @@ function loadAllowCatalogs() {
                     //定义查询条件
                     $.ajax({
                         method: 'POST',
-                        url:  $channelURL + "ocr-channel-manager/allowcatalog-mgr/find_pagination?context=3|3|lj|aaa",
+                        url:  $apiRoot + "ocr-channel-manager/allowcatalog-mgr/find_pagination?token=" + window.$token,
                         data: condition,
                         async: true,
                         dataType: 'json',
@@ -1172,7 +1173,7 @@ function notifyDelivery(){
 
     $.ajax({
         method: 'POST',
-        url: $salesURL + "ocr-sales-center/channel-restocking/commit?context=3|3|lj|aaa",
+        url: $apiRoot + "ocr-sales-center/channel-restocking/commit?token=" + window.$token,
         data: replenishmentJson,
         async: true,
         dataType: 'json',
