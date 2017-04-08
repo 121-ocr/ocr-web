@@ -48,7 +48,7 @@
             <tr>
                 <th field="code" width="80px" formatter="formatCellTooltip">编码</th>
                 <th field="name" width="80px" formatter="formatCellTooltip">名称</th>
-                <th field="shortname" width="80px" formatter="formatCellTooltip">名称缩写</th>
+                <th field="customer_acct" width="80px" formatter="formatCellTooltip">关联租户</th>
                 <th field="mcode" width="80px" formatter="formatCellTooltip">助记码</th>
                 <th field="legalperson" width="80px" formatter="formatCellTooltip">法人</th>
                 <th field="developdate" width="80px" formatter="formatCellTooltip">发展日期</th>
@@ -60,8 +60,8 @@
                 <th field="taxnumber" width="80px" formatter="formatCellTooltip">税号</th>
                 <th field="depositbank" width="80px" formatter="formatCellTooltip">开户银行</th>
                 <th field="bankaccount" width="80px" formatter="formatCellTooltip">银行账户</th>
-                <th field="credittype" width="80px" formatter="formatCellTooltip">供应商分类</th>
-                <th field="grade" width="80px" formatter="formatCellTooltip">供应商等级</th>
+                <th field="credittype" width="80px" formatter="formatCellTooltip">客户分类</th>
+                <th field="grade" width="80px" formatter="formatCellTooltip">客户等级</th>
             </tr>
             </thead>
         </table>
@@ -72,7 +72,7 @@
             <div data-options="region:'north',split:true" style="height:400px;border:0px;">
                 <table id="header" cellpadding="0" cellspacing="0" style="width:100%">
                     <tr style="height: 50px">
-                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">供应商基本档案</strong></td>
+                        <td colspan="6" style="text-align: center"><strong style="font-size: 18px">客户基本档案</strong></td>
                     </tr>
                     <tr style="height: 35px">
 
@@ -97,11 +97,11 @@
                     </tr>
                     <tr style="height: 35px">
                         <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
-                            名称缩写
+                            租户
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-textbox" id="shortname" style="width:200px" data-options="label:'Name:',required:true,onChange:onShortnameChanged">
+                            <input class="easyui-textbox" id="customer_acct" style="width:200px" data-options="label:'Name:',required:true,onChange:onCustomerAcctChanged">
 
                         </td>
 
@@ -208,7 +208,7 @@
 
                     <tr style="height: 35px">
                         <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
-                            供应商分类
+                            客户分类
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input id="credittype" class="easyui-combobox" style="width:200px;" data-options="
@@ -216,17 +216,17 @@
                                         textField:'name',
                                         data: [{
                                                 code: '1',
-                                                name: '优质供应商'
+                                                name: '经销商'
                                             },{
                                                 code: '2',
-                                                name: '中级供应商'
+                                                name: '经销网点'
                                             }],
                                             onSelect:onCredittypeSelected,
                                         required:true"
                             >
                         </td>
                         <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
-                            供应商等级
+                            客户等级
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input id="grade" class="easyui-combobox" style="width:200px;" data-options="
@@ -234,13 +234,13 @@
                                         textField:'name',
                                         data: [{
                                                 code: '1',
-                                                name: '价格等级1级'
+                                                name: '等级1级'
                                             },{
                                                 code: '2',
-                                                name: '价格等级2级'
+                                                name: '等级2级'
                                             },{
                                                 code: '3',
-                                                name: '价格等级3级'
+                                                name: '等级3级'
                                             }],
                                             onSelect:onGradeSelected,
                                         required:true"

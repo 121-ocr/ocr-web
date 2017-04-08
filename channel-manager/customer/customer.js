@@ -1,4 +1,6 @@
-﻿//﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -19,7 +21,7 @@ function save(){
 
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/suppliers-mgr/create?context=" + $token,
+            url: $apiRoot + "ocr-sales-center/customer-mgr/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -279,7 +281,7 @@ function newRep(){
         var newObj = {
             code: "",
             name: "",
-            shortname:"",
+            customer_acct:0,
             mcode:"",
             legalperson:"",
             developdate:"",
@@ -304,7 +306,7 @@ function newRep(){
         var rowData = {
             code: "",
             name: "",
-            shortname:"",
+            customer_acct:0,
             mcode:"",
             legalperson:"",
             developdate:"",
@@ -403,7 +405,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'POST',
-                url: $invcenterURL + "ocr-inventorycenter/suppliers-mgr/remove?context=" + $token,
+                url: $apiRoot + "ocr-inventorycenter/suppliers-mgr/remove?token=" + window.$token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',
@@ -463,11 +465,11 @@ function bindDgListData(data){
 
             name:dataItem.name,
             code:dataItem.code,
-            shortname:dataItem.shortname,
+            customer_acct:dataItem.customer_acct,
             mcode:dataItem.mcode,
             legalperson:dataItem.legalperson,
             developdate:dataItem.developdate,
-            address:dataItem.contactinfo.address,
+            //address:dataItem.contactinfo.address,
             email:dataItem.contactinfo.email,
             linkman:dataItem.contactinfo.linkman,
             phone:dataItem.contactinfo.phone,
@@ -513,7 +515,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/suppliers-mgr/query?context=" + $token,
+        url : $apiRoot + "ocr-sales-center/customer-mgr/findall?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -549,7 +551,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $invcenterURL + "ocr-inventorycenter/suppliers-mgr/query?context=" + $token,
+                            url: $apiRoot + "ocr-inventorycenter/suppliers-mgr/query?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -611,11 +613,11 @@ function bindSelectedDataToCard(data){
 
     $('#code').textbox('setValue',data.code);
     $('#name').textbox('setValue',data.name);
-    $('#shortname').textbox('setValue',data.shortname);
+    $('#customer_acct').textbox('setValue',data.customer_acct);
     $('#mcode').textbox('setValue',data.mcode);
     $('#legalperson').textbox('setValue',data.legalperson);
     $('#developdate').textbox('setValue',data.developdate);
-    $('#address').textbox('setValue',data.contactinfo.address);
+    //$('#address').textbox('setValue',data.contactinfo.address);
     $('#email').textbox('setValue',data.contactinfo.email);
     $('#linkman').textbox('setValue',data.contactinfo.linkman);
     $('#phone').textbox('setValue',data.contactinfo.phone);
@@ -655,11 +657,11 @@ function onNameChanged(newValue,oldValue) {
     updateParentListRow('name', cloneAllotInvObj.name);
 }
 
-function onShortnameChanged(newValue,oldValue) {
+function onCustomerAcctChanged(newValue,oldValue) {
     if(initialized) return;
-    cloneAllotInvObj.shortname = newValue;
+    cloneAllotInvObj.customer_acct = parseInt(newValue);
     isBodyChanged =true;
-    updateParentListRow('shortname', cloneAllotInvObj.shortname);
+    updateParentListRow('customer_acct', cloneAllotInvObj.customer_acct);
 }
 
 
