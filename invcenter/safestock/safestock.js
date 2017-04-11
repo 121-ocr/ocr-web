@@ -869,7 +869,7 @@ function bindGoodsDg(data) {
 function onGoodsSelected (index,rowData) {
     $('#goodsRefDialog').window('close');
 
-    var selectdData = rowData;
+    var selectdData = rowData.obj;
 
     $('#goods').val(selectdData.title);
 
