@@ -543,7 +543,7 @@ function onwarehousecodeChanged(newValue,oldValue) {
 }
 function onsafenumChanged(newValue,oldValue) {
     if(initialized) return;
-    cloneAllotInvObj.safenum = newValue;
+    cloneAllotInvObj.safenum = parseFloat(newValue);
     isBodyChanged =true;
     updateParentListRow('safenum', cloneAllotInvObj.safenum);
 }
