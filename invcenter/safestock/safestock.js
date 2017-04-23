@@ -543,7 +543,7 @@ function onwarehousecodeChanged(newValue,oldValue) {
 }
 function onsafenumChanged(newValue,oldValue) {
     if(initialized) return;
-    cloneAllotInvObj.safenum = newValue;
+    cloneAllotInvObj.safenum = parseFloat(newValue);
     isBodyChanged =true;
     updateParentListRow('safenum', cloneAllotInvObj.safenum);
 }
@@ -869,7 +869,7 @@ function bindGoodsDg(data) {
 function onGoodsSelected (index,rowData) {
     $('#goodsRefDialog').window('close');
 
-    var selectdData = rowData;
+    var selectdData = rowData.obj;
 
     $('#goods').val(selectdData.title);
 
