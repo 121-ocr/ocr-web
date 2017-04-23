@@ -48,8 +48,8 @@
             <tr>
                 <th field="code" width="80px" formatter="formatCellTooltip">编码</th>
                 <th field="name" width="80px" formatter="formatCellTooltip">名称</th>
-                <th field="shortname" width="80px" formatter="formatCellTooltip">名称缩写</th>
                 <th field="mcode" width="80px" formatter="formatCellTooltip">助记码</th>
+                <th field="supplier_acct" width="80px" formatter="formatCellTooltip">租户</th>
                 <th field="legalperson" width="80px" formatter="formatCellTooltip">法人</th>
                 <th field="developdate" width="80px" formatter="formatCellTooltip">发展日期</th>
                 <th field="address" width="80px" formatter="formatCellTooltip">地址</th>
@@ -97,11 +97,11 @@
                     </tr>
                     <tr style="height: 35px">
                         <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
-                            名称缩写
+                            租户
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-textbox" id="shortname" style="width:200px" data-options="label:'Name:',required:true,onChange:onShortnameChanged">
+                            <input class="easyui-textbox" id="supplier_acct" style="width:200px" data-options="label:'Name:',required:true,onChange:onCustomerAcctChanged">
 
                         </td>
 

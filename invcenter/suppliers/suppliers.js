@@ -1,4 +1,6 @@
-﻿//﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -19,7 +21,7 @@ function save(){
 
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/suppliers-mgr/create?context=" + $token,
+            url: $apiRoot + "ocr-inventorycenter/suppliers-mgr/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -204,6 +206,7 @@ function append(){
             // quantity: 0,
             nynum: 0,
             nsnum: 0,
+            supplier_acct: 0,
             unqualifiednum: 0,
             locations: "",
             shelflife: 0,
@@ -231,6 +234,7 @@ function append(){
             // quantity: 0,
             nynum: 0,
             nsnum: 0,
+            supplier_acct: 0,
             unqualifiednum: 0,
             locations: "",
             shelflife: 0,
@@ -279,7 +283,7 @@ function newRep(){
         var newObj = {
             code: "",
             name: "",
-            shortname:"",
+            supplier_acct:0,
             mcode:"",
             legalperson:"",
             developdate:"",
@@ -304,7 +308,7 @@ function newRep(){
         var rowData = {
             code: "",
             name: "",
-            shortname:"",
+            supplier_acct:0,
             mcode:"",
             legalperson:"",
             developdate:"",
@@ -403,7 +407,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'POST',
-                url: $invcenterURL + "ocr-inventorycenter/suppliers-mgr/remove?context=" + $token,
+                url: $apiRoot + "ocr-inventorycenter/suppliers-mgr/remove?token=" + window.$token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',
@@ -463,7 +467,7 @@ function bindDgListData(data){
 
             name:dataItem.name,
             code:dataItem.code,
-            shortname:dataItem.shortname,
+            supplier_acct:dataItem.supplier_acct,
             mcode:dataItem.mcode,
             legalperson:dataItem.legalperson,
             developdate:dataItem.developdate,
@@ -513,7 +517,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/suppliers-mgr/query?context=" + $token,
+        url : $apiRoot + "ocr-inventorycenter/suppliers-mgr/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -549,7 +553,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $invcenterURL + "ocr-inventorycenter/suppliers-mgr/query?context=" + $token,
+                            url: $apiRoot + "ocr-inventorycenter/suppliers-mgr/query?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -611,7 +615,7 @@ function bindSelectedDataToCard(data){
 
     $('#code').textbox('setValue',data.code);
     $('#name').textbox('setValue',data.name);
-    $('#shortname').textbox('setValue',data.shortname);
+    $('#supplier_acct').textbox('setValue',data.supplier_acct);
     $('#mcode').textbox('setValue',data.mcode);
     $('#legalperson').textbox('setValue',data.legalperson);
     $('#developdate').textbox('setValue',data.developdate);
@@ -655,12 +659,19 @@ function onNameChanged(newValue,oldValue) {
     updateParentListRow('name', cloneAllotInvObj.name);
 }
 
-function onShortnameChanged(newValue,oldValue) {
+function onCustomerAcctChanged(newValue,oldValue) {
+    if(initialized) return;
+    cloneAllotInvObj.supplier_acct = parseInt(newValue);
+    isBodyChanged =true;
+    updateParentListRow('supplier_acct', cloneAllotInvObj.supplier_acct);
+}
+
+/*function onShortnameChanged(newValue,oldValue) {
     if(initialized) return;
     cloneAllotInvObj.shortname = newValue;
     isBodyChanged =true;
     updateParentListRow('shortname', cloneAllotInvObj.shortname);
-}
+}*/
 
 
 function onMcodeChanged(newValue,oldValue) {
