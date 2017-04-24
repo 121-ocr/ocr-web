@@ -1,4 +1,6 @@
-﻿//﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -19,7 +21,7 @@ function save(){
 
         $.ajax({
             method: 'POST',
-            url: $channelURL + "ocr-channel-manager/pricepolicy-mgr/create?context=" + $token,
+            url: $apiRoot + "ocr-channel-manager/pricepolicy-mgr/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -585,7 +587,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'POST',
-                url :  $channelURL + "ocr-channel-manager/pricepolicy-mgr/remove?context=" + $token,
+                url :  $apiRoot + "ocr-channel-manager/pricepolicy-mgr/remove?token=" + window.$token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',
@@ -692,7 +694,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url :  $channelURL + "ocr-channel-manager/pricepolicy-mgr/find_pagination?context=" + $token,
+        url :  $apiRoot + "ocr-channel-manager/pricepolicy-mgr/find_pagination?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -728,7 +730,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url :  $channelURL + "ocr-channel-manager/pricepolicy-mgr/find_pagination?context=" + $token,
+                            url :  $apiRoot + "ocr-channel-manager/pricepolicy-mgr/find_pagination?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -1324,7 +1326,7 @@ var channelLoader = function (param, success, error) {
     var condStr = buildRepsQueryCond(0,1);
     $.ajax({
         method: 'POST',
-        url: $channelURL + "ocr-channel-manager/channel-org-mgr/findall?context=" + $token,
+        url: $apiRoot + "ocr-channel-manager/channel-org-mgr/findall?token=" + window.$token,
         async: true,
         data: condStr,
         dataType: 'json',
@@ -1346,7 +1348,7 @@ function showTree() {
 
     $.ajax({
         method: 'get',
-        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
+        url:$apiRoot + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
         async: true,
 
         dataType: 'json',

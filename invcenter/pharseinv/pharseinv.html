@@ -120,7 +120,7 @@
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle;display:none">
                             <input class="easyui-combotree" id="inv_org"  style="width:200px" data-options="
-                                        url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
+                                        url:$apiRoot + 'ocr-channel-manager/channel-org-mgr/findtree?token='+ window.$token,
                                         method:'get',
 
                                         panelHeight:'auto',
@@ -158,7 +158,7 @@
                         <td style="width: 180px;text-align: left; vertical-align: middle;display:none">
 
                             <input id="purchase_org" class="easyui-combotree" style="width:200px;" data-options="
-                                       url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
+                                       url:$apiRoot + 'ocr-channel-manager/channel-org-mgr/findtree?token='+ window.$token,
                                         method:'get',
 
                                         panelHeight:'auto',
@@ -357,7 +357,7 @@
     <div class="easyui-layout" data-options="fit:true">
         <div data-options="region:'west',split:true" style="width:120px">
             <ul class="easyui-tree" id="catelogTree"  style="width:100%" data-options="
-                                            url:$goodsURL + 'ocr-goods-center/sales-catelog-mgr/findtree?context=3|3|lj|aaa',
+                                            url:$apiRoot + 'ocr-goods-center/sales-catelog-mgr/findtree?token='+ window.$token,
                                             method:'get',
                                             onSelect: catelogTreeSel"
                                             />

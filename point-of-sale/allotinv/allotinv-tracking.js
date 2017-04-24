@@ -1,4 +1,6 @@
-﻿var replenishmentObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+var replenishmentObjIndex;
 var replenishmentObj;
 
 var cloneReplenishmentObj;
@@ -275,7 +277,7 @@ function loadDgList(status){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/replenishment-mgr/query?context=" + $token_pos,
+        url : $apiRoot + "ocr-pointofsale/replenishment-mgr/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -310,7 +312,7 @@ function loadDgList(status){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url : $posURL + "ocr-pointofsale/replenishment-mgr/query?context=" + $token_pos,
+                            url : $apiRoot + "ocr-pointofsale/replenishment-mgr/query?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',

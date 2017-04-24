@@ -171,7 +171,7 @@
     <div class="easyui-layout" data-options="fit:true">
         <div data-options="region:'west',split:true" style="width:120px">
             <ul class="easyui-tree" id="catelogTree"  style="width:100%" data-options="
-                                            url:$goodsURL + 'ocr-goods-center/sales-catelog-mgr/findtree?context=3|3|lj|aaa',
+                                            url:$apiRoot + 'ocr-goods-center/sales-catelog-mgr/findtree?token='+ window.$token,
                                             method:'get',
                                             onSelect: catelogTreeSel"
             />

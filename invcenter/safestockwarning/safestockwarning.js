@@ -1,4 +1,6 @@
-﻿//﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -133,7 +135,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-		url : $invcenterURL + "ocr-inventorycenter/safestockwarning/query?context=" + $token,
+		url : $apiRoot + "ocr-inventorycenter/safestockwarning/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',

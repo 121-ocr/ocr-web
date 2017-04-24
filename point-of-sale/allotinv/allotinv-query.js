@@ -1,4 +1,4 @@
-﻿
+﻿window.$token = localStorage.getItem("access_token");
 
 var shipmentDg;
 var currentReplenishment;
@@ -52,7 +52,7 @@ function loadShipments(ddv, replenishment, index){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/shipment-mgr/find_created?context=" + $token_pos,
+        url : $apiRoot + "ocr-pointofsale/shipment-mgr/find_created?token=" + window.$token,
         async : true,
         data: JSON.stringify(query),
         dataType : 'json',
@@ -351,7 +351,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/shipment-mgr/find_completed?context=" + $token_pos,
+        url : $apiRoot + "ocr-pointofsale/shipment-mgr/find_completed?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -386,7 +386,7 @@ function loadDgList(){
                     //定义查询条件
                     $.ajax({
                         method: 'POST',
-                        url : $posURL + "ocr-pointofsale/shipment-mgr/find_completed?context=" + $token_pos,
+                        url : $apiRoot + "ocr-pointofsale/shipment-mgr/find_completed?token=" + window.$token,
                         data: condStr,
                         async: true,
                         dataType: 'json',

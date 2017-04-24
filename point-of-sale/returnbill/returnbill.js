@@ -1,4 +1,6 @@
-﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -20,7 +22,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-pointofsale/returnbill/create?context=" + $token,
+            url: $apiRoot + "ocr-pointofsale/returnbill/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -246,7 +248,7 @@ function barcodeChanged(theInput){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token,
+        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?token=" + window.$token,
         async : true,
         data: reqData,
         dataType : 'json',
@@ -1065,7 +1067,7 @@ function bindDgListData(data){
 var warehoseLoader = function (param, success, error) {
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        url: $apiRoot + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
         async: true,
         data: JSON.stringify({}),
         dataType: 'json',
@@ -1086,7 +1088,7 @@ var warehoseLoader = function (param, success, error) {
 var rowwarehoseLoader = function (param, success, error) {
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        url: $apiRoot + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
         async: true,
         data: JSON.stringify({}),
         dataType: 'json',
@@ -1132,7 +1134,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/returnbill/query?context=" + $token,
+        url : $posURL + "ocr-pointofsale/returnbill/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -1168,7 +1170,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $posURL + "ocr-pointofsale/returnbill/query?context=" + $token,
+                            url: $posURL + "ocr-pointofsale/returnbill/query?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -1425,7 +1427,7 @@ function reload(){
 
     $.ajax({
         method: 'post',
-        url:$invcenterURL + 'ocr-inventorycenter/invfacility-mgr/findtree?context=3|3|lj|aaa',
+        url:$apiRoot + 'ocr-inventorycenter/invfacility-mgr/findtree?context=3|3|lj|aaa',
         async: true,
         data: obj,
         dataType: 'json',
@@ -1757,7 +1759,7 @@ function goodsRefReturnAppend(){
  //根据sku ，数量 ，匹配一个或多个货位，
   $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/automatch_location?context=" + $token,
+            url: $apiRoot + "ocr-inventorycenter/stockonhand-mgr/automatch_location?token=" + window.$token,
             data: con,
             async: true,
             dataType: 'json',
@@ -1805,7 +1807,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'POST',
-                url: $posURL + "ocr-pointofsale/returnbill/remove?context=" + $token,
+                url: $posURL + "ocr-pointofsale/returnbill/remove?token=" + window.$token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',
@@ -1855,7 +1857,7 @@ function approve(){
  
             $.ajax({
                 method: 'POST',
-                url: $invcenterURL + "ocr-pointofsale/returnbill/confirm?context=" + $token,
+                url: $apiRoot + "ocr-pointofsale/returnbill/confirm?token=" + window.$token,
                 data: param,
                 async: true,
                 dataType: 'json',
@@ -2013,7 +2015,7 @@ function locationTreeSel(node) {
 
     $.ajax({
         method: 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/invfacility-mgr/querylist?context=" + $token,
+        url : $apiRoot + "ocr-inventorycenter/invfacility-mgr/querylist?token=" + window.$token,
         data: condition,
         async: true,
         dataType: 'json',
@@ -2044,7 +2046,7 @@ function locationTreeSel(node) {
                     //定义查询条件
                     $.ajax({
                         method: 'POST',
-                        url : $invcenterURL + "ocr-inventorycenter/invfacility-mgr/querylist?context=" + $token,
+                        url : $apiRoot + "ocr-inventorycenter/invfacility-mgr/querylist?token=" + window.$token,
                         data: condition,
                         async: true,
                         dataType: 'json',

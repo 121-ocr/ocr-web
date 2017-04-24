@@ -1,4 +1,5 @@
-﻿
+﻿window.$token = localStorage.getItem("access_token");
+
 //保存
 function confirm(){
     if(isChanged){
@@ -14,7 +15,7 @@ function confirm(){
 
         $.ajax({
             method: 'POST',
-            url : $posURL + "ocr-pointofsale/allotinv/confirm?context=" + $token_pos,
+            url : $apiRoot + "ocr-pointofsale/allotinv/confirm?token=" + window.$token,
             data: JSON.stringify(data),
             async: true,
             dataType: 'json',
@@ -134,7 +135,7 @@ function loadShipments(ddv, replenishment, index){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/shipment-mgr/find_created?context=" + $token_pos,
+        url : $apiRoot + "ocr-pointofsale/shipment-mgr/find_created?token=" + window.$token,
         async : true,
         data: JSON.stringify(query),
         dataType : 'json',
@@ -503,7 +504,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/replenishment-mgr/query?context=" + $token_pos,
+        url : $apiRoot + "ocr-pointofsale/replenishment-mgr/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -538,7 +539,7 @@ function loadDgList(){
                     //定义查询条件
                     $.ajax({
                         method: 'POST',
-                        url : $posURL + "ocr-pointofsale/allotinv/getall?context=" + $token_pos,
+                        url : $apiRoot + "ocr-pointofsale/allotinv/getall?token=" + window.$token,
                         data: condStr,
                         async: true,
                         dataType: 'json',

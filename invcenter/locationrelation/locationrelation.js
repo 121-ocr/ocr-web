@@ -1,4 +1,6 @@
-﻿//﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -19,7 +21,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/locationrelation-mgr/create?context=" + $token,
+            url: $apiRoot + "ocr-inventorycenter/locationrelation-mgr/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -248,7 +250,7 @@ function barcodeChanged(theInput){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token,
+        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?token=" + window.$token,
         async : true,
         data: reqData,
         dataType : 'json',
@@ -406,7 +408,7 @@ function catelogTreeSel(node) {
 
     $.ajax({
         method: 'POST',
-        url: $goodsURL + "ocr-goods-center/goods-mgr/findall?context=3|3|lj|aaa",
+        url: $apiRoot + "ocr-goods-center/goods-mgr/findall?token=" + window.$token,
         data: condition,
         async: true,
         dataType: 'json',
@@ -436,7 +438,7 @@ function catelogTreeSel(node) {
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $goodsURL + "ocr-goods-center/goods-mgr/findall?context=3|3|lj|aaa",
+                            url: $apiRoot + "ocr-goods-center/goods-mgr/findall?token=" + window.$token,
                             data: condition,
                             async: true,
                             dataType: 'json',
@@ -472,7 +474,7 @@ function locationTreeSel(node) {
 
     $.ajax({
         method: 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/invfacility-mgr/querylist?context=" + $token,
+        url : $apiRoot + "ocr-inventorycenter/invfacility-mgr/querylist?token=" + window.$token,
         data: condition,
         async: true,
         dataType: 'json',
@@ -503,7 +505,7 @@ function locationTreeSel(node) {
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url : $invcenterURL + "ocr-inventorycenter/invfacility-mgr/querylist?context=" + $token,
+                            url : $apiRoot + "ocr-inventorycenter/invfacility-mgr/querylist?token=" + window.$token,
                             data: condition,
                             async: true,
                             dataType: 'json',
@@ -554,7 +556,7 @@ function reload(){
 	
     $.ajax({
         method: 'post',
-       url:$invcenterURL + 'ocr-inventorycenter/invfacility-mgr/findtree?context=3|3|lj|aaa',
+       url:$apiRoot + 'ocr-inventorycenter/invfacility-mgr/findtree?context=3|3|lj|aaa',
         async: true,
         data: obj,
         dataType: 'json',
@@ -861,7 +863,7 @@ function formatCellTooltip(value){
 var warehoseLoader = function (param, success, error) {
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        url: $apiRoot + "ocr-inventorycenter/invorg-mgr/queryAll?token=" + window.$token,
         async: true,
         data: JSON.stringify({}),
         dataType: 'json',
@@ -937,7 +939,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/locationrelation-mgr/querylist?context=" + $token,
+        url : $apiRoot + "ocr-inventorycenter/locationrelation-mgr/querylist?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -973,7 +975,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $invcenterURL + "ocr-inventorycenter/locationrelation-mgr/querylist?context=" + $token,
+                            url: $apiRoot + "ocr-inventorycenter/locationrelation-mgr/querylist?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -1368,7 +1370,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'POST',
-                url: $invcenterURL + "ocr-inventorycenter/locationrelation-mgr/remove?context=" + $token,
+                url: $apiRoot + "ocr-inventorycenter/locationrelation-mgr/remove?token=" + window.$token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',

@@ -1,4 +1,6 @@
-﻿//﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -18,7 +20,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/safestock/create?context=" + $token,
+            url: $apiRoot + "ocr-inventorycenter/safestock/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -300,7 +302,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'POST',
-                url: $invcenterURL + "ocr-inventorycenter/safestock/remove?context=" + $token,
+                url: $apiRoot + "ocr-inventorycenter/safestock/remove?token=" + window.$token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',
@@ -402,7 +404,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-		url : $invcenterURL + "ocr-inventorycenter/safestock/query?context=" + $token,
+		url : $apiRoot + "ocr-inventorycenter/safestock/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -438,7 +440,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                           url : $invcenterURL + "ocr-inventorycenter/safestock/query?context=" + $token,
+                           url : $apiRoot + "ocr-inventorycenter/safestock/query?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -693,7 +695,7 @@ function refExpdateDateSel(date){
 var warehoseLoader = function (param, success, error) {
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        url: $apiRoot + "ocr-inventorycenter/invorg-mgr/queryAll?token=" + window.$token,
         async: true,
         data: JSON.stringify({}),
         dataType: 'json',

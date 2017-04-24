@@ -1,4 +1,6 @@
-﻿var replenishmentObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+var replenishmentObjIndex;
 var replenishmentObj;
 
 //clone的数据
@@ -18,7 +20,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $salesURL + "ocr-sales-center/channel-restocking/create?context=3|3|lj|aaa",
+            url: $apiRoot + "ocr-sales-center/channel-restocking/create?token=" + window.$token,
             data: JSON.stringify(cloneReplenishmentObj),
             async: true,
             dataType: 'json',
@@ -61,7 +63,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'DELETE',
-                url: $salesURL + "ocr-sales-center/channel-restocking/remove?context=3|3|lj|aaa",
+                url: $apiRoot + "ocr-sales-center/channel-restocking/remove?token=" + window.$token,
                 data: JSON.stringify(cloneReplenishmentObj),
                 async: true,
                 dataType: 'json',
@@ -367,7 +369,7 @@ function catelogTreeSel(node) {
 
     $.ajax({
         method: 'POST',
-        url: $goodsURL + "ocr-goods-center/goods-mgr/findall?context=3|3|lj|aaa",
+        url: $goodsURL + "ocr-goods-center/goods-mgr/findall?token=" + window.$token,
         data: condition,
         async: true,
         dataType: 'json',
@@ -397,7 +399,7 @@ function catelogTreeSel(node) {
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $goodsURL + "ocr-goods-center/goods-mgr/findall?context=3|3|lj|aaa",
+                            url: $goodsURL + "ocr-goods-center/goods-mgr/findall?token=" + window.$token,
                             data: condition,
                             async: true,
                             dataType: 'json',
@@ -705,7 +707,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $salesURL + "ocr-sales-center/channel-restocking/find_shipped?context=3|3|lj|aaa",
+        url : $apiRoot + "ocr-sales-center/channel-restocking/find_shipped?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -740,7 +742,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $salesURL + "ocr-sales-center/channel-restocking/findcreated?context=3|3|lj|aaa",
+                            url: $apiRoot + "ocr-sales-center/channel-restocking/findcreated?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',

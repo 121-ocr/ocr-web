@@ -1,4 +1,6 @@
-﻿//﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -18,7 +20,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $posURL + "ocr-pointofsale/saleorder/create?context=" + $token_pos,
+            url: $apiRoot + "ocr-pointofsale/saleorder/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -308,7 +310,7 @@ function quantityChanged(theInput){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/query?context=" + $token_pos,
+        url : $apiRoot + "ocr-pointofsale/posprice/query?token=" + window.$token,
         async : true,
         data: reqData,
         dataType : 'json',
@@ -569,7 +571,7 @@ function queryPrice(goods, invbatchcode){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/query?context=" + $token_pos,
+        url : $apiRoot + "ocr-pointofsale/posprice/query?token=" + window.$token,
         async : true,
         data: reqData,
         dataType : 'json',
@@ -843,7 +845,7 @@ function formatCellTooltip(value){
 
  $.ajax({
  method : 'POST',
- url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token_pos,
+ url : $apiRoot + "ocr-pointofsale/posprice/getPriceByCon?token=" + window.$token,
  async : true,
  data: reqData,
  dataType : 'json',
@@ -945,7 +947,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/saleorder/getall?context=" + $token_pos,
+        url : $apiRoot + "ocr-pointofsale/saleorder/getall?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -980,7 +982,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $posURL + "ocr-pointofsale/saleorder/getall?context=" + $token_pos,
+                            url: $apiRoot + "ocr-pointofsale/saleorder/getall?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',

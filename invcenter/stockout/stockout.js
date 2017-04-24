@@ -1,4 +1,6 @@
-﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -18,7 +20,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/create?context=3|3|lj|aaa",
+            url: $apiRoot + "ocr-inventorycenter/stockout-mgr/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -65,7 +67,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'DELETE',
-                url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/remove?context=3|3|lj|aaa",
+                url: $apiRoot + "ocr-inventorycenter/stockout-mgr/remove?token=" + window.$token,
                 data: JSON.stringify(cloneAllotInvObj),
                 async: true,
                 dataType: 'json',
@@ -331,7 +333,7 @@ function catelogTreeSel(node) {
 
     $.ajax({
         method: 'POST',
-        url: $goodsURL + "ocr-goods-center/goods-mgr/findall?context=3|3|lj|aaa",
+        url: $goodsURL + "ocr-goods-center/goods-mgr/findall?token=" + window.$token,
         data: condition,
         async: true,
         dataType: 'json',
@@ -361,7 +363,7 @@ function catelogTreeSel(node) {
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $goodsURL + "ocr-goods-center/goods-mgr/findall?context=3|3|lj|aaa",
+                            url: $goodsURL + "ocr-goods-center/goods-mgr/findall?token=" + window.$token,
                             data: condition,
                             async: true,
                             dataType: 'json',
@@ -675,7 +677,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/stockout-mgr/query?context=3|3|lj|aaa",
+        url : $apiRoot + "ocr-inventorycenter/stockout-mgr/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -710,7 +712,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/query?context=3|3|lj|aaa",
+                            url: $apiRoot + "ocr-inventorycenter/stockout-mgr/query?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -1052,7 +1054,7 @@ function onshipping() {
 
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/stockout-mgr/onshipping?context=3|3|lj|aaa",
+        url: $apiRoot + "ocr-inventorycenter/stockout-mgr/onshipping?token=" + window.$token,
         data: JSON.stringify(cloneAllotInvObj),
         async: true,
         dataType: 'json',

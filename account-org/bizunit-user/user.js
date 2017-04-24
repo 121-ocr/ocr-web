@@ -311,6 +311,7 @@ function insertPartTimeUser(){
     var userData = {
         acct_id: acctId,
         biz_unit_id: currentBizUnit.id,
+        d_org_role_id: currentBizUnit.org_role_id,
         post_id: postId,
         auth_user_id: row.obj.id
     };
@@ -597,6 +598,7 @@ function insertNewUser(){
     var userData = {
         acct_id: acctId,
         biz_unit_id: currentBizUnit.id,
+        d_org_role_id: currentBizUnit.org_role_id,
         d_is_global_bu: currentBizUnit.is_global==1?true:false,
         post_id: postId,
         user: {

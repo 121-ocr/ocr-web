@@ -135,7 +135,7 @@
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
                             <input id="channel" class="easyui-combotree" style="width:200px;" data-options="
-                                       url:$channelURL + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
+                                       url:$apiRoot + 'ocr-channel-manager/channel-org-mgr/findtree?token='+ window.$token,
                                         method:'get',
                                         panelHeight:'auto',
                                         onSelect: onOutOrgSel,

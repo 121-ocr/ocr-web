@@ -1,4 +1,6 @@
-﻿var replenishmentObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+var replenishmentObjIndex;
 var replenishmentObj;
 
 //clone的数据
@@ -14,7 +16,7 @@ function save(){
     if(isHeadChanged){
         $.ajax({
             method: 'POST',
-            url: $salesURL + "ocr-sales-center/channel-restocking/create?context=3|3|lj|aaa",
+            url: $apiRoot + "ocr-sales-center/channel-restocking/create?token=" + window.$token,
             data: JSON.stringify(cloneReplenishmentObj),
             async: true,
             dataType: 'json',
@@ -179,7 +181,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $salesURL + "ocr-sales-center/shipment/find-completed?context=3|3|lj|aaa",
+        url : $apiRoot + "ocr-sales-center/shipment/find-completed?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -214,7 +216,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url : $salesURL + "ocr-sales-center/shipment/find-completed?context=3|3|lj|aaa",
+                            url : $apiRoot + "ocr-sales-center/shipment/find-completed?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',

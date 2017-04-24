@@ -1,4 +1,6 @@
-﻿//﻿var allotInvObjIndex;
+﻿window.$token = localStorage.getItem("access_token");
+
+//﻿var allotInvObjIndex;
 var allotInvObj;
 
 //clone的数据
@@ -19,7 +21,7 @@ function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
         $.ajax({
             method: 'POST',
-            url: $invcenterURL + "ocr-inventorycenter/pharseorder-mgr/create?context=" + $token,
+            url: $apiRoot + "ocr-inventorycenter/pharseorder-mgr/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -270,7 +272,7 @@ function barcodeChanged(theInput){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token,
+        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?token=" + window.$token,
         async : true,
         data: reqData,
         dataType : 'json',
@@ -767,7 +769,7 @@ function querySelectAddDatas(){
 
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/pharseorder-mgr/querybyconditon?context=" + $token,
+        url : $apiRoot + "ocr-inventorycenter/pharseorder-mgr/querybyconditon?token=" + window.$token,
         async : true,
         data: reqData,
         dataType : 'json',
@@ -840,7 +842,7 @@ function addPharseInvLines(data){
 var warehoseLoader = function (param, success, error) {
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        url: $apiRoot + "ocr-inventorycenter/invorg-mgr/queryAll?token=" + window.$token,
         async: true,
         data: JSON.stringify({}),
         dataType: 'json',
@@ -1109,7 +1111,7 @@ function formatCellTooltip(value){
 
     $.ajax({
         method : 'POST',
-        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?context=" + $token,
+        url : $posURL + "ocr-pointofsale/posprice/getPriceByCon?token=" + window.$token,
         async : true,
         data: reqData,
         dataType : 'json',
@@ -1187,7 +1189,7 @@ function bindDgListData(data){
 var warehoseLoader = function (param, success, error) {
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/invorg-mgr/queryAll?context=" + $account + "|" + $account + "|lj|aaa",
+        url: $apiRoot + "ocr-inventorycenter/invorg-mgr/queryAll?token=" + window.$token,
         async: true,
         data: JSON.stringify({}),
         dataType: 'json',
@@ -1233,7 +1235,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $invcenterURL + "ocr-inventorycenter/pharseorder-mgr/query?context=" + $token,
+        url : $apiRoot + "ocr-inventorycenter/pharseorder-mgr/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -1269,7 +1271,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $invcenterURL + "ocr-inventorycenter/pharseorder-mgr/query?context=" + $token,
+                            url: $apiRoot + "ocr-inventorycenter/pharseorder-mgr/query?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -1813,7 +1815,7 @@ function locatonsTreeSelone(node) {
 
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/stockonhand-mgr/query_avaliable?context=" + $token,
+        url: $apiRoot + "ocr-inventorycenter/stockonhand-mgr/query_avaliable?token=" + window.$token,
         data: condition,
         async: true,
         dataType: 'json',
@@ -1956,7 +1958,7 @@ function pharseinvRefReturnAppend(){
 
     $.ajax({
         method: 'POST',
-        url: $invcenterURL + "ocr-inventorycenter/pharseorder-mgr/batch_createPharseInv?context=" + $token,
+        url: $apiRoot + "ocr-inventorycenter/pharseorder-mgr/batch_createPharseInv?token=" + window.$token,
         data: pharseOrderJson,
         async: true,
         dataType: 'json',
