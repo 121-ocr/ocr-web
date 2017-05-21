@@ -60,7 +60,7 @@
     </div>
     <div data-options="region:'center'">
         <div class="easyui-layout" data-options="fit:true" style="border:0px">
-            <div data-options="region:'north',split:true" style="height:200px;border:0px;">
+            <div data-options="region:'north',split:false" style="height:200px;border:0px;">
                 <table id="header" cellpadding="0" cellspacing="0" style="width:100%">
                     <tr style="height: 50px">
                         <td colspan="6" style="text-align: center"><strong style="font-size: 18px">仓库管理</strong></td>
@@ -163,19 +163,20 @@
                         <td style="width: 180px;text-align: left; vertical-align: middle">
                             <input class="easyui-textbox" id="region_detail" style="width:200px;" data-options="label:'Name:',required:true,onChange:onRegionDetailChanged">
                         </td>
-                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
-                            采购组织
+<!--                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                            所属业务单元
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
-
-                            <input id="purchase_org" class="easyui-combotree" style="width:200px;" data-options="
-                                       url:$apiRoot + 'ocr-channel-manager/channel-org-mgr/findtree?token=' + window.$token,
-                                        method:'get',
-
+                            <input class="easyui-combobox" id="cmb_bizunit" style="width:200px;" data-options="
+                                        mode: 'remote',
+                                        loader: bizUnitLoader,
+                                        valueField:'id',
+                                        textField:'unit_name',
                                         panelHeight:'auto',
-                                        onSelect: purchaseOrglSel,
+                                        onSelect: bizUnitSelected,
                                         required:true">
-                        </td>
+
+                        </td>-->
 
                     </tr>
 
@@ -187,40 +188,45 @@
                 </table>
             </div>
 
-            <div data-options="region:'south',split:true" style="height:80px;">
-                <table cellpadding="0" cellspacing="0" style="width:100%;margin-top: 10px">
-                    <tr style="height: 35px">
-                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
-                            制单人
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-
-                            <input class="easyui-textbox" name="operator" style="width:200px" data-options="label:'Name:',required:false">
-
-                        </td>
-                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
-                            制单日期
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-
-                            <input class="easyui-textbox" name="bill_date" style="width:200px" data-options="label:'name:',required:false">
-
-                        </td>
-                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-
-                        </td>
-
-                    </tr>
-                </table>
+            <div data-options="region:'south',split:true" style="height:400px;">
+                <div class="easyui-panel" title="VMI货主" style="border:0px; width: 100%; height: 100%;">
+                    <div id="toolbar2" style="background-color: #EAEDF1;border: 0.5px">
+                    </div>
+                    <table id="vmiOwnerList" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%;margin-top: 30px;margin-bottom: 20px">
+                        <thead>
+                        <tr>
+                            <th field="supplier_code" width="150px" formatter="formatCellTooltip" >供应商编码</th>
+                            <th field="supplier_name" width="100px" formatter="formatCellTooltip">供应商名</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 
-
+<!--供应商选择-->
+<div class="easyui-window" id="supplierDlg" title="供应商" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:400px;height:400px;padding: 20px 20px;">
+    <div style="margin-bottom:20px;margin-top: 20px;height: 250px">
+        <table id="supplierDg" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%; height:100%; margin-top: 30px;margin-bottom: 20px">
+            <thead>
+            <tr>
+                <th data-options="field:'ck',checkbox:true"></th>
+                <th field="supplier_code" width="65px" formatter="formatCellTooltip">供应商编码</th>
+                <th field="supplier_name" width="100px" formatter="formatCellTooltip">供应商名称</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div style="float:right ">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" style="padding:5px 0px;width:150px;" onclick="supplierSelectOk();">
+            <span style="font-size:14px;">确定</span>
+        </a>
+    </div>
+</div>
 
 
 </body>

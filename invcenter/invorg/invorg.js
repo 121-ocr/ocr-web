@@ -1,10 +1,12 @@
 ﻿window.$token = localStorage.getItem("access_token");
+var acctInfo = window.getCurrentAcctInfo();
+var acctId = acctInfo.acct_id;
 
 //﻿var allotInvObjIndex;
 var warehouseObj;
 
 //clone的数据
-var warehouse;
+var invorg;
 var currentDetailRowObj;
 
 //主子表状态
@@ -19,10 +21,12 @@ var editIndex = undefined;
 function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
 
+        delete invorg.bizunit;
+
         $.ajax({
             method: 'POST',
-            url: $apiRoot + "ocr-inventorycenter/warehouse-mgr/create?token=" + window.$token,
-            data: JSON.stringify(warehouse),
+            url: $apiRoot + "ocr-inventorycenter/invorg-mgr/create?token=" + window.$token,
+            data: JSON.stringify(invorg),
             async: true,
             dataType: 'json',
             beforeSend: function (x) {
@@ -31,8 +35,8 @@ function save(){
             success: function (data) {
 
                 //-------刷新关联属性------
-                warehouse = data;
-                warehouseObj = warehouse;
+                invorg = data;
+                warehouseObj = invorg;
 
                 var dgList = $('#dgList');
                 var row = dgList.datagrid('getSelected');
@@ -89,9 +93,10 @@ function dgListSetting(){
         }
     });
 
-    $('#vmiOwnerList').datagrid({
+    $('#warehouseList').datagrid({
         loadMsg: "正在加载，请稍等...",
         iconCls : 'icon-a_detail',
+        fit : true,
         fitColumns : false,
         rownumbers : true,
         singleSelect : true,
@@ -104,40 +109,136 @@ function dgListSetting(){
                 //$('#gridleft').datagrid('selectRow', 0);
             }
         },
+        view: detailview,
+        detailFormatter:function(index,row){
+            return '<div style="padding:2px"><table class="ddv"></table></div>';
+        },
+        onExpandRow: function(index,row){
+            var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
+            ddv.datagrid({
+                title:"VMI",
+                fitColumns:true,
+                singleSelect:true,
+                rownumbers:true,
+                loadMsg:'',
+                height:'auto',
+                columns:[[
+                    {field:'supplier_code',title:'供应商编码',width:'100px'},
+                    {field:'supplier_name',title:'供应商名称',width:'100px'}
+                ]],
+                onResize:function(){
+                    $('#warehouseList').datagrid('fixDetailRowHeight',index);
+                },
+                onLoadSuccess:function(){
+                    setTimeout(function(){
+                        $('#warehouseList').datagrid('fixDetailRowHeight',index);
+                    },0);
+                }
+            });
+            //currentReplenishment = row.obj;
+            loadVMISuppliers(ddv, row.obj, index);
+            //shipmentDg = ddv;
+        },
+
         toolbar :
             [
                 {
                     text : '添加',
                     iconCls : 'icon-add',
                     handler : function() {
-                        addSupplier();
+                        addWarehouse();
                     }
                 },
                 {
                     text : '删除',
                     iconCls : 'icon-remove',
                     handler : function() {
-                        deleteSupplier();
+                        deleteWarehouse();
                     }
                 }
 
             ]
+
+
     });
 
 }
 
+function loadVMISuppliers (ddv, data, index) {
 
-function addSupplier(){
+    if(data.warehouse_code == undefined || data.warehouse_code == null){
+        return;
+    }
 
-    var supplierDg = $('#supplierDg');
-    supplierDg.datagrid('loadData',{
+    var ownerQuery = {
+        code: data.warehouse_code,
+        account: acctId.toString()
+    };
+    var ownerQueryData = JSON.stringify(ownerQuery);
+    //定义查询条件
+    $.ajax({
+        method : 'POST',
+        url : $apiRoot + "ocr-inventorycenter/warehouse-mgr/queryAll?token=" + window.$token,
+        async : true,
+        data: ownerQueryData,
+        dataType : 'json',
+        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
+        success : function(retData) {
+            if (retData.errCode != undefined && retData.errCode != null) {
+                alert_autoClose('提示', '错误码：' + retData.errCode + '，原因：' + retData.errMsg);
+            } else {
+                showVMISupplierList(ddv, retData);
+                $('#warehouseList').datagrid('fixDetailRowHeight',index);
+            }
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
+
+}
+
+function showVMISupplierList(ddv, data){
+
+    var viewModel = new Array();
+    if(data.result.length > 0){
+        var dataItem = data.result[0];
+        if(dataItem.vmi_suppliers != undefined){
+            var vmi_suppliers = dataItem.vmi_suppliers;
+            if(vmi_suppliers.length > 0){
+                for ( var i in vmi_suppliers) {
+                    var vmi_supplier = vmi_suppliers[i];
+                    var row_data = {
+                        supplier_code: vmi_supplier.supplier_code,
+                        supplier_name: vmi_supplier.supplier_name,
+                        obj: vmi_supplier
+                    };
+                    viewModel.push(row_data);
+                }
+                ddv.datagrid('loadData',{
+                    total: viewModel.length,
+                    rows: viewModel
+                });
+
+            }
+        }
+
+    }
+
+}
+
+
+function addWarehouse(){
+
+    var warehouseDg = $('#warehouseDg');
+    warehouseDg.datagrid('loadData',{
         total: 0,
         rows: []
     });
     //定义查询条件
     $.ajax({
         method : 'GET',
-        url : $apiRoot + "ocr-inventorycenter/suppliers-mgr/query-nopaging?token=" + window.$token,
+        url : $apiRoot + "ocr-inventorycenter/warehouse-mgr/query-nopaging?token=" + window.$token,
         async : true,
         dataType : 'json',
         beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
@@ -148,17 +249,17 @@ function addSupplier(){
                 var viewModel = new Array();
                 for ( var i in data) {
                     var dataItem = data[i];
-                    if(!existSupplier(dataItem.code)) {
+                    if(!existWarehouse(dataItem.code)) {
                         var row_data = {
-                            supplier_code: dataItem.code,
-                            supplier_name: dataItem.name,
+                            warehouse_code: dataItem.code,
+                            warehouse_name: dataItem.name,
                             obj: dataItem
                         };
                         viewModel.push(row_data);
                     }
                 }
 
-                supplierDg.datagrid('loadData',{
+                warehouseDg.datagrid('loadData',{
                     total: data.total,
                     rows: viewModel
                 });
@@ -170,14 +271,14 @@ function addSupplier(){
         }
     });
 
-    $('#supplierDlg').window('open');  // open a window
+    $('#warehouseDlg').window('open');  // open a window
 }
 
-function existSupplier(supplierCode){
-    if(warehouse.vmi_suppliers != undefined && warehouse.vmi_suppliers != null && warehouse.vmi_suppliers.length > 0){
-        for(var j in warehouse.vmi_suppliers){
-            var supplier = warehouse.vmi_suppliers[j];
-            if(supplier.supplier_code == supplierCode){
+function existWarehouse(warehouseCode){
+    if(invorg.warehouses != undefined && invorg.warehouses != null && invorg.warehouses.length > 0){
+        for(var j in invorg.warehouses){
+            var warehouse = invorg.warehouses[j];
+            if(warehouse.warehouse_code == warehouseCode){
                 return true;
             }
         }
@@ -185,12 +286,12 @@ function existSupplier(supplierCode){
     return false;
 }
 
-function removeSupplier(supplierCode){
-    if(warehouse.vmi_suppliers != undefined && warehouse.vmi_suppliers != null && warehouse.vmi_suppliers.length > 0){
-        for(var j in warehouse.vmi_suppliers){
-            var supplier = warehouse.vmi_suppliers[j];
-            if(supplier.supplier_code == supplierCode){
-                warehouse.vmi_suppliers.splice(j,1);
+function removeWarehouse(warehouseCode){
+    if(invorg.warehouses != undefined && invorg.warehouses != null && invorg.warehouses.length > 0){
+        for(var j in invorg.warehouses){
+            var warehouse = invorg.warehouses[j];
+            if(warehouse.warehouse_code == warehouseCode){
+                invorg.warehouses.splice(j,1);
                 return;
             }
         }
@@ -199,57 +300,57 @@ function removeSupplier(supplierCode){
 }
 
 
-function supplierSelectOk(){
+function warehouseSelectOk(){
 
-    var supplierRows = $('#supplierDg').datagrid('getSelections');
-    if(supplierRows != null && supplierRows.length > 0) {
-        if (warehouse.vmi_suppliers == undefined || warehouse.vmi_suppliers == null) {
-            warehouse.vmi_suppliers = [];
+    var warehouseRows = $('#warehouseDg').datagrid('getSelections');
+    if(warehouseRows != null && warehouseRows.length > 0) {
+        if (invorg.warehouses == undefined || invorg.warehouses == null) {
+            invorg.warehouses = [];
         }
 
-        var vmiOwnerList = $('#vmiOwnerList');
+        var warehouseList = $('#warehouseList');
 
-        for (var i in supplierRows) {
-            var dataItem = supplierRows[i].obj;
+        for (var i in warehouseRows) {
+            var dataItem = warehouseRows[i].obj;
             var newItem = {
-                supplier_code: dataItem.code,
-                supplier_name: dataItem.name
+                warehouse_code: dataItem.code,
+                warehouse_name: dataItem.name
             };
-            warehouse.vmi_suppliers.push(newItem);
+            invorg.warehouses.push(newItem);
             var row_data = {
-                supplier_code: newItem.supplier_code,
-                supplier_name: newItem.supplier_name,
+                warehouse_code: newItem.warehouse_code,
+                warehouse_name: newItem.warehouse_name,
                 obj: newItem
             };
 
-            vmiOwnerList.datagrid('appendRow', row_data);
+            warehouseList.datagrid('appendRow', row_data);
         }
 
         isHeadChanged = true;
     }
 
-    $('#supplierDlg').window('close');  // open a window
+    $('#warehouseDlg').window('close');  // open a window
 
 }
 
-function deleteSupplier() {
-    var vmiOwnerList = $('#vmiOwnerList');
+function deleteWarehouse() {
+    var warehouseList = $('#warehouseList');
 
-    var row = vmiOwnerList.datagrid('getSelected');
+    var row = warehouseList.datagrid('getSelected');
     if(row != null) {
 
-        removeSupplier(row.obj.supplier_code);
+        removeWarehouse(row.obj.warehouse_code);
 
-        var actIndex = vmiOwnerList.datagrid('getRowIndex', row);
+        var actIndex = warehouseList.datagrid('getRowIndex', row);
 
-        vmiOwnerList.datagrid('deleteRow', actIndex);
+        warehouseList.datagrid('deleteRow', actIndex);
 
         if (actIndex > 0) {
-            vmiOwnerList.datagrid('selectRow', actIndex - 1);
+            warehouseList.datagrid('selectRow', actIndex - 1);
         } else {
-            var rows = vmiOwnerList.datagrid('getRows');
+            var rows = warehouseList.datagrid('getRows');
             if (rows.length > 0) {
-                vmiOwnerList.datagrid('selectRow', actIndex + 1);
+                warehouseList.datagrid('selectRow', actIndex + 1);
             }
         }
 
@@ -535,52 +636,21 @@ function append(){
         var theDateStr = theDate.format("yyyy-MM-dd");
 
         var newDetailObj = {
-            detail_code: "",
-            goods: {},
-            // quantity: 0,
-            nynum: 0,
-            nsnum: 0,
-            unqualifiednum: 0,
-            locations: "",
-            shelflife: 0,
-            shelflifeunit:"",
-            expdate:theDateStr,
-            su_batch_code:"",
-            batch_code: "",
-            purchase_price: {},
-            supply_price: {},
-            supply_amount: {},
-            discount: "",
-            discount_amount: {},
-            note: ""
+            biz_unit_code: "",
+            bizunit: {
+                unit_code : "",
+                unit_name : "",
+                is_global: false,
+                role_name : ""
+            }
         };
-        warehouse.detail.push(newDetailObj);
+        invorg.detail.push(newDetailObj);
 
         var rowData = {
-            product_sku_code : "",
-            title : "",
-            sales_catelog: {},
-            bar_code : "",
-            specifications: {},
-            base_unit: "",
-            batch_code: "",
-            // quantity: 0,
-            nynum: 0,
-            nsnum: 0,
-            unqualifiednum: 0,
-            locations: "",
-            shelflife: 0,
-            shelflifeunit:"",
-            expdate:theDateStr,
-            su_batch_code:"",
-            purchase_price: 0.00,
-            supply_price: 0.00,
-            supply_amount: 0.00,
-            discount: 0.00,
-            discount_amount: 0.00,
-            brand: "",
-            manufacturer: "",
-            note: "",
+            unit_code : "",
+            unit_name : "",
+            is_global: false,
+            role_name : "",
             obj: newDetailObj
         };
 
@@ -613,25 +683,21 @@ function newRep(){
         var dgList =  $('#dgList');
         var newObjIndex = dgList.datagrid('getRows').length;
         var newObj = {
-            code: "",
-            name: "",
-            type: {},
-            character:{},
-            region_code:"",
-            region_name:"",
-            region_detail:"",
-            purchase_org:{}
+            biz_unit_code: "",
+            bizunit: {
+                unit_code : "",
+                unit_name : "",
+                is_global: false,
+                role_name : ""
+            },
+            warehouses: []
         };
 
         var rowData = {
-            code: "",
-            name: "",
-            type: {},
-            character:{},
-            region_code:"",
-            region_name:"",
-            region_detail:"",
-            purchase_org:{},
+            unit_code : "",
+            unit_name : "",
+            is_global: false,
+            role_name : "",
             obj: newObj
         };
 
@@ -669,8 +735,8 @@ function rejectDetail(){
     $('#detailDg').datagrid('rejectChanges');
     editIndex = undefined;
     //克隆
-    warehouse.detail = cloneJsonObject(warehouseObj.detail);
-    bindSelectedDataToSubDetail(warehouse.detail);
+    invorg.detail = cloneJsonObject(warehouseObj.detail);
+    bindSelectedDataToSubDetail(invorg.detail);
 
     isBodyChanged = false;
 }
@@ -689,9 +755,9 @@ function reject(){
         removeRep();
     }else {
         //重新克隆
-        warehouse = cloneJsonObject(warehouseObj);
-        bindSelectedDataToCard(warehouse)
-        bindSelectedDataToSubDetail(warehouse.detail);
+        invorg = cloneJsonObject(warehouseObj);
+        bindSelectedDataToCard(invorg)
+        bindSelectedDataToSubDetail(invorg.detail);
 
         isHeadChanged = false;
         isBodyChanged = false;
@@ -704,14 +770,14 @@ function removeRep(){
     if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}
 
     obj = new Object();
-    obj._id = warehouse._id;
+    obj._id = invorg._id;
 
     $.messager.confirm('删除警告', '是否确认删除?', function(r){
         if (r){
 
             $.ajax({
                 method: 'POST',
-                url: $apiRoot + "ocr-inventorycenter/warehouse-mgr/remove?token=" + window.$token,
+                url: $apiRoot + "ocr-inventorycenter/invorg-mgr/remove?token=" + window.$token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',
@@ -733,12 +799,12 @@ function removeRep(){
                     var rowCount = dgList.datagrid('getRows').length + 1;
                     if(rowCount > 0){
                         if(allotInvObjIndex == 0){
-                            dgList.datagrid('selectRow',warehouse);
+                            dgList.datagrid('selectRow',invorg);
                         }else{
                             if(allotInvObjIndex == rowCount -1){
-                                dgList.datagrid('selectRow',warehouse-1);
+                                dgList.datagrid('selectRow',invorg-1);
                             }else{
-                                dgList.datagrid('selectRow',warehouse+1);
+                                dgList.datagrid('selectRow',invorg+1);
                             }
                         }
                     }
@@ -762,24 +828,17 @@ function formatCellTooltip(value){
 function bindDgListData(data){
     var dgLst = $('#dgList');
     var viewModel = new Array();
-
 	
      for ( var i in data.datas) {
         var dataItem = data.datas[i];
-
-        var row_data = {
-            name:dataItem.name,
-            code:dataItem.code,
-            type:dataItem.type.name,
-            character:dataItem.character.name,
-            region_code:dataItem.region_code,
-            region_name:dataItem.region_name,
-            region_detail:dataItem.region_detail,
-            account:dataItem.account,
-            // sale_date: dataItem.sale_date,
-            // salesman: dataItem.salesman,
-            obj: dataItem
-        };
+         var bizunit = dataItem.bizunit;
+         var row_data = {
+             unit_code: bizunit.unit_code,
+             unit_name: bizunit.unit_name,
+             is_global: bizunit.is_global,
+             role_name: bizunit.role_name,
+             obj: dataItem
+         };
         viewModel.push(row_data);
     }
     dgLst.datagrid('loadData',{
@@ -814,12 +873,16 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $apiRoot + "ocr-inventorycenter/warehouse-mgr/query?token=" + window.$token,
+        url : $apiRoot + "ocr-inventorycenter/invorg-mgr/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
         beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
         success : function(data) {
+            if (data.errCode != undefined && data.errCode != null) {
+                alert_autoClose('提示', '错误码：' + data.errCode + '，原因：' + data.errMsg);
+                return;
+            }
 
             bindDgListData(data);
 
@@ -858,6 +921,10 @@ function loadDgList(){
                                 x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
                             },
                             success: function (data) {
+                                if (data.errCode != undefined && data.errCode != null) {
+                                    alert_autoClose('提示', '错误码：' + data.errCode + '，原因：' + data.errMsg);
+                                    return;
+                                }
                                 bindDgListData(data);
                             },
                             error: function (x, e) {
@@ -878,11 +945,16 @@ function loadDgList(){
 
 var bizUnitLoader = function(param,success,error){
 
+    var query = {
+        acct_id: acctId
+    }
+
     //定义查询条件
     $.ajax({
-        method : 'GET',
-        url :  $apiRoot + 'ocr-inventorycenter/warehouse-mgr/owner-bizunit.get?token=' + window.$token,
+        method : 'POST',
+        url :  $apiRoot + 'otocloud-acct-org/my-bizunit/query?token=' + window.$token,
         async : true,
+        data: JSON.stringify(query),
         dataType : 'json',
         beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
         success : function(data) {
@@ -902,11 +974,23 @@ var bizUnitLoader = function(param,success,error){
 
 function bizUnitSelected(record){
     isBodyChanged = true;
-    warehouse.owner_bizunit = {
-        id: record.id,
+    invorg.biz_unit_code = record.unit_code;
+    invorg.bizunit = {
         unit_code: record.unit_code,
-        unit_name: record.unit_name
-    };
+        unit_name: record.unit_name,
+        is_global: record.is_global,
+        role_name: record.role_name
+    }
+
+    $('#bizunit_code').textbox('setValue',record.unit_code);
+    $('#is_global').textbox('setValue',record.is_global);
+    $('#role_name').textbox('setValue',record.role_name);
+
+    isBodyChanged =true;
+    updateParentListRow('unit_code', record.unit_code);
+    updateParentListRow('unit_name', record.unit_name);
+    updateParentListRow('is_global', record.is_global);
+    updateParentListRow('role_name', record.role_name);
 }
 
 
@@ -921,10 +1005,13 @@ function onRowSelected (rowIndex, rowData) {
     warehouseObj = rowData.obj;
 
     //克隆数据
-    warehouse = cloneJsonObject(warehouseObj);
+    invorg = cloneJsonObject(warehouseObj);
 
-    bindSelectedDataToCard(warehouse);
-    bindSelectedDataToSubDetail(warehouse.vmi_suppliers);
+    bindSelectedDataToCard(invorg);
+    if(invorg.warehouses == undefined){
+        invorg.warehouses = [];
+    }
+    bindSelectedDataToSubDetail(invorg.warehouses);
 
     var viewModel = new Array();
     $('#locationsDg').datagrid('loadData',{
@@ -937,21 +1024,21 @@ function onRowSelected (rowIndex, rowData) {
 
 //绑定到子表
 function bindSelectedDataToSubDetail(detailData){
-    //var detailDg = $('#vmiOwnerList');
+    //var detailDg = $('#warehouseList');
     //detailDg.datagrid('loadData', { total: 0, rows: [] });
     bindDetailData(detailData);
 }
 
 //绑定表体数据
 function bindDetailData(data){
-    var dgLst = $('#vmiOwnerList');
+    var dgLst = $('#warehouseList');
     var viewModel = new Array();
     for ( var i in data) {
         var dataItem = data[i];
 
         var row_data = {
-            supplier_code : dataItem.supplier_code,
-            supplier_name : dataItem.supplier_name,
+            warehouse_code : dataItem.warehouse_code,
+            warehouse_name : dataItem.warehouse_name,
             obj: dataItem
         };
         viewModel.push(row_data);
@@ -975,20 +1062,10 @@ function onDetailRowSelected(rowIndex, detailRowData){
 //绑定当前选择行的数据
 function bindSelectedDataToCard(data){
 
-
-    $('#code').textbox('setValue',data.code);
-    $('#name').textbox('setValue',data.name);
-    $('#type').textbox('setValue',data.type.name);
-    $('#character').textbox('setValue',data.character.name);
-    $('#region_code').textbox('setValue',data.region_code);
-    $('#region_name').textbox('setValue',data.region_name);
-    $('#region_detail').textbox('setValue',data.region_detail);
-
-    $('#purchase_org').textbox('setValue',data.purchase_org.name);
-
-    //$('#cmb_bizunit').combobox('setValue', data.owner_bizunit.unit_name);
-
-
+    $('#bizunit_code').textbox('setValue',data.bizunit.unit_code);
+    $('#cmb_bizunit').combobox('setValue', data.bizunit.unit_name);
+    $('#is_global').textbox('setValue',data.bizunit.is_global);
+    $('#role_name').textbox('setValue',data.bizunit.role_name);
 
 }
 
@@ -1006,48 +1083,10 @@ function updateParentListRow(field, value){
 }
 
 
-function onWarehouseCodeChanged(newValue,oldValue) {
-    if(initialized) return;
-    warehouse.code = newValue;
-    isBodyChanged =true;
-    updateParentListRow('code', warehouse.code);
-}
-function onWarehouseNameChanged(newValue,oldValue) {
-    if(initialized) return;
-    warehouse.name = newValue;
-    isBodyChanged =true;
-    updateParentListRow('name', warehouse.name);
-}
-
-function onRegionCodeChanged(newValue,oldValue){
-    if(initialized) return;
-    warehouse.region_code = newValue;
-    isBodyChanged = true;
-    updateParentListRow('region_code', warehouse.region_code);
-}
-
-function onRegionNameChanged(newValue,oldValue) {
-    if(initialized) return;
-    warehouse.region_name = newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('region_name', warehouse.region_name);
-}
-function onRegionDetailChanged(newValue,oldValue) {
-    if(initialized) return;
-    warehouse.region_detail= newValue;
-    isBodyChanged = true;
-
-    updateParentListRow('region_detail', newValue);
-}
-
-
-
-
 //仓库类型选择
 function onTypeSelected(record){
     if(initialized) return;
-    warehouse.type = {
+    invorg.type = {
         code: record.code,
         name: record.name
     };
@@ -1058,7 +1097,7 @@ function onTypeSelected(record){
 
 function onCharacterSelected(record){
     if(initialized) return;
-    warehouse.character = {
+    invorg.character = {
         code: record.code,
         name: record.name
     };
@@ -1071,7 +1110,7 @@ function onCharacterSelected(record){
 //渠道选择
 function purchaseOrglSel(record){
     if(initialized) return;
-    warehouse.purchase_org = record.attributes;
+    invorg.purchase_org = record.attributes;
 
     $('#channel_type').textbox('setValue',record.attributes.channel_type.name);
 
@@ -1226,7 +1265,7 @@ $.extend($.fn.datagrid.defaults.editors, {
 
 //构建分页条件
 function buildLocationsQueryCond(total, pageNum,sku,type) {
-    var warehousecode = warehouse.warehouse.code;
+    var warehousecode = invorg.invorg.code;
     var condition = {
         paging: {
             sort_field: "_id",
