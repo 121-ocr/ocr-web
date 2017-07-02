@@ -69,7 +69,7 @@
     </div>
     <div data-options="region:'center'">
         <div class="easyui-layout" data-options="fit:true" style="border:0px">
-            <div data-options="region:'north',split:true" style="height:400px;border:0px;">
+            <div data-options="region:'north',split:false" style="height:500px;border:0px;">
                 <table id="header" cellpadding="0" cellspacing="0" style="width:100%">
                     <tr style="height: 50px">
                         <td colspan="6" style="text-align: center"><strong style="font-size: 18px">客户基本档案</strong></td>
@@ -257,33 +257,21 @@
                 </table>
             </div>
 
-            <div data-options="region:'south',split:true" style="height:80px;">
-                <table cellpadding="0" cellspacing="0" style="width:100%;margin-top: 10px">
-                    <tr style="height: 35px">
-                        <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
-                            制单人
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-
-                            <input class="easyui-textbox" name="operator" style="width:200px" data-options="label:'Name:',required:false">
-
-                        </td>
-                        <td style="width: 50px;text-align: right; vertical-align: middle; padding: 5px">
-                            制单日期
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-
-                            <input class="easyui-textbox" name="bill_date" style="width:200px" data-options="label:'name:',required:false">
-
-                        </td>
-                        <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
-                        </td>
-                        <td style="width: 180px;text-align: left; vertical-align: middle">
-
-                        </td>
-
-                    </tr>
-                </table>
+            <div data-options="region:'south',split:true" style="height:300px;">
+                <div class="easyui-panel" title="渠道节点" style="border:0px; width: 100%; height: 100%;">
+                    <div id="toolbar2" style="background-color: #EAEDF1;border: 0.5px">
+                    </div>
+                    <table id="channelList" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%;margin-top: 30px;margin-bottom: 20px">
+                        <thead>
+                        <tr>
+                            <th field="channel_code" width="150px" formatter="formatCellTooltip" >渠道编码</th>
+                            <th field="channel_name" width="100px" formatter="formatCellTooltip">渠道名称</th>
+                            <th field="channel_type_name" width="100px" formatter="formatCellTooltip">渠道类型</th>
+                            <th field="region_full_name" width="100px" formatter="formatCellTooltip">地区</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

@@ -21,7 +21,7 @@ function save(){
 
         $.ajax({
             method: 'POST',
-            url: $apiRoot + "ocr-channel-manager/channel-org-mgr/create?token=" + window.$token,
+            url: $apiRoot + "ocr-channel-manager/channel-mgr/create?token=" + window.$token,
             data: JSON.stringify(cloneAllotInvObj),
             async: true,
             dataType: 'json',
@@ -406,7 +406,7 @@ function removeRep(){
 
             $.ajax({
                 method: 'POST',
-                url :  $apiRoot + "ocr-channel-manager/channel-org-mgr/remove?token=" + window.$token,
+                url :  $apiRoot + "ocr-channel-manager/channel-mgr/remove?token=" + window.$token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',
@@ -508,7 +508,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url :  $apiRoot + "ocr-channel-manager/channel-org-mgr/findall?token=" + window.$token,
+        url :  $apiRoot + "ocr-channel-manager/channel-mgr/findall?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -544,7 +544,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url :  $apiRoot + "ocr-channel-manager/channel-org-mgr/findall?token=" + window.$token,
+                            url :  $apiRoot + "ocr-channel-manager/channel-mgr/findall?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -616,8 +616,8 @@ function bindSelectedDataToCard(data){
     $('#phone').textbox('setValue',data.ship_to.contact.phone);
     $('#email').textbox('setValue',data.ship_to.contact.email);
     $('#customercode').textbox('setValue',data.customer.code);
-    $('#customername').textbox('setValue',data.customer.name);
-    $('#parentid').textbox('setValue',data.parentid.name);
+    $('#cmb_customer').combobox('setValue', data.customer.code);
+    //$('#parentid').textbox('setValue',data.parentid.name);
     // $('#bankaccount').textbox('setValue',data.accountinfo.bankaccount);
     // $('#credittype').textbox('setValue',data.creditinfo.credittype.name);
     // $('#grade').textbox('setValue',data.creditinfo.grade.name);
@@ -951,7 +951,7 @@ var channelLoader = function (param, success, error) {
     var condStr = buildRepsQueryCond(0,1);
     $.ajax({
         method: 'POST',
-        url: $apiRoot + "ocr-channel-manager/channel-org-mgr/findall?token=" + window.$token,
+        url: $apiRoot + "ocr-channel-manager/channel-mgr/findall?token=" + window.$token,
         async: true,
         data: condStr,
         dataType: 'json',
@@ -973,7 +973,7 @@ function showTree() {
 
     $.ajax({
         method: 'get',
-        url:$apiRoot + 'ocr-channel-manager/channel-org-mgr/findtree?context=' + $token,
+        url:$apiRoot + 'ocr-channel-manager/channel-mgr/findtree?context=' + $token,
         async: true,
 
         dataType: 'json',
@@ -996,5 +996,43 @@ function showTree() {
 }
 
 
+var customerLoader = function(param,success,error){
+
+    //定义查询条件
+    $.ajax({
+        method : 'POST',
+        url : $apiRoot + "ocr-sales-center/customer-mgr/findall-nopaging?token=" + window.$token,
+        async : true,
+        //data: JSON.stringify(query),
+        dataType : 'json',
+        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
+        success : function(data) {
+            if (data.errCode != undefined && data.errCode != null) {
+                alert_autoClose('提示', '错误码：' + data.errCode + '，原因：' + data.errMsg);
+            } else {
+                success(data);
+            }
+        },
+        error: function (x, e) {
+            var args = [];
+            args.push(e);
+            error.apply(this, args);
+        }
+    });
+}
 
 
+function customerSelected(record){
+    isBodyChanged = true;
+
+    cloneAllotInvObj.customer = {
+        code: record.code,
+        name: record.name
+    }
+
+    $('#customercode').textbox('setValue',record.code);
+
+    isBodyChanged =true;
+/*    updateParentListRow('unit_code', record.unit_code);
+    updateParentListRow('unit_name', record.unit_name);*/
+}

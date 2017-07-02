@@ -298,7 +298,7 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $apiRoot + "ocr-channel-manager/channel-org-mgr/findall?token=" + window.$token,
+        url : $apiRoot + "ocr-channel-manager/channel-mgr/findall?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
@@ -333,7 +333,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url: $apiRoot + "ocr-channel-manager/channel-org-mgr/findall?token=" + window.$token,
+                            url: $apiRoot + "ocr-channel-manager/channel-mgr/findall?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',

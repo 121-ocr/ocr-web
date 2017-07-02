@@ -232,7 +232,14 @@
                         </td>
                         <td style="width: 180px;text-align: left; vertical-align: middle">
 
-                            <input class="easyui-textbox" id="customername" style="width:200px;" data-options="label:'Name:',required:true,onChange:onCustomerNameChanged">
+                            <input class="easyui-combobox" id="cmb_customer" style="width:200px;" data-options="
+                                        mode: 'remote',
+                                        loader: customerLoader,
+                                        valueField:'code',
+                                        textField:'name',
+                                        panelHeight:'auto',
+                                        onSelect: customerSelected,
+                                        required:true">
                         </td>
 
                         <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">

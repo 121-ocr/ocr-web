@@ -1326,7 +1326,7 @@ var channelLoader = function (param, success, error) {
     var condStr = buildRepsQueryCond(0,1);
     $.ajax({
         method: 'POST',
-        url: $apiRoot + "ocr-channel-manager/channel-org-mgr/findall?token=" + window.$token,
+        url: $apiRoot + "ocr-channel-manager/channel-mgr/findall?token=" + window.$token,
         async: true,
         data: condStr,
         dataType: 'json',
@@ -1348,7 +1348,7 @@ function showTree() {
 
     $.ajax({
         method: 'get',
-        url:$apiRoot + 'ocr-channel-manager/channel-org-mgr/findtree?context=3|3|lj|aaa',
+        url:$apiRoot + 'ocr-channel-manager/channel-mgr/findtree?context=3|3|lj|aaa',
         async: true,
 
         dataType: 'json',

@@ -1,10 +1,12 @@
 ﻿window.$token = localStorage.getItem("access_token");
+var acctInfo = window.getCurrentAcctInfo();
+var acctId = acctInfo.acct_id;
 
 //﻿var allotInvObjIndex;
-var allotInvObj;
+var channelObj;
 
 //clone的数据
-var cloneAllotInvObj;
+var saleorg;
 var currentDetailRowObj;
 
 //主子表状态
@@ -19,10 +21,12 @@ var editIndex = undefined;
 function save(){
     if(isHeadChanged || isBodyChanged || isNewRep){
 
+        delete saleorg.bizunit;
+
         $.ajax({
             method: 'POST',
-            url: $apiRoot + "ocr-sales-center/customer-mgr/create?token=" + window.$token,
-            data: JSON.stringify(cloneAllotInvObj),
+            url: $apiRoot + "ocr-sales-center/saleorg-mgr/create?token=" + window.$token,
+            data: JSON.stringify(saleorg),
             async: true,
             dataType: 'json',
             beforeSend: function (x) {
@@ -31,8 +35,8 @@ function save(){
             success: function (data) {
 
                 //-------刷新关联属性------
-                cloneAllotInvObj = data;
-                allotInvObj = cloneAllotInvObj;
+                saleorg = data;
+                channelObj = saleorg;
 
                 var dgList = $('#dgList');
                 var row = dgList.datagrid('getSelected');
@@ -41,7 +45,7 @@ function save(){
                 row['sale_date'] = data.sale_date;
                 row['salesman'] = data.salesman;
 
-                row.obj = allotInvObj;
+                row.obj = channelObj;
                 dgList.datagrid('refreshRow', index);
 
                 resetState();
@@ -66,7 +70,7 @@ function resetState(){
 function dgListSetting(){
     $('#dgList').datagrid({
         loadMsg: "正在加载，请稍等...",
-        title : '客户列表',
+        title : '仓库列表',
         iconCls : 'icon-a_detail',
         fit : true,
         fitColumns : false,
@@ -90,28 +94,200 @@ function dgListSetting(){
     });
 
     $('#channelList').datagrid({
-            loadMsg: "正在加载，请稍等...",
-            iconCls: 'icon-a_detail',
-            fit: true,
-            fitColumns: false,
-            rownumbers: true,
-            singleSelect: true,
-            border: false,
-            //onSelect: onAppSelected,  //行选择事件
-            onLoadSuccess: function (data) {
-                if (data.total > 0) {
-                    var dg = $(this);
-                    dg.datagrid('selectRow', 0);
-                    //$('#gridleft').datagrid('selectRow', 0);
+        loadMsg: "正在加载，请稍等...",
+        iconCls : 'icon-a_detail',
+        fit : true,
+        fitColumns : false,
+        rownumbers : true,
+        singleSelect : true,
+        border : false,
+        //onSelect: onAppSelected,  //行选择事件
+        onLoadSuccess: function (data) {
+            if (data.total > 0) {
+                var dg = $(this);
+                dg.datagrid('selectRow', 0);
+                //$('#gridleft').datagrid('selectRow', 0);
+            }
+        },
+        //view: detailview,
+        detailFormatter:function(index,row){
+            return '<div style="padding:2px"><table class="ddv"></table></div>';
+        },
+        toolbar :
+            [
+                {
+                    text : '添加',
+                    iconCls : 'icon-add',
+                    handler : function() {
+                        addChannel();
+                    }
+                },
+                {
+                    text : '删除',
+                    iconCls : 'icon-remove',
+                    handler : function() {
+                        deletechannel();
+                    }
                 }
-            },
-            //view: detailview,
-            detailFormatter: function (index, row) {
-                return '<div style="padding:2px"><table class="ddv"></table></div>';
+
+            ]
+
+
+    });
+
+}
+
+
+function addChannel(){
+
+    var channelDg = $('#channelDg');
+    channelDg.datagrid('loadData',{
+        total: 0,
+        rows: []
+    });
+    //定义查询条件
+    $.ajax({
+        method : 'POST',
+        url :  $apiRoot + "ocr-channel-manager/channel-mgr/findall-nopaging?token=" + window.$token,
+        async : true,
+        dataType : 'json',
+        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
+        success : function(data) {
+            if (data.errCode != undefined && data.errCode != null) {
+                alert_autoClose('提示', '错误码：' + data.errCode + '，原因：' + data.errMsg);
+            } else {
+                var viewModel = new Array();
+                for ( var i in data) {
+                    var dataItem = data[i];
+                    if(!existChannel(dataItem.code)) {
+                        var row_data = {
+                            channel_code: dataItem.code,
+                            channel_name: dataItem.name,
+                            channel_type_name: dataItem.channel_type.name,
+                            customer_name: dataItem.customer.name,
+                            region_full_name: dataItem.region.name,
+                            obj: dataItem
+                        };
+                        viewModel.push(row_data);
+                    }
+                }
+
+                channelDg.datagrid('loadData',{
+                    total: data.total,
+                    rows: viewModel
+                });
+
+            }
+        },
+        error: function (x, e) {
+            alert(e.toString(), 0, "友好提醒");
+        }
+    });
+
+    $('#channelDlg').window('open');  // open a window
+}
+
+function existChannel(channelCode){
+    if(saleorg.channels != undefined && saleorg.channels != null && saleorg.channels.length > 0){
+        for(var j in saleorg.channels){
+            var channel = saleorg.channels[j];
+            if(channel.code == channelCode){
+                return true;
             }
         }
-    );
+    }
+    return false;
+}
 
+function removechannel(channelCode){
+    if(saleorg.channels != undefined && saleorg.channels != null && saleorg.channels.length > 0){
+        for(var j in saleorg.channels){
+            var channel = saleorg.channels[j];
+            if(channel.code == channelCode){
+                saleorg.channels.splice(j,1);
+                return;
+            }
+        }
+    }
+    return;
+}
+
+
+function channelSelectOk(){
+
+    var channelRows = $('#channelDg').datagrid('getSelections');
+    if(channelRows != null && channelRows.length > 0) {
+        if (saleorg.channels == undefined || saleorg.channels == null) {
+            saleorg.channels = [];
+        }
+
+        var channelList = $('#channelList');
+
+        for (var i in channelRows) {
+            var dataItem = channelRows[i].obj;
+            var newItem = {
+                code: dataItem.code,
+                name: dataItem.name,
+                region: {
+                    code: dataItem.region.code,
+                    name: dataItem.region.name
+                },
+                channel_type: {
+                    code: dataItem.channel_type.code,
+                    name: dataItem.channel_type.name
+                },
+                customer: {
+                    code: dataItem.customer.code,
+                    name: dataItem.customer.name
+                },
+                channel_assistant: dataItem.channel_assistant
+            };
+            saleorg.channels.push(newItem);
+            var row_data = {
+                channel_code: newItem.code,
+                channel_name: newItem.name,
+                channel_type_name: newItem.channel_type.name,
+                customer_name: newItem.customer.name,
+                region_full_name: newItem.region.name,
+                channel_assistant: newItem.channel_assistant,
+                obj: newItem
+            };
+
+            channelList.datagrid('appendRow', row_data);
+        }
+
+        isHeadChanged = true;
+    }
+
+    $('#channelDlg').window('close');  // open a window
+
+}
+
+function deleteChannel() {
+    var channelList = $('#ChannelList');
+
+    var row = channelList.datagrid('getSelected');
+    if(row != null) {
+
+        removeChannel(row.obj.code);
+
+        var actIndex = channelList.datagrid('getRowIndex', row);
+
+        channelList.datagrid('deleteRow', actIndex);
+
+        if (actIndex > 0) {
+            channelList.datagrid('selectRow', actIndex - 1);
+        } else {
+            var rows = channelList.datagrid('getRows');
+            if (rows.length > 0) {
+                channelList.datagrid('selectRow', actIndex + 1);
+            }
+        }
+
+        isHeadChanged = true;
+
+        alert_autoClose("提示", "需要点击“保存”才能最终删除！");
+    }
 }
 
 
@@ -206,7 +382,172 @@ function onAfterEdit(index, row){
 }
 
 function onEndEdit(index, row) {
+    //对于合计行进行处理
+    // var ed = $(this).datagrid('getEditor', {
+    //     index: index,
+    //     field: 'quantity'
+    // });
+    // if (ed != null && ed != undefined) {
+    //     var newValue = $(ed.target).val();
+    //     row.quantity = newValue; //设置当前行的数量值
+    //     currentDetailRowObj.quantity = newValue; //设置当前行对象的值
+    // }
 
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'nynum'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.nynum = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.nynum = parseFloat(newValue); //设置当前行对象的值
+    }
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'nsnum'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.nsnum = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.nsnum = parseFloat(newValue); //设置当前行对象的值
+    }
+
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'unqualifiednum'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.unqualifiednum = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.unqualifiednum = parseFloat(newValue); //设置当前行对象的值
+    }
+
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'locations'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.locations = newValue; //设置当前行的数量值
+        currentDetailRowObj.locations = newValue; //设置当前行对象的值
+    }
+
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'shelflife'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.shelflife = newValue; //设置当前行的数量值
+        currentDetailRowObj.shelflife = newValue; //设置当前行对象的值
+    }
+
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'shelflifeunit'
+		
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.shelflifeunit = newValue; //设置当前行的数量值
+        currentDetailRowObj.shelflifeunit = newValue; //设置当前行对象的值
+    }
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'expdate'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.expdate = newValue; //设置当前行的数量值
+        currentDetailRowObj.expdate = newValue; //设置当前行对象的值
+    }
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'su_batch_code'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.su_batch_code = newValue; //设置当前行的数量值
+        currentDetailRowObj.su_batch_code = newValue; //设置当前行对象的值
+    }
+	
+	 var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'batch_code'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.batch_code = newValue; //设置当前行的数量值
+        currentDetailRowObj.batch_code = newValue; //设置当前行对象的值
+    }
+
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'purchase_price'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.purchase_price = parseFloat(newValue); //设置采购价
+        currentDetailRowObj.purchase_price = {
+            tax_type: "VTA",
+            tax_rate: 0.17,
+            price: {
+                original_currency: {
+                    money: 0.00,
+                    currency_type: "USD"
+                },
+                currency: {
+                    money: parseFloat(newValue),
+                    currency_type: "CYN"
+                }
+            }
+        };
+
+    }
+
+
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'supply_price'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.supply_price = parseFloat(newValue); //设置当前行的数量值
+        currentDetailRowObj.supply_price = {
+            tax_type: "VTA",
+            tax_rate: 0.17,
+            price: {
+                original_currency: {
+                    money: 0.00,
+                    currency_type: "USD"
+                },
+                currency: {
+                    money: parseFloat(newValue),
+                    currency_type: "CYN"
+                }
+            }
+        };
+
+    }
+
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'supply_amount'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.supply_amount = newValue; //设置当前行的数量值
+        currentDetailRowObj.supply_amount = newValue; //设置当前行对象的值
+    }
+    var ed = $(this).datagrid('getEditor', {
+        index: index,
+        field: 'discount_amount'
+    });
+    if (ed != null && ed != undefined) {
+        var newValue = $(ed.target).val();
+        row.discount_amount = newValue; //设置当前行的数量值
+        currentDetailRowObj.discount_amount = newValue; //设置当前行对象的值
+    }
     refreshSubTotalRows(); //刷新小计列
 }
 
@@ -225,52 +566,21 @@ function append(){
         var theDateStr = theDate.format("yyyy-MM-dd");
 
         var newDetailObj = {
-            detail_code: "",
-            goods: {},
-            // quantity: 0,
-            nynum: 0,
-            nsnum: 0,
-            unqualifiednum: 0,
-            locations: "",
-            shelflife: 0,
-            shelflifeunit:"",
-            expdate:theDateStr,
-            su_batch_code:"",
-            batch_code: "",
-            purchase_price: {},
-            supply_price: {},
-            supply_amount: {},
-            discount: "",
-            discount_amount: {},
-            note: ""
+            biz_unit_code: "",
+            bizunit: {
+                unit_code : "",
+                unit_name : "",
+                is_global: false,
+                role_name : ""
+            }
         };
-        cloneAllotInvObj.detail.push(newDetailObj);
+        saleorg.channels.push(newDetailObj);
 
         var rowData = {
-            product_sku_code : "",
-            title : "",
-            sales_catelog: {},
-            bar_code : "",
-            specifications: {},
-            base_unit: "",
-            batch_code: "",
-            // quantity: 0,
-            nynum: 0,
-            nsnum: 0,
-            unqualifiednum: 0,
-            locations: "",
-            shelflife: 0,
-            shelflifeunit:"",
-            expdate:theDateStr,
-            su_batch_code:"",
-            purchase_price: 0.00,
-            supply_price: 0.00,
-            supply_amount: 0.00,
-            discount: 0.00,
-            discount_amount: 0.00,
-            brand: "",
-            manufacturer: "",
-            note: "",
+            unit_code : "",
+            unit_name : "",
+            is_global: false,
+            role_name : "",
             obj: newDetailObj
         };
 
@@ -303,53 +613,21 @@ function newRep(){
         var dgList =  $('#dgList');
         var newObjIndex = dgList.datagrid('getRows').length;
         var newObj = {
-            code: "",
-            name: "",
-            customer_acct:0,
-            mcode:"",
-            legalperson:"",
-            developdate:"",
-            contactinfo:{
-                address:"",
-                email:"",
-                linkman:"",
-                phone:"",
-                fax:""
+            biz_unit_code: "",
+            bizunit: {
+                unit_code : "",
+                unit_name : "",
+                is_global: false,
+                role_name : ""
             },
-            accountinfo:{
-                taxnumber:"",
-                depositbank:"",
-                bankaccount:""
-            },
-            creditinfo:{
-                credittype:{},
-                grade:{}
-            }
+            channels: []
         };
 
         var rowData = {
-            code: "",
-            name: "",
-            customer_acct:0,
-            mcode:"",
-            legalperson:"",
-            developdate:"",
-            contactinfo:{
-                address:"",
-                email:"",
-                linkman:"",
-                phone:"",
-                fax:""
-            },
-            accountinf:{
-                taxnumber:"",
-                depositbank:"",
-                bankaccount:""
-            },
-            creditinfo:{
-                credittype:{},
-                grade:{}
-            },
+            unit_code : "",
+            unit_name : "",
+            is_global: false,
+            role_name : "",
             obj: newObj
         };
 
@@ -382,20 +660,20 @@ function removeDetail(){
     }
 }*/
 
-//回退表体
+/*//回退表体
 function rejectDetail(){
     $('#detailDg').datagrid('rejectChanges');
     editIndex = undefined;
     //克隆
-    cloneAllotInvObj.detail = cloneJsonObject(allotInvObj.detail);
-    bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
+    saleorg.detail = cloneJsonObject(channelObj.detail);
+    bindSelectedDataToSubDetail(saleorg.detail);
 
     isBodyChanged = false;
 }
-/*function getChanges(){
+/!*function getChanges(){
     var rows = $('#detailDg').datagrid('getChanges');
     alert(rows.length+' rows are changed!');
-}*/
+}*!/*/
 
 
 //回退整个单据
@@ -407,9 +685,9 @@ function reject(){
         removeRep();
     }else {
         //重新克隆
-        cloneAllotInvObj = cloneJsonObject(allotInvObj);
-        bindSelectedDataToCard(cloneAllotInvObj)
-        bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
+        saleorg = cloneJsonObject(channelObj);
+        bindSelectedDataToCard(saleorg)
+        bindSelectedDataToSubDetail(saleorg.channels);
 
         isHeadChanged = false;
         isBodyChanged = false;
@@ -422,14 +700,14 @@ function removeRep(){
     if (allotInvObjIndex == undefined || allotInvObjIndex == null){return}
 
     obj = new Object();
-    obj._id = cloneAllotInvObj._id;
+    obj._id = saleorg._id;
 
     $.messager.confirm('删除警告', '是否确认删除?', function(r){
         if (r){
 
             $.ajax({
                 method: 'POST',
-                url: $apiRoot + "ocr-inventorycenter/suppliers-mgr/remove?token=" + window.$token,
+                url: $apiRoot + "ocr-sales-center/saleorg-mgr/remove?token=" + window.$token,
                 data: JSON.stringify(obj),
                 async: true,
                 dataType: 'json',
@@ -451,12 +729,12 @@ function removeRep(){
                     var rowCount = dgList.datagrid('getRows').length + 1;
                     if(rowCount > 0){
                         if(allotInvObjIndex == 0){
-                            dgList.datagrid('selectRow',cloneAllotInvObj);
+                            dgList.datagrid('selectRow',saleorg);
                         }else{
                             if(allotInvObjIndex == rowCount -1){
-                                dgList.datagrid('selectRow',cloneAllotInvObj-1);
+                                dgList.datagrid('selectRow',saleorg-1);
                             }else{
-                                dgList.datagrid('selectRow',cloneAllotInvObj+1);
+                                dgList.datagrid('selectRow',saleorg+1);
                             }
                         }
                     }
@@ -480,31 +758,17 @@ function formatCellTooltip(value){
 function bindDgListData(data){
     var dgLst = $('#dgList');
     var viewModel = new Array();
-
 	
      for ( var i in data.datas) {
         var dataItem = data.datas[i];
-
-        var row_data = {
-
-            name:dataItem.name,
-            code:dataItem.code,
-            customer_acct:dataItem.customer_acct,
-            mcode:dataItem.mcode,
-            legalperson:dataItem.legalperson,
-            developdate:dataItem.developdate,
-            //address:dataItem.contactinfo.address,
-            email:dataItem.contactinfo.email,
-            linkman:dataItem.contactinfo.linkman,
-            phone:dataItem.contactinfo.phone,
-            fax:dataItem.contactinfo.fax,
-            taxnumber:dataItem.accountinfo.taxnumber,
-            depositbank:dataItem.accountinfo.depositbank,
-            bankaccount:dataItem.accountinfo.bankaccount,
-            credittype:dataItem.creditinfo.credittype.name,
-            grade:dataItem.creditinfo.grade.name,
-            obj: dataItem
-        };
+         var bizunit = dataItem.bizunit;
+         var row_data = {
+             unit_code: bizunit.unit_code,
+             unit_name: bizunit.unit_name,
+             is_global: bizunit.is_global,
+             role_name: bizunit.role_name,
+             obj: dataItem
+         };
         viewModel.push(row_data);
     }
     dgLst.datagrid('loadData',{
@@ -539,14 +803,14 @@ function loadDgList(){
     //定义查询条件
     $.ajax({
         method : 'POST',
-        url : $apiRoot + "ocr-sales-center/customer-mgr/findall?token=" + window.$token,
+        url : $apiRoot + "ocr-sales-center/saleorg-mgr/query?token=" + window.$token,
         async : true,
         data: condStr,
         dataType : 'json',
         beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
         success : function(data) {
-            if(data.errCode != undefined && data.errCode != null){
-                alert_autoClose('提示', '保存失败，错误码：' + data.errCode + '，原因：' + data.errMsg);
+            if (data.errCode != undefined && data.errCode != null) {
+                alert_autoClose('提示', '错误码：' + data.errCode + '，原因：' + data.errMsg);
                 return;
             }
 
@@ -579,7 +843,7 @@ function loadDgList(){
                         //定义查询条件
                         $.ajax({
                             method: 'POST',
-                            url : $apiRoot + "ocr-sales-center/customer-mgr/findall?token=" + window.$token,
+                            url: $apiRoot + "ocr-sales-center/pharseinv-mgr/query?token=" + window.$token,
                             data: condStr,
                             async: true,
                             dataType: 'json',
@@ -587,8 +851,8 @@ function loadDgList(){
                                 x.setRequestHeader("Content-Type", "application/json; charset=utf-8");
                             },
                             success: function (data) {
-                                if(data.errCode != undefined && data.errCode != null){
-                                    alert_autoClose('提示', '保存失败，错误码：' + data.errCode + '，原因：' + data.errMsg);
+                                if (data.errCode != undefined && data.errCode != null) {
+                                    alert_autoClose('提示', '错误码：' + data.errCode + '，原因：' + data.errMsg);
                                     return;
                                 }
                                 bindDgListData(data);
@@ -609,6 +873,58 @@ function loadDgList(){
 
 }
 
+var bizUnitLoader = function(param,success,error){
+
+    var query = {
+        acct_id: acctId
+    }
+
+    //定义查询条件
+    $.ajax({
+        method : 'POST',
+        url :  $apiRoot + 'otocloud-acct-org/my-bizunit/query?token=' + window.$token,
+        async : true,
+        data: JSON.stringify(query),
+        dataType : 'json',
+        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
+        success : function(data) {
+            if (data.errCode != undefined && data.errCode != null) {
+                alert_autoClose('提示', '错误码：' + data.errCode + '，原因：' + data.errMsg);
+            } else {
+                success(data.result);
+            }
+        },
+        error: function (x, e) {
+            var args = [];
+            args.push(e);
+            error.apply(this, args);
+        }
+    });
+}
+
+function bizUnitSelected(record){
+    isBodyChanged = true;
+    saleorg.biz_unit_code = record.unit_code;
+    saleorg.bizunit = {
+        unit_code: record.unit_code,
+        unit_name: record.unit_name,
+        is_global: record.is_global,
+        role_name: record.role_name
+    }
+
+    $('#bizunit_code').textbox('setValue',record.unit_code);
+    $('#is_global').textbox('setValue',record.is_global);
+    $('#role_name').textbox('setValue',record.role_name);
+
+    isBodyChanged =true;
+    updateParentListRow('unit_code', record.unit_code);
+    updateParentListRow('unit_name', record.unit_name);
+    updateParentListRow('is_global', record.is_global);
+    updateParentListRow('role_name', record.role_name);
+}
+
+
+
 //行选择事件
 
 var initialized = false;
@@ -616,13 +932,16 @@ function onRowSelected (rowIndex, rowData) {
     initialized = true;
 
     allotInvObjIndex = rowIndex;
-    allotInvObj = rowData.obj;
+    channelObj = rowData.obj;
 
     //克隆数据
-    cloneAllotInvObj = cloneJsonObject(allotInvObj);
+    saleorg = cloneJsonObject(channelObj);
 
-    bindSelectedDataToCard(cloneAllotInvObj);
-   // bindSelectedDataToSubDetail(cloneAllotInvObj.detail);
+    bindSelectedDataToCard(saleorg);
+    if(saleorg.channels == undefined){
+        saleorg.channels = [];
+    }
+    bindSelectedDataToSubDetail(saleorg.channels);
 
     var viewModel = new Array();
     $('#locationsDg').datagrid('loadData',{
@@ -631,6 +950,42 @@ function onRowSelected (rowIndex, rowData) {
     });
 
     initialized = false;
+}
+
+//绑定到子表
+function bindSelectedDataToSubDetail(detailData){
+    //var detailDg = $('#channelList');
+    //detailDg.datagrid('loadData', { total: 0, rows: [] });
+    bindDetailData(detailData);
+}
+
+//绑定表体数据
+function bindDetailData(data){
+    var dgLst = $('#channelList');
+    var viewModel = new Array();
+    for ( var i in data) {
+        var dataItem = data[i];
+
+        var row_data = {
+            channel_code : dataItem.code,
+            channel_name : dataItem.name,
+            channel_type_name : dataItem.channel_type.name,
+            region_full_name : dataItem.region.name,
+            customer_name : dataItem.customer.name,
+            //channel_assistant : dataItem.channel.channel_assistant,
+            //ship_to : dataItem.ship_to.address.address_detail,
+            obj: dataItem
+        };
+        viewModel.push(row_data);
+        //dgLst.datagrid('appendRow', row_data);
+    }
+
+    dgLst.datagrid('loadData',{
+        total: viewModel.length,
+        rows: viewModel
+    });
+
+    //dgLst.datagrid({loadFilter: pagerFilter}).datagrid('loadData',viewModel);
 }
 
 var currentRowIndex = 0;
@@ -642,25 +997,11 @@ function onDetailRowSelected(rowIndex, detailRowData){
 //绑定当前选择行的数据
 function bindSelectedDataToCard(data){
 
+    $('#bizunit_code').textbox('setValue',data.bizunit.unit_code);
+    $('#cmb_bizunit').combobox('setValue', data.bizunit.unit_name);
+    $('#is_global').textbox('setValue',data.bizunit.is_global);
+    $('#role_name').textbox('setValue',data.bizunit.role_name);
 
-    $('#code').textbox('setValue',data.code);
-    $('#name').textbox('setValue',data.name);
-    $('#customer_acct').textbox('setValue',data.customer_acct);
-    $('#mcode').textbox('setValue',data.mcode);
-    $('#legalperson').textbox('setValue',data.legalperson);
-    $('#developdate').textbox('setValue',data.developdate);
-    //$('#address').textbox('setValue',data.contactinfo.address);
-    $('#email').textbox('setValue',data.contactinfo.email);
-    $('#linkman').textbox('setValue',data.contactinfo.linkman);
-    $('#phone').textbox('setValue',data.contactinfo.phone);
-    $('#fax').textbox('setValue',data.contactinfo.fax);
-    $('#taxnumber').textbox('setValue',data.accountinfo.taxnumber);
-    $('#depositbank').textbox('setValue',data.accountinfo.depositbank);
-    $('#bankaccount').textbox('setValue',data.accountinfo.bankaccount);
-    $('#credittype').textbox('setValue',data.creditinfo.credittype.name);
-    $('#grade').textbox('setValue',data.creditinfo.grade.name);
-
-    bindChannelsData(data);
 }
 
 
@@ -677,133 +1018,34 @@ function updateParentListRow(field, value){
 }
 
 
-function onCodeChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.code = newValue;
-    isBodyChanged =true;
-    updateParentListRow('code', cloneAllotInvObj.code);
-}
-function onNameChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.name = newValue;
-    isBodyChanged =true;
-    updateParentListRow('name', cloneAllotInvObj.name);
-}
-
-function onCustomerAcctChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.customer_acct = parseInt(newValue);
-    isBodyChanged =true;
-    updateParentListRow('customer_acct', cloneAllotInvObj.customer_acct);
-}
-
-
-function onMcodeChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.mcode = newValue;
-    isBodyChanged =true;
-    updateParentListRow('mcode', cloneAllotInvObj.mcode);
-}
-
-function onlegalpersonChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.legalperson = newValue;
-    isBodyChanged =true;
-    updateParentListRow('legalperson', cloneAllotInvObj.legalperson);
-}
-
-function ondevelopdateChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.developdate = newValue;
-    isBodyChanged =true;
-    updateParentListRow('developdate', cloneAllotInvObj.developdate);
-}
-
-
-function onAddressChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.contactinfo.address = newValue;
-    isBodyChanged =true;
-    updateParentListRow('address', cloneAllotInvObj.contactinfo.address);
-}
-
-function onEmailChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.contactinfo.email = newValue;
-    isBodyChanged =true;
-    updateParentListRow('email', cloneAllotInvObj.contactinfo.email);
-}
-
-function onlinkmanChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.contactinfo.linkman = newValue;
-    isBodyChanged =true;
-    updateParentListRow('linkman', cloneAllotInvObj.contactinfo.linkman);
-}
-
-function onphoneChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.contactinfo.phone = newValue;
-    isBodyChanged =true;
-    updateParentListRow('phone', cloneAllotInvObj.contactinfo.phone);
-}
-
-function onfaxChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.contactinfo.fax = newValue;
-    isBodyChanged =true;
-    updateParentListRow('fax', cloneAllotInvObj.contactinfo.fax);
-}
-
-function ontaxnumberChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.accountinfo.taxnumber = newValue;
-    isBodyChanged =true;
-    updateParentListRow('taxnumber', cloneAllotInvObj.accountinfo.taxnumber);
-}
-
-function ondepositbankChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.accountinfo.depositbank = newValue;
-    isBodyChanged =true;
-    updateParentListRow('depositbank', cloneAllotInvObj.accountinfo.depositbank);
-}
-
-function onbankaccountChanged(newValue,oldValue) {
-    if(initialized) return;
-    cloneAllotInvObj.accountinfo.bankaccount = newValue;
-    isBodyChanged =true;
-    updateParentListRow('bankaccount', cloneAllotInvObj.accountinfo.bankaccount);
-}
-
 //仓库类型选择
-function onCredittypeSelected(record){
+function onTypeSelected(record){
     if(initialized) return;
-    cloneAllotInvObj.creditinfo.credittype = {
+    saleorg.type = {
         code: record.code,
         name: record.name
     };
     isBodyChanged = true;
     //-------刷新关联属性------
-    updateParentListRow('credittype', record.name);
+    updateParentListRow('type', record.name);
 }
 
-function onGradeSelected(record){
+function onCharacterSelected(record){
     if(initialized) return;
-    cloneAllotInvObj.creditinfo.grade = {
+    saleorg.character = {
         code: record.code,
         name: record.name
     };
 
     isBodyChanged = true;
     //-------刷新关联属性------
-    updateParentListRow('grade', record.name);
+    updateParentListRow('character', record.name);
 }
 
 //渠道选择
 function purchaseOrglSel(record){
     if(initialized) return;
-    cloneAllotInvObj.purchase_org = record.attributes;
+    saleorg.purchase_org = record.attributes;
 
     $('#channel_type').textbox('setValue',record.attributes.channel_type.name);
 
@@ -836,7 +1078,7 @@ function formatSpecificationCol(specArray){
     return "<span title='" + specifications + "'>" + specifications + "</span>";
 }
 
-//detail数据前台分页
+/*//detail数据前台分页
 function pagerFilter(data){
     if (typeof data.length == 'number' && typeof data.splice == 'function'){    // 判断数据是否是数组
         data = {
@@ -873,7 +1115,7 @@ function pagerFilter(data){
         buildSubTotalRow(data.rows)
     ];
     return data;
-}
+}*/
 
 
 function compute(date, colName) {
@@ -953,94 +1195,11 @@ $.extend($.fn.datagrid.defaults.editors, {
 });
 
 
-					
-
-
-//构建分页条件
-function buildLocationsQueryCond(total, pageNum,sku,type) {
-    var warehousecode = cloneAllotInvObj.warehouse.code;
-    var condition = {
-        paging: {
-            sort_field: "_id",
-            sort_direction: -1,
-            page_number: pageNum,
-            page_size: 2,
-            total: total,
-            total_page: -1
-        },
-        query: {'sku':sku,'type':type, 'warehousecode': warehousecode}
-    };
-    var reqData = JSON.stringify(condition);
-    return reqData;
-}
-
-
-
-
-
-//构建分页条件
-function buildGoodRefQueryCond(sku,nsnum,warehousecode) {
-    var condition = {
-
-        query: {'sku':sku,'type':"fixed",'nsnum':nsnum,"warehousecode":warehousecode}
-    };
-    var reqData = JSON.stringify(condition);
-    return reqData;
-}
-
 function refExpdateDateSel(date){
 	var dd=date.format("yyyy-MM-dd");
 	 $('#ref_expdatestr').val(dd);
-   
 }
 
-function bindChannelsData(data){
 
-    var condition = {
-        'customer.code': data.code
-    }
-    var reqData = JSON.stringify(condition);
 
-    //定义查询条件
-    $.ajax({
-        method : 'POST',
-        url :  $apiRoot + "ocr-channel-manager/channel-mgr/findall-nopaging?token=" + window.$token,
-        async : true,
-        data: reqData,
-        dataType : 'json',
-        beforeSend: function (x) { x.setRequestHeader("Content-Type", "application/json; charset=utf-8"); },
-        success : function(data) {
-            if (data.errCode != undefined && data.errCode != null) {
-                alert_autoClose('提示', '错误码：' + data.errCode + '，原因：' + data.errMsg);
-            } else {
 
-                var dgLst = $('#channelList');
-                var viewModel = new Array();
-
-                for ( var i in data) {
-                    var dataItem = data[i];
-                    var row_data = {
-                        channel_code : dataItem.code,
-                        channel_name : dataItem.name,
-                        channel_type_name : dataItem.channel_type.name,
-                        region_full_name : dataItem.region.name,
-                        customer_name : dataItem.customer.name,
-                        obj: dataItem
-                    };
-                    viewModel.push(row_data);
-
-                }
-
-                dgLst.datagrid('loadData',{
-                    total: viewModel.length,
-                    rows: viewModel
-                });
-
-            }
-        },
-        error: function (x, e) {
-            alert(e.toString(), 0, "友好提醒");
-        }
-    });
-
-}

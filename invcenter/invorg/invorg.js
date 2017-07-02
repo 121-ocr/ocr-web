@@ -1063,7 +1063,7 @@ function onDetailRowSelected(rowIndex, detailRowData){
 function bindSelectedDataToCard(data){
 
     $('#bizunit_code').textbox('setValue',data.bizunit.unit_code);
-    $('#cmb_bizunit').combobox('setValue', data.bizunit.unit_name);
+    $('#cmb_bizunit').combobox('setValue', data.bizunit.unit_code);
     $('#is_global').textbox('setValue',data.bizunit.is_global);
     $('#role_name').textbox('setValue',data.bizunit.role_name);
 
