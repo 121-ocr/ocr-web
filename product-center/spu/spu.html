@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DataGrid Selection - jQuery EasyUI Demo</title>
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/jquery-easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../../css/demo.css">
+
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/plugins/datagrid-detailview.js"></script>
+    <script type="text/javascript" src="../../lib/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../js/constant.js"></script>
+    <script type="text/javascript" src="../../js/utility.js"></script>
+    <script type="text/javascript" src="spu.js"></script>
+    <style type="text/css">
+        .subtotal { font-weight: bold; }/*合计单元格样式*/
+    </style>
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false" style="height:38px; border-top: 0px">
+        <div style="padding:5px; background:#fafafa; border:0px; solid:#ccc">
+            <table cellpadding="0" cellspacing="0" style="width:100%">
+                <tr>
+                    <td style="padding-left:2px">
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-add" onclick="newRep();">新增</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-save" onclick="save();">保存</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-remove" onclick="removeRep();">删除</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-reload">刷新</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="reject();">撤销</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-print">打印</a>
+                        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help"></a>
+                    </td>
+                    <td style="text-align:right;padding-right:2px">
+                        <input class="easyui-searchbox" data-options="prompt:'Please input somthing'" style="width:200px"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div data-options="region:'west',split:true" style="width:200px">
+        <div class="panel easyui-fluid" style="display: block; width: 100%;height: 100%">
+            <div class="panel-header" style="width: 100%;">
+                <div class="panel-title">产品分类</div><div class="panel-tool"></div>
+            </div>
+            <div class="easyui-panel panel-noscroll panel-body" title="" style="border: 0px; width: 100%; height: 100%;">
+                <ul id="spuCateTree" class="easyui-tree" checkbox="false" data-options="lines:true"></ul>
+            </div>
+        </div>
+    </div>
+    <div data-options="region:'center'">
+        <div class="easyui-layout" data-options="fit:true">
+            <div data-options="region:'west',split:true" style="width:350px;border: none;">
+                <div style="height:100%;border: none;">
+                    <table id="spuList" class="easyui-datagrid" title="产品" style="width:100%;height:100%"
+                           title="Load Data" >
+                        <thead>
+                        <tr>
+                            <th data-options="field:'ck',checkbox:true"></th>
+                            <th field="spu_code" width="100px" formatter="formatCellTooltip">产品编码</th>
+                            <th field="name" width="100px" formatter="formatCellTooltip">产品名</th>
+                            <th field="brand_name" width="90px" formatter="formatCellTooltip">品牌</th>
+                            <th field="is_kit" width="90px" formatter="formatCellTooltip">是否套件</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div data-options="region:'center'" style="height: 100%">
+                <div class="easyui-layout" data-options="fit:true">
+                    <div data-options="region:'north',split:false" style="height:30%;border:0px;">
+                        <table id="header" cellpadding="0" cellspacing="0" style="width:100%;">
+                            <tr style="height: 50px">
+                                <td colspan="6" style="text-align: center"><strong style="font-size: 18px">产品定义</strong></td>
+                            </tr>
+                            <tr style="height: 35px">
+                                <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                                    产品编码
+                                </td>
+                                <td style="width: 180px;text-align: left; vertical-align: middle">
+                                    <input class="easyui-textbox" id="bizunit_code" style="width:200px;" data-options="label:'Name:',required:true">
+                                </td>
+                                <td style="width: 100px;text-align: right; vertical-align: middle; padding: 5px">
+                                    产品名称
+                                </td>
+                                <td style="width: 180px;text-align: left; vertical-align: middle">
+                                    <input class="easyui-combobox" id="cmb_bizunit" style="width:200px;" data-options="
+                                                mode: 'remote',
+                                                loader: bizUnitLoader,
+                                                valueField:'unit_code',
+                                                textField:'unit_name',
+                                                panelHeight:'auto',
+                                                onSelect: bizUnitSelected,
+                                                required:true">
+
+                                </td>
+                            </tr>
+
+                            <tr style="height: 35px">
+                                <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                                    基本售卖单位
+                                </td>
+                                <td style="width: 180px;text-align: left; vertical-align: middle">
+                                    <input class="easyui-textbox" id="is_global" style="width:200px;" data-options="label:'Name:',required:true">
+                                </td>
+                                <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                                    品牌
+                                </td>
+                                <td style="width: 180px;text-align: left; vertical-align: middle">
+                                    <input class="easyui-textbox" id="role_name" style="width:200px;" data-options="label:'Name:',required:true">
+                                </td>
+
+                            </tr>
+
+                            <tr style="height: 35px">
+                                <td style="width: 80px;text-align: right; vertical-align: middle; padding: 5px">
+                                    是否成套件
+                                </td>
+                                <td style="width: 180px;text-align: left; vertical-align: middle">
+                                    <input class="easyui-textbox" id="is_global2" style="width:200px;" data-options="label:'Name:',required:true">
+                                </td>
+
+                            </tr>
+
+
+
+                        </table>
+                    </div>
+
+                    <div data-options="region:'south',split:true"  style="height:70%;">
+
+                        <div id="tt" class="easyui-tabs" style="width:100%;height:100%;">
+                            <div title="属性" data-options="closable:false">
+                                <div style="background-color: #EAEDF1;border: 0.5px">
+                                     <a href="#" class="easyui-linkbutton easyui-tooltip" title="修改" data-options="iconCls:'icon-edit',plain:true"></a>
+                                     <a href="#" class="easyui-linkbutton easyui-tooltip" title="保存" data-options="iconCls:'icon-save',plain:true" onclick="saveOwner();"></a>
+                                </div>
+                                <table id="actList" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%;margin-top: 30px;margin-bottom: 20px">
+                                    <thead>
+                                    <tr>
+                                        <th field="activity_code" width="100px" formatter="formatCellTooltip">编码</th>
+                                        <th field="activity_name" width="100px" formatter="formatCellTooltip">属性名</th>
+                                        <th field="activity_desc" width="80px" formatter="formatCellTooltip">领域</th>
+                                        <th field="action" width="80px" formatter="formatCellTooltip" >是否量纲属性</th>
+                                        <th field="uom" width="80px" formatter="formatCellTooltip" >量纲单位</th>
+                                        <th field="values" width="80px" formatter="formatCellTooltip" >属性值</th>
+                                        <th field="cat" width="80px" formatter="formatCellTooltip" >是否品类继承</th>
+                                        <th field="catecode" width="100px" formatter="formatCellTooltip" >品类属性</th>
+                                        <th field="spec" width="100px" formatter="formatCellTooltip" >是否作为产品规格</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div title="规格" data-options="closable:false">
+                                <div style="background-color: #EAEDF1;border: 0.5px">
+                                    <a href="#" class="easyui-linkbutton easyui-tooltip" title="修改" data-options="iconCls:'icon-edit',plain:true"></a>
+                                    <a href="#" class="easyui-linkbutton easyui-tooltip" title="保存" data-options="iconCls:'icon-save',plain:true" onclick="saveOwner();"></a>
+                                </div>
+                                <table id="actList2" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%;margin-top: 30px;margin-bottom: 20px">
+                                    <thead>
+                                    <tr>
+                                        <th field="activity_code" width="150px" formatter="formatCellTooltip">规格编码</th>
+                                        <th field="activity_name" width="200px" formatter="formatCellTooltip">规格名称</th>
+                                        <th field="activity_desc" width="150px" formatter="formatCellTooltip">来源类型</th>
+                                        <th field="action" width="200px" formatter="formatCellTooltip" >来源编码</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div title="多分类" data-options="closable:false">
+
+                            </div>
+                            <div title="套件BOM" data-options="closable:false">
+
+                            </div>
+                            <div title="维修件BOM" data-options="closable:false">
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--供应商选择-->
+<div class="easyui-window" id="warehouseDlg" title="仓库" data-options="iconCls:'icon-add',closed:true,modal:true,collapsible:false,minimizable:false,maximizable:false,closable:true,resizable:true"
+     style="width:400px;height:400px;padding: 20px 20px;">
+    <div style="margin-bottom:20px;margin-top: 20px;height: 250px">
+        <table id="warehouseDg" class="easyui-datagrid" cellpadding="0" cellspacing="0" style="width:100%; height:100%; margin-top: 30px;margin-bottom: 20px">
+            <thead>
+            <tr>
+                <th data-options="field:'ck',checkbox:true"></th>
+                <th field="warehouse_code" width="65px" formatter="formatCellTooltip">仓库编码</th>
+                <th field="warehouse_name" width="100px" formatter="formatCellTooltip">仓库名称</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div style="float:right ">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" style="padding:5px 0px;width:150px;" onclick="warehouseSelectOk();">
+            <span style="font-size:14px;">确定</span>
+        </a>
+    </div>
+</div>
+
+
+</body>
+
+<script type="text/javascript">
+    dgListSetting();
+    detailListSetting();
+    loadDgList();
+</script>
+</html>
